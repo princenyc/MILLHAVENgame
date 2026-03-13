@@ -1,0 +1,2578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City of Millhaven</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Courier+Prime:wght@400;700&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --desk: #1a1208;
+    --desk-mid: #241a0e;
+    --desk-light: #2e2212;
+    --paper: #f5ecd7;
+    --paper-dark: #e8d9be;
+    --paper-darker: #d4c49e;
+    --ink: #1a1208;
+    --ink-faded: #4a3f2e;
+    --brass: #c9a84c;
+    --brass-light: #e2c46a;
+    --red-ink: #8b1a1a;
+    --green-stat: #2d6a2d;
+    --blue-stat: #1a3a6b;
+    --terminal-green: #4ade80;
+    --terminal-bg: #0a1a0a;
+    --terminal-dim: #2a5a2a;
+    --seal-gold: #d4af37;
+    --folder-tan: #c4a96c;
+    --folder-dark: #8b6914;
+    --urgent: #c0392b;
+    --warning: #d4850a;
+    --good: #2d7d2d;
+    --neutral: #5a5a3a;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--desk);
+    font-family: 'Courier Prime', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+    background-image:
+      repeating-linear-gradient(90deg, transparent, transparent 80px, rgba(0,0,0,0.03) 80px, rgba(0,0,0,0.03) 81px),
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(0,0,0,0.02) 60px, rgba(0,0,0,0.02) 61px),
+      radial-gradient(ellipse at 30% 20%, rgba(50,30,10,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 80%, rgba(30,20,5,0.3) 0%, transparent 50%);
+  }
+
+  #game-wrapper {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 12px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* ── TOP NAMEPLATE ── */
+  #nameplate {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 20px;
+    background: linear-gradient(135deg, #2e2212, #1a1208, #2e2212);
+    border: 1px solid var(--brass);
+    border-radius: 2px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(201,168,76,0.2);
+  }
+
+  #nameplate .seal {
+    width: 38px;
+    height: 38px;
+    border: 2px solid var(--brass);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--brass);
+    font-size: 18px;
+    background: radial-gradient(circle, #2a1e08, #1a1208);
+    flex-shrink: 0;
+  }
+
+  #nameplate .title-block {
+    text-align: center;
+    flex: 1;
+  }
+
+  #nameplate h1 {
+    font-family: 'Playfair Display', serif;
+    color: var(--brass-light);
+    font-size: 1.05rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+  }
+
+  #nameplate .subtitle {
+    color: var(--brass);
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    opacity: 0.7;
+    margin-top: 1px;
+  }
+
+  #nameplate .date-display {
+    text-align: right;
+    color: var(--brass);
+    font-size: 0.75rem;
+    min-width: 100px;
+  }
+
+  #nameplate .date-display .month-year {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    color: var(--brass-light);
+  }
+
+  #nameplate .date-display .year-label {
+    font-size: 0.6rem;
+    opacity: 0.6;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── MAIN DESK GRID ── */
+  #desk-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr 270px;
+    gap: 10px;
+    flex: 1;
+  }
+
+  /* ── PAPER PANEL BASE ── */
+  .paper-panel {
+    background: var(--paper);
+    border: 1px solid var(--paper-darker);
+    box-shadow: 2px 3px 12px rgba(0,0,0,0.5), inset 0 0 40px rgba(0,0,0,0.03);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .paper-panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--folder-dark), var(--folder-tan), var(--folder-dark));
+  }
+
+  .panel-header {
+    background: linear-gradient(180deg, var(--paper-dark) 0%, var(--paper) 100%);
+    border-bottom: 2px solid var(--paper-darker);
+    padding: 8px 12px 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .panel-header .stamp {
+    font-family: 'Special Elite', cursive;
+    font-size: 0.6rem;
+    color: var(--red-ink);
+    border: 1px solid var(--red-ink);
+    padding: 1px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0.8;
+    transform: rotate(-2deg);
+    display: inline-block;
+  }
+
+  .panel-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+    color: var(--ink);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* ── LEFT PANEL: CITY VITALS ── */
+  #panel-vitals {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .vitals-body {
+    padding: 10px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  /* Terminal stats block */
+  .terminal-block {
+    background: var(--terminal-bg);
+    border: 1px solid var(--terminal-dim);
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 0.7rem;
+    color: var(--terminal-green);
+    font-family: 'Courier Prime', monospace;
+    box-shadow: 0 0 8px rgba(74,222,128,0.06), inset 0 0 20px rgba(0,0,0,0.3);
+  }
+
+  .terminal-block .t-header {
+    color: #6ee7b7;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    border-bottom: 1px solid var(--terminal-dim);
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    font-weight: 700;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+    gap: 4px;
+  }
+
+  .stat-label {
+    flex: 1;
+    font-size: 0.67rem;
+    color: #86efac;
+    white-space: nowrap;
+  }
+
+  .stat-bar-outer {
+    width: 70px;
+    height: 7px;
+    background: #0a2a0a;
+    border: 1px solid var(--terminal-dim);
+    flex-shrink: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-bar-inner {
+    height: 100%;
+    transition: width 0.6s ease;
+    position: relative;
+  }
+
+  .stat-bar-inner.good { background: linear-gradient(90deg, #166534, var(--terminal-green)); }
+  .stat-bar-inner.ok { background: linear-gradient(90deg, #854d0e, #fbbf24); }
+  .stat-bar-inner.bad { background: linear-gradient(90deg, #7f1d1d, #f87171); }
+
+  .stat-val {
+    font-size: 0.67rem;
+    min-width: 28px;
+    text-align: right;
+    color: #d1fae5;
+    font-weight: 700;
+  }
+
+  /* Budget section */
+  .budget-block {
+    background: #f0e6cc;
+    border: 1px solid var(--paper-darker);
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 0.7rem;
+  }
+
+  .budget-block .b-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--ink);
+    border-bottom: 1px solid var(--paper-darker);
+    margin-bottom: 6px;
+    padding-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .budget-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 3px;
+    color: var(--ink-faded);
+    font-size: 0.68rem;
+  }
+
+  .budget-row.total {
+    border-top: 1px solid var(--ink-faded);
+    margin-top: 4px;
+    padding-top: 3px;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .budget-row .positive { color: var(--green-stat); font-weight: 700; }
+  .budget-row .negative { color: var(--urgent); font-weight: 700; }
+
+  .balance-display {
+    text-align: center;
+    margin-top: 6px;
+    padding: 4px;
+    background: var(--ink);
+    color: var(--brass-light);
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+  }
+
+  /* Approval gauge */
+  .approval-block {
+    background: #f0e6cc;
+    border: 1px solid var(--paper-darker);
+    padding: 8px 10px;
+  }
+
+  .approval-label {
+    font-size: 0.65rem;
+    color: var(--ink-faded);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 4px;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .approval-meter {
+    height: 16px;
+    background: #d4c49e;
+    border: 1px solid var(--paper-darker);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .approval-fill {
+    height: 100%;
+    transition: width 0.8s ease;
+    position: relative;
+  }
+
+  .approval-fill::after {
+    content: attr(data-pct) '%';
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  }
+
+  /* ── CENTER PANEL: SITUATION ── */
+  #panel-center {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .situation-body {
+    padding: 12px 14px;
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  /* Event card */
+  .event-card {
+    background: #faf5e8;
+    border-left: 3px solid var(--brass);
+    padding: 12px 14px;
+    box-shadow: 1px 2px 6px rgba(0,0,0,0.08);
+  }
+
+  .event-card.urgent { border-left-color: var(--urgent); }
+  .event-card.opportunity { border-left-color: var(--good); }
+
+  .event-tag {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .event-tag.tag-crisis { color: var(--urgent); }
+  .event-tag.tag-opportunity { color: var(--good); }
+  .event-tag.tag-routine { color: var(--neutral); }
+  .event-tag.tag-political { color: var(--blue-stat); }
+
+  .event-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 6px;
+    line-height: 1.3;
+  }
+
+  .event-body {
+    font-size: 0.73rem;
+    color: var(--ink-faded);
+    line-height: 1.6;
+    margin-bottom: 10px;
+  }
+
+  /* Staff advice */
+  .staff-advice {
+    background: #f0e6cc;
+    border: 1px dashed var(--paper-darker);
+    padding: 7px 10px;
+    font-size: 0.68rem;
+    color: var(--ink-faded);
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .staff-advice .advisor-name {
+    font-style: normal;
+    font-weight: 700;
+    color: var(--ink);
+    font-family: 'Playfair Display', serif;
+    font-size: 0.72rem;
+  }
+
+  .staff-advice .advisor-trait {
+    font-size: 0.6rem;
+    border: 1px solid currentColor;
+    padding: 0 3px;
+    margin-left: 4px;
+    font-style: normal;
+    border-radius: 2px;
+    vertical-align: middle;
+  }
+
+  /* Choices */
+  .choices-label {
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-faded);
+    margin-bottom: 6px;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .choice-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: var(--paper-dark);
+    border: 1px solid var(--paper-darker);
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.72rem;
+    color: var(--ink);
+    line-height: 1.4;
+    position: relative;
+  }
+
+  .choice-btn:hover {
+    background: #ede0c4;
+    border-color: var(--brass);
+    transform: translateX(2px);
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.1);
+  }
+
+  .choice-btn .choice-key {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--brass-light);
+    font-size: 0.62rem;
+    padding: 1px 5px;
+    margin-right: 6px;
+    font-weight: 700;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  .choice-effects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-top: 4px;
+    margin-left: 24px;
+  }
+
+  .effect-tag {
+    font-size: 0.58rem;
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  .effect-pos { background: #dcfce7; color: #166534; border: 1px solid #86efac; }
+  .effect-neg { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+  .effect-neu { background: #fef9c3; color: #713f12; border: 1px solid #fde047; }
+
+  /* Outcome / Aftermath */
+  .outcome-card {
+    background: #fdf8ee;
+    border: 1px solid var(--paper-darker);
+    padding: 12px 14px;
+    font-size: 0.75rem;
+    color: var(--ink-faded);
+    line-height: 1.6;
+  }
+
+  .outcome-card .outcome-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+  }
+
+  .reaction-list {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .reaction-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.67rem;
+  }
+
+  .reaction-name {
+    font-weight: 700;
+    color: var(--ink);
+    min-width: 130px;
+  }
+
+  .reaction-change {
+    font-weight: 700;
+    font-size: 0.72rem;
+    padding: 0 4px;
+    border-radius: 2px;
+  }
+
+  .reaction-change.pos { color: var(--good); background: #dcfce7; }
+  .reaction-change.neg { color: var(--urgent); background: #fee2e2; }
+  .reaction-change.neu { color: var(--neutral); background: #f3f4f6; }
+
+  /* Advance button */
+  .advance-btn {
+    background: var(--ink);
+    color: var(--brass-light);
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 100%;
+    border-top: 2px solid var(--brass);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.2);
+  }
+
+  .advance-btn:hover {
+    background: #2e2212;
+    color: var(--brass);
+    letter-spacing: 0.2em;
+  }
+
+  .advance-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* No event state */
+  .no-event {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 8px;
+    opacity: 0.4;
+    text-align: center;
+  }
+
+  .no-event .desk-icon { font-size: 2.5rem; }
+  .no-event p { font-family: 'Playfair Display', serif; font-size: 0.85rem; color: var(--ink-faded); }
+
+  /* ── RIGHT PANEL: PEOPLE ── */
+  #panel-people {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .people-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--paper-darker);
+    background: var(--paper-dark);
+  }
+
+  .tab-btn {
+    flex: 1;
+    padding: 6px 4px;
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    cursor: pointer;
+    background: transparent;
+    border: none;
+    color: var(--ink-faded);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.15s;
+  }
+
+  .tab-btn.active {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+    font-weight: 700;
+    background: var(--paper);
+  }
+
+  .tab-btn:hover:not(.active) { color: var(--ink); background: rgba(0,0,0,0.04); }
+
+  .people-body {
+    padding: 8px;
+    overflow-y: auto;
+    flex: 1;
+    max-height: 440px;
+  }
+
+  /* Person card */
+  .person-card {
+    background: #faf5e8;
+    border: 1px solid var(--paper-darker);
+    padding: 7px 9px;
+    margin-bottom: 6px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .person-card:hover { border-color: var(--brass); box-shadow: 1px 1px 4px rgba(0,0,0,0.1); }
+
+  .person-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 1px;
+  }
+
+  .person-role {
+    font-size: 0.6rem;
+    color: var(--ink-faded);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+  }
+
+  .person-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    margin-bottom: 5px;
+  }
+
+  .trait-badge {
+    font-size: 0.58rem;
+    padding: 1px 5px;
+    border-radius: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .trait-loyal { background: #dcfce7; color: #166534; }
+  .trait-ambitious { background: #ffedd5; color: #9a3412; }
+  .trait-analytical { background: #dbeafe; color: #1e40af; }
+  .trait-emotional { background: #fce7f3; color: #9d174d; }
+  .trait-principled { background: #f3e8ff; color: #6b21a8; }
+  .trait-pragmatic { background: #ffedd5; color: #7c2d12; }
+  .trait-forgiving { background: #ecfeff; color: #155e75; }
+  .trait-grudge { background: #fef3c7; color: #92400e; }
+
+  .person-approval {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .approval-mini-label {
+    font-size: 0.58rem;
+    color: var(--ink-faded);
+    min-width: 50px;
+  }
+
+  .approval-mini-bar {
+    flex: 1;
+    height: 5px;
+    background: var(--paper-darker);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .approval-mini-fill {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .approval-mini-val {
+    font-size: 0.62rem;
+    font-weight: 700;
+    min-width: 22px;
+    text-align: right;
+    color: var(--ink);
+  }
+
+  /* Faction leader detail */
+  .faction-card {
+    background: #faf5e8;
+    border: 1px solid var(--paper-darker);
+    padding: 7px 9px;
+    margin-bottom: 6px;
+  }
+
+  .faction-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .faction-leader {
+    font-size: 0.62rem;
+    color: var(--ink-faded);
+    margin-bottom: 4px;
+  }
+
+  /* ── BOTTOM TICKER ── */
+  #news-ticker {
+    background: var(--ink);
+    border: 1px solid var(--brass);
+    padding: 6px 12px;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    overflow: hidden;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.4);
+  }
+
+  #news-ticker .ticker-label {
+    color: var(--brass);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    flex-shrink: 0;
+    border-right: 1px solid var(--brass);
+    padding-right: 10px;
+  }
+
+  #ticker-scroll {
+    display: flex;
+    gap: 40px;
+    font-size: 0.65rem;
+    color: #e8dcc8;
+    white-space: nowrap;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  .ticker-item {
+    flex-shrink: 0;
+  }
+
+  .ticker-item::before {
+    content: '◆ ';
+    color: var(--brass);
+  }
+
+  /* ── WIN/LOSE OVERLAY ── */
+  #game-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #game-overlay.visible { display: flex; }
+
+  .overlay-content {
+    background: var(--paper);
+    max-width: 500px;
+    width: 90%;
+    padding: 40px;
+    border: 2px solid var(--brass);
+    text-align: center;
+    box-shadow: 0 0 60px rgba(0,0,0,0.8);
+  }
+
+  .overlay-content h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--ink);
+    margin-bottom: 10px;
+  }
+
+  .overlay-content p {
+    color: var(--ink-faded);
+    font-size: 0.85rem;
+    margin-bottom: 20px;
+    line-height: 1.6;
+  }
+
+  .overlay-btn {
+    background: var(--ink);
+    color: var(--brass-light);
+    border: none;
+    padding: 10px 30px;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .overlay-btn:hover { background: #2e2212; }
+
+  /* ── COUNCIL VOTE ── */
+  .vote-display {
+    background: #fdf8ee;
+    border: 1px solid var(--paper-darker);
+    padding: 10px 12px;
+    font-size: 0.7rem;
+    margin-top: 8px;
+  }
+
+  .vote-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  .vote-results {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .vote-member {
+    font-size: 0.62rem;
+    padding: 2px 6px;
+    border-radius: 2px;
+  }
+
+  .vote-yes { background: #dcfce7; color: #166534; }
+  .vote-no { background: #fee2e2; color: #991b1b; }
+  .vote-abstain { background: #f3f4f6; color: #6b7280; }
+
+  .vote-summary {
+    margin-top: 8px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: var(--ink);
+    border-top: 1px solid var(--paper-darker);
+    padding-top: 6px;
+  }
+
+  /* Council tab */
+  .council-member-card {
+    background: #faf5e8;
+    border: 1px solid var(--paper-darker);
+    padding: 6px 8px;
+    margin-bottom: 5px;
+    font-size: 0.67rem;
+  }
+
+  .council-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .council-faction-tag {
+    font-size: 0.58rem;
+    padding: 0 4px;
+    border-radius: 2px;
+    margin-left: 4px;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  .faction-labor { background: #dbeafe; color: #1e3a8a; }
+  .faction-business { background: #dcfce7; color: #14532d; }
+  .faction-community { background: #fce7f3; color: #831843; }
+  .faction-reform { background: #f3e8ff; color: #4c1d95; }
+  .faction-independent { background: #fef3c7; color: #78350f; }
+  .faction-developer { background: #ffedd5; color: #9a3412; }
+
+  .scrollable { overflow-y: auto; max-height: 100%; }
+
+  /* Reaction colors */
+  .rel-improving { color: #16a34a; font-size: 0.6rem; }
+  .rel-straining { color: #dc2626; font-size: 0.6rem; }
+
+  /* Section divider */
+  .section-divider {
+    border: none;
+    border-top: 1px solid var(--paper-darker);
+    margin: 8px 0;
+  }
+
+  /* Election bar */
+  .election-bar {
+    background: #f0e6cc;
+    border: 1px solid var(--paper-darker);
+    padding: 6px 10px;
+    font-size: 0.68rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .election-bar .el-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-faded);
+    font-family: 'Playfair Display', serif;
+    white-space: nowrap;
+  }
+
+  .election-progress {
+    flex: 1;
+    height: 8px;
+    background: var(--paper-darker);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .election-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--brass), var(--brass-light));
+    transition: width 0.4s;
+  }
+
+  .election-countdown {
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--ink);
+    white-space: nowrap;
+    font-family: 'Playfair Display', serif;
+  }
+
+</style>
+</head>
+<body>
+
+<div id="game-wrapper">
+  <!-- NAMEPLATE -->
+  <div id="nameplate">
+    <div class="seal">⚖</div>
+    <div class="title-block">
+      <h1>Office of the Mayor — City of Millhaven</h1>
+      <div class="subtitle">Municipal Executive Administration · Established 1887</div>
+    </div>
+    <div class="date-display">
+      <div class="year-label">Current Date</div>
+      <div class="month-year" id="display-date">January, Year 1</div>
+    </div>
+  </div>
+
+  <!-- DESK GRID -->
+  <div id="desk-grid">
+
+    <!-- LEFT: VITALS -->
+    <div class="paper-panel" id="panel-vitals">
+      <div class="panel-header">
+        <h2>City Status</h2>
+        <span class="stamp">Official</span>
+      </div>
+      <div class="vitals-body">
+        <!-- Terminal stats -->
+        <div class="terminal-block">
+          <div class="t-header">◈ MILLHAVEN MUNICIPAL INDEX</div>
+          <div class="stat-row">
+            <span class="stat-label">INFRASTRUCTURE</span>
+            <div class="stat-bar-outer"><div class="stat-bar-inner" id="bar-infra"></div></div>
+            <span class="stat-val" id="val-infra">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">PUBLIC SAFETY</span>
+            <div class="stat-bar-outer"><div class="stat-bar-inner" id="bar-crime"></div></div>
+            <span class="stat-val" id="val-crime">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">SERVICES</span>
+            <div class="stat-bar-outer"><div class="stat-bar-inner" id="bar-services"></div></div>
+            <span class="stat-val" id="val-services">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">HOUSING</span>
+            <div class="stat-bar-outer"><div class="stat-bar-inner" id="bar-housing"></div></div>
+            <span class="stat-val" id="val-housing">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">DEVELOPMENT</span>
+            <div class="stat-bar-outer"><div class="stat-bar-inner" id="bar-dev"></div></div>
+            <span class="stat-val" id="val-dev">—</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">UNEMPLOYMENT</span>
+            <div class="stat-bar-outer"><div class="stat-bar-inner" id="bar-unemp"></div></div>
+            <span class="stat-val" id="val-unemp">—</span>
+          </div>
+        </div>
+
+        <!-- Budget -->
+        <div class="budget-block">
+          <div class="b-header">Monthly Budget</div>
+          <div class="budget-row"><span>Revenue</span><span class="positive" id="bud-revenue">—</span></div>
+          <div class="budget-row"><span>Infrastructure</span><span id="bud-infra">—</span></div>
+          <div class="budget-row"><span>Public Safety</span><span id="bud-safety">—</span></div>
+          <div class="budget-row"><span>Social Services</span><span id="bud-social">—</span></div>
+          <div class="budget-row"><span>Administration</span><span id="bud-admin">—</span></div>
+          <div class="budget-row total">
+            <span>Monthly Net</span>
+            <span id="bud-net">—</span>
+          </div>
+          <div class="balance-display" id="bud-balance">TREASURY: $—</div>
+        </div>
+
+        <!-- Approval -->
+        <div class="approval-block">
+          <div class="approval-label">Overall Approval</div>
+          <div class="approval-meter">
+            <div class="approval-fill" id="approval-fill" data-pct="0"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; margin-top:4px; font-size:0.6rem; color:var(--ink-faded);">
+            <span>RECALL</span><span>LANDSLIDE</span>
+          </div>
+          <div class="section-divider"></div>
+          <div class="election-bar">
+            <span class="el-label">Term Progress</span>
+            <div class="election-progress">
+              <div class="election-progress-fill" id="term-progress-fill" style="width:0%"></div>
+            </div>
+            <span class="election-countdown" id="election-countdown">48 mos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CENTER: SITUATION ROOM -->
+    <div class="paper-panel" id="panel-center">
+      <div class="panel-header">
+        <h2>Situation Room</h2>
+        <span class="stamp" id="event-type-stamp">Incoming</span>
+      </div>
+      <div class="situation-body" id="situation-body">
+        <div class="no-event" id="no-event-msg">
+          <div class="desk-icon">📋</div>
+          <p>Your desk is clear.</p>
+          <p style="font-size:0.7rem; margin-top:4px;">Advance the month to see what arrives.</p>
+        </div>
+      </div>
+      <button class="advance-btn" id="advance-btn" onclick="advanceMonth()">
+        ▶ Advance to Next Month
+      </button>
+    </div>
+
+    <!-- RIGHT: PEOPLE -->
+    <div class="paper-panel" id="panel-people">
+      <div class="panel-header">
+        <h2>Personnel</h2>
+      </div>
+      <div class="people-tabs">
+        <button class="tab-btn active" onclick="switchTab('staff')">Staff</button>
+        <button class="tab-btn" onclick="switchTab('council')">Council</button>
+        <button class="tab-btn" onclick="switchTab('factions')">Factions</button>
+      </div>
+      <div class="people-body" id="people-body"></div>
+    </div>
+
+  </div>
+
+  <!-- NEWS TICKER -->
+  <div id="news-ticker">
+    <span class="ticker-label">MILLHAVEN HERALD</span>
+    <div id="ticker-scroll">
+      <span class="ticker-item">Welcome to Millhaven. Your term begins now.</span>
+    </div>
+  </div>
+</div>
+
+<!-- WIN/LOSE OVERLAY -->
+<div id="game-overlay">
+  <div class="overlay-content">
+    <h2 id="overlay-title">—</h2>
+    <p id="overlay-body">—</p>
+    <button class="overlay-btn" onclick="restartGame()">New Term</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  GAME DATA
+// ═══════════════════════════════════════════════════
+
+const MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+
+const TRAIT_STYLES = {
+  loyal: 'trait-loyal', ambitious: 'trait-ambitious',
+  analytical: 'trait-analytical', emotional: 'trait-emotional',
+  principled: 'trait-principled', pragmatic: 'trait-pragmatic',
+  forgiving: 'trait-forgiving', grudge: 'trait-grudge'
+};
+
+const TRAIT_LABELS = {
+  loyal: 'Loyal', ambitious: 'Ambitious',
+  analytical: 'Analytical', emotional: 'Emotional',
+  principled: 'Principled', pragmatic: 'Pragmatic',
+  forgiving: 'Forgiving', grudge: 'Grudge-Holder'
+};
+
+// ── STAFF ──
+const INITIAL_STAFF = [
+  {
+    id: 'cos', name: 'Rachel Okafor', role: 'Chief of Staff',
+    traits: ['loyal', 'analytical'],
+    approval: 72,
+    bio: 'Former city planner. Methodical, keeps you from stepping on landmines.',
+    relationHistory: []
+  },
+  {
+    id: 'budget', name: 'Victor Slade', role: 'Budget Director',
+    traits: ['pragmatic', 'analytical'],
+    approval: 65,
+    bio: 'Numbers man. Will find a deal anywhere. Not above creative accounting.',
+    relationHistory: []
+  },
+  {
+    id: 'comms', name: 'Maya Chen', role: 'Communications Director',
+    traits: ['emotional', 'ambitious'],
+    approval: 68,
+    bio: 'Media savvy. Wants your success badly — mostly because she wants hers.',
+    relationHistory: []
+  },
+  {
+    id: 'planning', name: 'Douglas Merritt', role: 'City Planner',
+    traits: ['principled', 'grudge'],
+    approval: 60,
+    bio: 'Old school. Has seen every backroom deal this city ever made. Remembers them.',
+    relationHistory: []
+  }
+];
+
+// ── COUNCIL ──
+const INITIAL_COUNCIL = [
+  { id: 'c1', name: 'Donna Torres', faction: 'labor', factionLabel: 'Labor', traits: ['emotional', 'grudge'], approval: 55, district: 'District 3' },
+  { id: 'c2', name: 'Frank Beaumont', faction: 'business', factionLabel: 'Business', traits: ['pragmatic', 'analytical'], approval: 60, district: 'At-Large' },
+  { id: 'c3', name: 'Priya Nair', faction: 'reform', factionLabel: 'Reform', traits: ['principled', 'analytical'], approval: 63, district: 'District 1' },
+  { id: 'c4', name: 'James "Big Jim" Callahan', faction: 'developer', factionLabel: 'Developer', traits: ['pragmatic', 'ambitious'], approval: 50, district: 'District 5' },
+  { id: 'c5', name: 'Sandra Liu', faction: 'community', factionLabel: 'Community', traits: ['emotional', 'forgiving'], approval: 58, district: 'District 2' },
+  { id: 'c6', name: 'Marcus Webb', faction: 'independent', factionLabel: 'Independent', traits: ['analytical', 'pragmatic'], approval: 52, district: 'District 4' },
+  { id: 'c7', name: 'Carla Reyes', faction: 'community', factionLabel: 'Community', traits: ['principled', 'loyal'], approval: 65, district: 'District 6' }
+];
+
+// ── FACTIONS ──
+const INITIAL_FACTIONS = [
+  { id: 'labor', name: 'Municipal Workers Union', leader: 'Donna Torres', leaderPersonality: 'Emotional, holds grudges', approval: 55, traits: ['emotional', 'grudge'] },
+  { id: 'business', name: 'Millhaven Business Alliance', leader: 'Frank Beaumont', leaderPersonality: 'Analytical, deal-maker', approval: 62, traits: ['analytical', 'pragmatic'] },
+  { id: 'residents', name: "Residents' Association", leader: 'Patricia Nkemelu', leaderPersonality: 'Principled, won\'t be bought', approval: 58, traits: ['principled', 'forgiving'] },
+  { id: 'developers', name: 'City Developers Consortium', leader: 'James Callahan', leaderPersonality: 'Ambitious, transactional', approval: 52, traits: ['ambitious', 'pragmatic'] },
+  { id: 'press', name: 'Millhaven Herald', leader: 'Tom Vasquez', leaderPersonality: 'Principled, analytical', approval: 50, traits: ['principled', 'analytical'] },
+  { id: 'police', name: 'Police & Fire Unions', leader: 'Chief Ray Kovacs', leaderPersonality: 'Loyal (to precedent), grudge', approval: 60, traits: ['loyal', 'grudge'] }
+];
+
+// ─────────────────────────────────────────────────────
+//  EVENTS POOL
+// ─────────────────────────────────────────────────────
+const EVENTS_POOL = [
+  {
+    id: 'union_contract',
+    title: 'Union Contract Negotiations',
+    tag: 'political',
+    type: 'routine',
+    body: 'The Municipal Workers Union is demanding a 12% wage increase over three years, citing inflation and understaffing. Negotiations have stalled. Union President Donna Torres is threatening a work slowdown.',
+    advisor: 'cos',
+    choices: [
+      {
+        label: 'Accept the full 12% increase',
+        effects: [
+          { stat: 'budget', val: -80000, label: '+$80k/mo expense', type: 'neg' },
+          { stat: 'services', val: 5, label: 'Services ↑', type: 'pos' },
+        ],
+        factionEffects: { labor: +18, business: -8, press: +3 },
+        councilKey: 'labor_friendly',
+        outcome: 'The union accepts immediately. Torres publicly praises your office. Services improve as morale rises — though your budget director is furious about the long-term cost.',
+        voteRequired: true,
+        voteIssue: 'Union Contract Approval'
+      },
+      {
+        label: 'Offer 6% over two years — counter-propose',
+        effects: [
+          { stat: 'budget', val: -40000, label: '+$40k/mo expense', type: 'neg' },
+          { stat: 'services', val: 2, label: 'Services ↑ (modest)', type: 'pos' },
+        ],
+        factionEffects: { labor: -5, business: -2, press: +5 },
+        councilKey: 'neutral',
+        outcome: 'Torres accepts reluctantly. Grumbling continues but work slowdown is avoided. A reasonable outcome that pleases nobody completely.',
+        voteRequired: false
+      },
+      {
+        label: 'Reject the demand — hold the line on budget',
+        effects: [
+          { stat: 'services', val: -8, label: 'Services ↓', type: 'neg' },
+          { stat: 'crime', val: -4, label: 'Safety ↓ (slowdown)', type: 'neg' },
+        ],
+        factionEffects: { labor: -20, business: +10, residents: -8, press: -5 },
+        councilKey: 'business_friendly',
+        outcome: 'Torres calls a work slowdown. Trash piles up in District 3. The Herald runs a front-page story on "Mayor Stonewalls Workers." Business Alliance quietly sends a thank-you note.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'rezone_commercial',
+    title: 'Rezone Request: Eastside Corridor',
+    tag: 'political',
+    type: 'routine',
+    body: 'Developer Jim Callahan wants to rezone the Eastside Corridor from residential to mixed-use commercial. It would bring 200 construction jobs and an estimated $3M in new annual tax revenue. Residents in Districts 2 and 3 are furious about displacement and increased traffic.',
+    advisor: 'planning',
+    choices: [
+      {
+        label: 'Approve the full rezoning',
+        effects: [
+          { stat: 'budget', val: 30000, label: 'Revenue ↑ (long-term)', type: 'pos' },
+          { stat: 'development', val: 10, label: 'Development ↑', type: 'pos' },
+          { stat: 'housing', val: -10, label: 'Housing ↓', type: 'neg' },
+        ],
+        factionEffects: { developers: +20, residents: -18, labor: +5, business: +10 },
+        councilKey: 'developer_friendly',
+        outcome: 'Construction begins within 90 days. District 2 organizes protests outside City Hall. Callahan sends a case of scotch to your office.',
+        voteRequired: true,
+        voteIssue: 'Eastside Rezoning Ordinance'
+      },
+      {
+        label: 'Approve limited rezoning with affordable housing requirements',
+        effects: [
+          { stat: 'budget', val: 12000, label: 'Revenue ↑ (reduced)', type: 'pos' },
+          { stat: 'development', val: 5, label: 'Development ↑', type: 'pos' },
+          { stat: 'housing', val: 3, label: 'Housing ↑ (slight)', type: 'pos' },
+        ],
+        factionEffects: { developers: -5, residents: +5, labor: +3, press: +8 },
+        councilKey: 'neutral',
+        outcome: 'Callahan is annoyed but takes the deal. Residents appreciate the concession. The Herald calls it "a measured compromise." Nobody is thrilled. That often means you got it right.',
+        voteRequired: true,
+        voteIssue: 'Modified Eastside Rezoning'
+      },
+      {
+        label: 'Reject the application',
+        effects: [
+          { stat: 'development', val: -5, label: 'Development ↓', type: 'neg' },
+        ],
+        factionEffects: { developers: -22, residents: +15, business: -8, press: +5 },
+        councilKey: 'community_friendly',
+        outcome: 'Callahan threatens to pull support in the next election. Residents hold a supportive rally. Your planner, Merritt, nods approvingly for the first time in months.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'crime_spike',
+    title: 'Crime Spike — East District',
+    tag: 'crisis',
+    type: 'crisis',
+    body: 'Violent crime in District 4 and 5 is up 18% this quarter. Chief Kovacs is requesting emergency overtime funding and expanded patrol presence. The Herald has run three consecutive front-page stories. Council members are calling your office.',
+    advisor: 'cos',
+    choices: [
+      {
+        label: 'Approve emergency police overtime — full funding',
+        effects: [
+          { stat: 'budget', val: -60000, label: '+$60k emergency expense', type: 'neg' },
+          { stat: 'crime', val: 12, label: 'Safety ↑', type: 'pos' },
+        ],
+        factionEffects: { police: +20, labor: +5, residents: +10, press: +5, business: +8 },
+        outcome: 'Crime numbers begin dropping within weeks. Chief Kovacs gives a press conference crediting your leadership. Budget takes a hit but the numbers speak.',
+        voteRequired: false
+      },
+      {
+        label: 'Fund targeted patrols only — hold the line on overtime',
+        effects: [
+          { stat: 'budget', val: -25000, label: '+$25k targeted expense', type: 'neg' },
+          { stat: 'crime', val: 5, label: 'Safety ↑ (modest)', type: 'pos' },
+        ],
+        factionEffects: { police: -5, residents: +2, press: -3 },
+        outcome: 'A measured response. Crime stabilizes but doesn\'t dramatically improve. The Herald calls it "insufficient." Kovacs tells staff he expected more.',
+        voteRequired: false
+      },
+      {
+        label: 'Commission a 90-day public safety task force review',
+        effects: [
+          { stat: 'crime', val: -4, label: 'Safety ↓ (delay)', type: 'neg' },
+        ],
+        factionEffects: { police: -15, residents: -10, press: -12, business: -8 },
+        outcome: 'The public reads "task force" as "delay." Three more incidents in District 4. Kovacs stops returning your calls. Torres uses the phrase "failed leadership" at a press conference.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'water_main',
+    title: 'Water Main Failure — Districts 1 & 2',
+    tag: 'crisis',
+    type: 'crisis',
+    body: 'A major water main has ruptured under Chandler Avenue. 8,000 residents are under a boil-water advisory. The repair estimate is $1.4M. City Planner Merritt has been warning about aging infrastructure for two years.',
+    advisor: 'planning',
+    choices: [
+      {
+        label: 'Emergency repair — full funding from reserve',
+        effects: [
+          { stat: 'budget', val: -120000, label: '$1.4M one-time (reserve)', type: 'neg' },
+          { stat: 'infrastructure', val: 8, label: 'Infrastructure ↑', type: 'pos' },
+        ],
+        factionEffects: { residents: +15, press: +8, police: +3 },
+        outcome: 'Repairs complete in 11 days. Advisory lifted. Merritt notes there are three more pipes in similar condition.',
+        voteRequired: false
+      },
+      {
+        label: 'Emergency repair — cut parks budget to fund it',
+        effects: [
+          { stat: 'infrastructure', val: 8, label: 'Infrastructure ↑', type: 'pos' },
+          { stat: 'services', val: -5, label: 'Services ↓ (parks cut)', type: 'neg' },
+        ],
+        factionEffects: { residents: +8, press: +3, business: -3 },
+        outcome: 'Water restored. Residents accept the parks cuts as reasonable given the emergency. Merritt logs that you robbed Peter to pay Paul.',
+        voteRequired: false
+      },
+      {
+        label: 'Apply for state emergency infrastructure grant (6-week delay)',
+        effects: [
+          { stat: 'infrastructure', val: -6, label: 'Infrastructure ↓ (delay)', type: 'neg' },
+          { stat: 'services', val: -8, label: 'Services ↓', type: 'neg' },
+        ],
+        factionEffects: { residents: -18, press: -15, labor: -8 },
+        outcome: 'The 6-week wait becomes a political disaster. The Herald publishes photographs of residents buying bottled water. Two council members call for a censure vote.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'school_funding',
+    title: 'School Budget Shortfall',
+    tag: 'political',
+    type: 'routine',
+    body: 'The Millhaven Unified School District is facing a $2.1M shortfall. Superintendent Gloria Park is asking City Hall for emergency bridge funding while federal grants are applied for. Cutting an afterschool program serving 1,200 kids is the alternative.',
+    advisor: 'budget',
+    choices: [
+      {
+        label: 'Provide the full bridge funding',
+        effects: [
+          { stat: 'budget', val: -175000, label: '$2.1M one-time draw', type: 'neg' },
+          { stat: 'services', val: 7, label: 'Services ↑', type: 'pos' },
+        ],
+        factionEffects: { residents: +15, labor: +8, press: +10, business: -5 },
+        outcome: 'Programs preserved. The district gets the federal grant three months later. Families in Districts 1, 2, and 5 remember.',
+        voteRequired: false
+      },
+      {
+        label: 'Partial funding — split cost with the district',
+        effects: [
+          { stat: 'budget', val: -90000, label: '$1.05M from city', type: 'neg' },
+          { stat: 'services', val: 3, label: 'Services ↑ (modest)', type: 'pos' },
+        ],
+        factionEffects: { residents: +5, press: +3, labor: +3 },
+        outcome: 'A compromise. Some programs scale back. Superintendent Park is grateful but disappointed.',
+        voteRequired: false
+      },
+      {
+        label: 'Deny — education is a state/district matter, not City Hall\'s',
+        effects: [
+          { stat: 'services', val: -10, label: 'Services ↓', type: 'neg' },
+        ],
+        factionEffects: { residents: -18, labor: -12, press: -15, business: +5 },
+        outcome: '1,200 kids lose afterschool programs. The Herald runs a photo of an empty gymnasium. Your approval in Districts 1 and 2 drops sharply.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'factory_violation',
+    title: 'Environmental Violation — Grayson Plastics',
+    tag: 'political',
+    type: 'routine',
+    body: 'Grayson Plastics, Millhaven\'s largest private employer with 1,400 jobs, has been cited for illegal discharge into the Mell River. The Business Alliance wants you to negotiate quietly. Environmental groups and the press are watching.',
+    advisor: 'comms',
+    choices: [
+      {
+        label: 'Enforce full penalties — fine and remediation order',
+        effects: [
+          { stat: 'development', val: -6, label: 'Development ↓ (employer tension)', type: 'neg' },
+        ],
+        factionEffects: { residents: +15, press: +18, business: -18, developers: -8 },
+        outcome: 'Grayson pays the fine. The CEO publicly threatens to relocate. The Herald praises your decision as "rare municipal spine." Business Alliance is furious.',
+        voteRequired: false
+      },
+      {
+        label: 'Negotiate a private compliance agreement with Grayson',
+        effects: [
+          { stat: 'development', val: 3, label: 'Development stable', type: 'pos' },
+        ],
+        factionEffects: { residents: -8, press: -10, business: +12, developers: +5 },
+        outcome: 'A private deal is struck. Grayson commits to a 2-year remediation timeline. Environmentalists call it a cover-up. The Herald files a FOIA request.',
+        voteRequired: false
+      },
+      {
+        label: 'Delay — commission an "independent environmental study"',
+        effects: [
+          { stat: 'services', val: -3, label: 'Trust ↓', type: 'neg' },
+        ],
+        factionEffects: { residents: -12, press: -15, business: +5 },
+        outcome: 'Transparency advocates are outraged. "Study" becomes a punchline. The Herald uses the word "stonewall" twice in one editorial.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'press_investigation',
+    title: 'Herald Investigation — City Contracts',
+    tag: 'political',
+    type: 'political',
+    body: 'Tom Vasquez at the Herald is investigating allegations that city contracts were awarded to companies with ties to Council Member Callahan\'s network. Your comms director says you have two weeks before publication. Your records are clean — but Callahan isn\'t.',
+    advisor: 'comms',
+    choices: [
+      {
+        label: 'Cooperate fully — open the books, hold a press briefing',
+        effects: [
+          { stat: 'budget', val: -5000, label: 'Minor legal cost', type: 'neg' },
+        ],
+        factionEffects: { press: +20, residents: +10, developers: -15, business: -5 },
+        councilKey: 'callahan_hostile',
+        outcome: 'The story runs but your office is cleared. Callahan takes the heat. He\'ll remember. Press gives you the rare "transparent leadership" headline.',
+        voteRequired: false
+      },
+      {
+        label: 'Stay neutral — "we cooperate with all lawful inquiries"',
+        effects: [],
+        factionEffects: { press: -5, residents: -3 },
+        outcome: 'Non-answer reads as evasion. Vasquez\'s story is slightly sharper because of it. You avoided conflict but gained nothing.',
+        voteRequired: false
+      },
+      {
+        label: 'Quietly tip off Callahan to give him time to prepare',
+        effects: [],
+        factionEffects: { developers: +12, press: -25, residents: -15, police: -5 },
+        councilKey: 'callahan_loyal',
+        outcome: 'Callahan\'s people lawyer up. The Herald gets wind of the tip. A second story runs: "Sources: Mayor Warned Subject of Investigation." It\'s worse than the original.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'budget_shortfall',
+    title: 'Quarterly Budget Shortfall',
+    tag: 'crisis',
+    type: 'crisis',
+    body: 'Tax revenues came in 14% below projection. Victor Slade says you need to cut $280,000 from the operating budget this month or draw from reserves. Three areas are on the table: social services, parks, and infrastructure maintenance.',
+    advisor: 'budget',
+    choices: [
+      {
+        label: 'Cut social services — protect infrastructure',
+        effects: [
+          { stat: 'services', val: -12, label: 'Services ↓↓', type: 'neg' },
+          { stat: 'infrastructure', val: 2, label: 'Infrastructure maintained', type: 'pos' },
+        ],
+        factionEffects: { residents: -15, labor: -12, press: -8, business: +5 },
+        outcome: 'The cuts hit the most vulnerable residents. Two council members hold a press conference on the steps of City Hall.',
+        voteRequired: false
+      },
+      {
+        label: 'Cut parks and discretionary — protect social services',
+        effects: [
+          { stat: 'services', val: -5, label: 'Services ↓ (parks)', type: 'neg' },
+          { stat: 'infrastructure', val: -3, label: 'Infrastructure ↓', type: 'neg' },
+        ],
+        factionEffects: { residents: -5, press: -3, labor: +3 },
+        outcome: 'The least harmful cut available. Merritt warns that deferred maintenance is a debt that compounds.',
+        voteRequired: false
+      },
+      {
+        label: 'Draw from the emergency reserve — don\'t cut anything',
+        effects: [
+          { stat: 'budget', val: -280000, label: '$280k reserve draw', type: 'neg' },
+        ],
+        factionEffects: { residents: +5, press: +3, business: -3 },
+        outcome: 'Short-term pain avoided. Reserve fund shrinks. Slade notes this is the second draw in two terms. "We have a revenue problem, Mayor."',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'homeless_encampment',
+    title: 'Eastbridge Park Encampment',
+    tag: 'political',
+    type: 'political',
+    body: 'A 140-person encampment has formed in Eastbridge Park. Business Alliance wants it cleared. The Residents\' Association is split. Social service organizations are requesting city resources to address root causes. Council Member Liu has been handing out flyers at the park.',
+    advisor: 'comms',
+    choices: [
+      {
+        label: 'Authorize police to clear the encampment with 72-hour notice',
+        effects: [
+          { stat: 'crime', val: 3, label: 'Safety stat ↑ (short-term)', type: 'pos' },
+          { stat: 'housing', val: -5, label: 'Housing crisis worsens', type: 'neg' },
+        ],
+        factionEffects: { business: +15, developers: +10, residents: -12, labor: -10, press: -15 },
+        outcome: 'Park is cleared. Photographs of the operation circulate. Herald writes an editorial questioning your humanity. People reappear under the Chandler bridge within weeks.',
+        voteRequired: false
+      },
+      {
+        label: 'Fund a temporary shelter partnership with St. Catherine\'s',
+        effects: [
+          { stat: 'budget', val: -30000, label: '+$30k/mo shelter cost', type: 'neg' },
+          { stat: 'services', val: 5, label: 'Services ↑', type: 'pos' },
+          { stat: 'housing', val: 3, label: 'Housing ↑', type: 'pos' },
+        ],
+        factionEffects: { residents: +8, labor: +10, press: +12, business: -5 },
+        outcome: '110 of 140 accept shelter placement. A genuine reduction. The approach is cited as a model by the state. Business Alliance still grumbles about "incentivizing vagrancy."',
+        voteRequired: false
+      },
+      {
+        label: 'Create a city-managed managed encampment with services',
+        effects: [
+          { stat: 'budget', val: -50000, label: '+$50k/mo managed site', type: 'neg' },
+          { stat: 'housing', val: 5, label: 'Housing ↑', type: 'pos' },
+        ],
+        factionEffects: { residents: -3, press: +8, labor: +5, business: -15, developers: -12 },
+        outcome: 'Bold and contested. Developers call it a "permanent blight." Advocacy groups call it "the most humane decision this city has made in a decade."',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'tax_rate_proposal',
+    title: 'Council Tax Rate Proposal',
+    tag: 'political',
+    type: 'political',
+    body: 'Council Member Nair has proposed a 2% increase in the property tax rate to fund a long-term infrastructure renewal program. The Business Alliance opposes it. Residents\' Association supports it. You have to take a position before the council votes.',
+    advisor: 'budget',
+    choices: [
+      {
+        label: 'Support and champion the tax increase',
+        effects: [
+          { stat: 'budget', val: 90000, label: 'Revenue ↑ (+$90k/mo)', type: 'pos' },
+          { stat: 'infrastructure', val: 5, label: 'Infrastructure ↑', type: 'pos' },
+        ],
+        factionEffects: { residents: +12, labor: +8, business: -18, developers: -10, press: +5 },
+        councilKey: 'reform_friendly',
+        outcome: 'The vote passes 5-2. Nair publicly credits your leadership. Business Alliance launches a "Stop the Mayor\'s Tax Grab" social campaign.',
+        voteRequired: true,
+        voteIssue: 'Infrastructure Tax Increase'
+      },
+      {
+        label: 'Stay neutral — let the council decide without you',
+        effects: [],
+        factionEffects: { press: -8, residents: -5, business: +3 },
+        outcome: 'Nair is disappointed. The Herald runs a piece on "Absent Leadership." The bill passes 4-3 without your support — which means you got the money without taking the hit. Slade calls it "tactically sound, cowardly, and probably correct."',
+        voteRequired: false
+      },
+      {
+        label: 'Oppose the increase — protect taxpayers',
+        effects: [],
+        factionEffects: { business: +18, developers: +10, residents: -10, labor: -5, press: -8, police: +3 },
+        councilKey: 'business_friendly',
+        outcome: 'Business Alliance hosts a luncheon in your honor. Nair publicly questions your commitment to the city\'s future. The bill fails 3-4.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'staff_loyalty',
+    title: 'Staff Loyalty Test',
+    tag: 'political',
+    type: 'political',
+    body: 'You\'ve learned through a source that Communications Director Maya Chen has been taking private meetings with your likely opponent in the next election, sharing internal polling data. She hasn\'t broken any laws but the betrayal is significant.',
+    advisor: 'cos',
+    choices: [
+      {
+        label: 'Confront her directly and demand her resignation',
+        effects: [],
+        factionEffects: { press: -5 },
+        outcome: 'Chen resigns and immediately joins your opponent\'s campaign. Her departure creates a brief media story but your internal team solidifies. Okafor notes: "The room is cleaner now."',
+        voteRequired: false
+      },
+      {
+        label: 'Keep her close — cut her access to sensitive information',
+        effects: [],
+        factionEffects: { press: +3 },
+        outcome: 'Chen stays on the payroll. Her access is quietly reduced. She doesn\'t notice immediately. You know she\'s a leak. That knowledge is its own kind of leverage.',
+        voteRequired: false
+      },
+      {
+        label: 'Do nothing — you need her media relationships right now',
+        effects: [],
+        factionEffects: { press: +8 },
+        outcome: 'Short-term media coverage improves. Long-term: she has ongoing access to your internal strategy. The calculus may be right. It\'s definitely a gamble.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'corporation_incentive',
+    title: 'Corporate Relocation Incentive Request',
+    tag: 'opportunity',
+    type: 'routine',
+    body: 'Nexus Logistics wants to open a regional distribution center in Millhaven. They\'re asking for a 5-year tax abatement, worth approximately $1.8M foregone revenue. The deal would bring 340 jobs. The Labor Union wants prevailing wage guarantees as a condition.',
+    advisor: 'budget',
+    choices: [
+      {
+        label: 'Approve the incentive with a prevailing wage requirement',
+        effects: [
+          { stat: 'development', val: 8, label: 'Development ↑', type: 'pos' },
+          { stat: 'infrastructure', val: -3, label: 'Infrastructure strain ↑', type: 'neg' },
+        ],
+        factionEffects: { labor: +15, business: +8, developers: +10, residents: +8, press: +5 },
+        outcome: 'Nexus accepts. Ground breaks in 6 months. 340 jobs at prevailing wage. This might be the cleanest win your administration has had.',
+        voteRequired: true,
+        voteIssue: 'Nexus Logistics Tax Abatement'
+      },
+      {
+        label: 'Approve the incentive without wage conditions',
+        effects: [
+          { stat: 'development', val: 10, label: 'Development ↑↑', type: 'pos' },
+        ],
+        factionEffects: { labor: -15, business: +18, developers: +12 },
+        outcome: 'Nexus loves you. The union posts "SOLD OUT" on social. 340 jobs at market wage — which means some will pay less than workers expect.',
+        voteRequired: false
+      },
+      {
+        label: 'Reject — tax abatements hurt the city\'s long-term revenue',
+        effects: [],
+        factionEffects: { labor: +8, business: -12, developers: -8, residents: -5, press: -5 },
+        outcome: 'Nexus announces it\'s going to Denton County instead. The Herald asks why Millhaven "can\'t close a deal." Principled, but politically costly.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'road_repair',
+    title: 'Road Repair Backlog',
+    tag: 'routine',
+    type: 'routine',
+    body: 'City Planner Merritt presents you with a 47-page infrastructure deferred maintenance report. The roads in Districts 3, 5, and 6 are rated "D" by the state DOT. An accelerated repair program would cost $900,000 but would dramatically improve resident quality of life and reduce vehicle damage liability.',
+    advisor: 'planning',
+    choices: [
+      {
+        label: 'Fund the full accelerated repair program',
+        effects: [
+          { stat: 'budget', val: -75000, label: '+$75k/mo over 12 months', type: 'neg' },
+          { stat: 'infrastructure', val: 12, label: 'Infrastructure ↑↑', type: 'pos' },
+        ],
+        factionEffects: { residents: +15, labor: +10, press: +8, business: +5 },
+        outcome: 'Merritt says this is the first time he\'s smiled in three years. Districts 3, 5, and 6 notice. And they vote.',
+        voteRequired: false
+      },
+      {
+        label: 'Fund repairs in the two worst-rated districts only',
+        effects: [
+          { stat: 'budget', val: -40000, label: '+$40k/mo over 12 months', type: 'neg' },
+          { stat: 'infrastructure', val: 6, label: 'Infrastructure ↑', type: 'pos' },
+        ],
+        factionEffects: { residents: +6, press: +3 },
+        outcome: 'A partial fix. District 6 council member Reyes publicly thanks you and privately asks when their streets are next.',
+        voteRequired: false
+      },
+      {
+        label: 'Defer — apply for state infrastructure grant next cycle',
+        effects: [
+          { stat: 'infrastructure', val: -6, label: 'Infrastructure ↓ (continued decay)', type: 'neg' },
+        ],
+        factionEffects: { residents: -10, press: -8, labor: -5 },
+        outcome: 'Merritt\'s report goes into a drawer. A pothole causes a city lawsuit the following month. The cycle continues.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'strike_threat',
+    title: 'City Worker Strike Threat',
+    tag: 'crisis',
+    type: 'crisis',
+    body: 'Sanitation and maintenance workers, frustrated by safety equipment shortages and unpaid overtime, are 72 hours from an authorized strike. Torres is coordinating. A strike would halt garbage collection, park maintenance, and road repair for an indefinite period.',
+    advisor: 'cos',
+    choices: [
+      {
+        label: 'Meet with Torres personally — negotiate directly',
+        effects: [
+          { stat: 'budget', val: -30000, label: 'Safety equipment + OT cost', type: 'neg' },
+          { stat: 'services', val: 5, label: 'Services ↑', type: 'pos' },
+        ],
+        factionEffects: { labor: +20, residents: +8, press: +8, business: -5 },
+        outcome: 'Torres is caught off-guard by the personal meeting. The grievances are real and you know it. A deal is struck in 4 hours. No strike. The Herald calls it "decisive leadership."',
+        voteRequired: false
+      },
+      {
+        label: 'Invoke the city\'s no-strike clause — threaten legal action',
+        effects: [
+          { stat: 'services', val: -8, label: 'Services ↓ (slowdown)', type: 'neg' },
+        ],
+        factionEffects: { labor: -25, residents: -10, press: -12, business: +12 },
+        outcome: 'Workers comply legally but perform exactly to the letter of their contracts — no more. The slowdown is legal. Bags pile up by Saturday.',
+        voteRequired: false
+      },
+      {
+        label: 'Hire temporary contractors as strike insurance',
+        effects: [
+          { stat: 'budget', val: -50000, label: 'Contractor cost', type: 'neg' },
+        ],
+        factionEffects: { labor: -30, business: +5, residents: -5, press: -10 },
+        outcome: 'Torres calls it "union-busting." The strike happens anyway. Contractors are slow and inadequate. It takes 3 weeks and a mediated settlement to resolve.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'high_rise_variance',
+    title: 'Zoning Variance — Kellerman Tower',
+    tag: 'political',
+    type: 'routine',
+    body: 'A developer is requesting a height variance to build a 24-story mixed-use tower downtown, well above the current 12-story limit. It would include 80 units of "workforce housing" (income-capped at 120% AMI). Architecture critics are excited. Historic preservationists are not.',
+    advisor: 'planning',
+    choices: [
+      {
+        label: 'Approve the variance — density is a solution, not a problem',
+        effects: [
+          { stat: 'housing', val: 8, label: 'Housing ↑', type: 'pos' },
+          { stat: 'development', val: 8, label: 'Development ↑', type: 'pos' },
+          { stat: 'budget', val: 15000, label: 'Revenue ↑', type: 'pos' },
+        ],
+        factionEffects: { developers: +18, business: +10, residents: -8, press: +5 },
+        outcome: 'Groundbreaking in spring. Historic preservationists hold a candlelight vigil. The 80 workforce units are immediately waitlisted.',
+        voteRequired: true,
+        voteIssue: 'Kellerman Tower Height Variance'
+      },
+      {
+        label: 'Approve at 18 stories — a negotiated compromise',
+        effects: [
+          { stat: 'housing', val: 4, label: 'Housing ↑ (moderate)', type: 'pos' },
+          { stat: 'development', val: 4, label: 'Development ↑ (moderate)', type: 'pos' },
+        ],
+        factionEffects: { developers: +5, residents: -2, press: +8 },
+        outcome: 'Developer accepts. Preservationists remain unhappy but contained. "The art of acceptable compromise" — Slade.',
+        voteRequired: false
+      },
+      {
+        label: 'Deny the variance — existing height limits exist for a reason',
+        effects: [
+          { stat: 'development', val: -5, label: 'Development ↓', type: 'neg' },
+        ],
+        factionEffects: { developers: -15, residents: +10, press: -3 },
+        outcome: 'Preservationists are relieved. Developers are not. The 80 units of workforce housing don\'t get built.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'festival_proposal',
+    title: 'Annual Arts Festival Proposal',
+    tag: 'opportunity',
+    type: 'routine',
+    body: 'The Millhaven Arts Collective is requesting a $120,000 city co-sponsorship for an expanded 3-day downtown arts festival. Last year\'s event brought an estimated $800,000 in economic activity. The business district loves it. Some council members see it as a luxury.',
+    advisor: 'comms',
+    choices: [
+      {
+        label: 'Fund it fully — economic return justifies the spend',
+        effects: [
+          { stat: 'budget', val: -10000, label: '-$120k (net positive w/ revenue)', type: 'pos' },
+          { stat: 'development', val: 5, label: 'Development ↑', type: 'pos' },
+          { stat: 'services', val: 3, label: 'Quality of life ↑', type: 'pos' },
+        ],
+        factionEffects: { business: +12, residents: +10, press: +8, labor: +5 },
+        outcome: 'Best attended festival in the city\'s history. You give a brief speech on the main stage. The Herald runs a photo of you surrounded by residents. It\'s a good week.',
+        voteRequired: false
+      },
+      {
+        label: 'Partial funding — $60,000 city contribution',
+        effects: [
+          { stat: 'development', val: 2, label: 'Development ↑ (modest)', type: 'pos' },
+        ],
+        factionEffects: { business: +5, residents: +4, press: +3 },
+        outcome: 'Festival happens at reduced scale. Collective is grateful for anything. Event is a modest success.',
+        voteRequired: false
+      },
+      {
+        label: 'Deny — city funds aren\'t for arts patronage',
+        effects: [],
+        factionEffects: { business: -8, residents: -8, press: -10, labor: -3 },
+        outcome: 'The festival doesn\'t happen. Chen — before her issues surfaced — warns that this will be remembered at election time. She\'s right.',
+        voteRequired: false
+      }
+    ]
+  },
+  {
+    id: 'pension_crisis',
+    title: 'Municipal Pension Fund Warning',
+    tag: 'crisis',
+    type: 'crisis',
+    body: 'An actuarial review reveals the city\'s pension fund is 68% funded — a $42M unfunded liability. The problem has been building for 15 years. Slade says you can either begin a multi-year restructuring now or inherit a full crisis in 4 years. The union will fight any changes.',
+    advisor: 'budget',
+    choices: [
+      {
+        label: 'Begin immediate restructuring — increase city contributions',
+        effects: [
+          { stat: 'budget', val: -60000, label: '+$60k/mo to pension fund', type: 'neg' },
+        ],
+        factionEffects: { labor: -10, business: +8, press: +10, residents: +5 },
+        outcome: 'Torres doesn\'t love it but respects the honesty. The Herald calls it "governing for the long term, not the next election." Your approval among older residents ticks up.',
+        voteRequired: false
+      },
+      {
+        label: 'Negotiate reduced benefits for new hires only',
+        effects: [
+          { stat: 'budget', val: -20000, label: '+$20k/mo partial fix', type: 'neg' },
+        ],
+        factionEffects: { labor: -20, business: +5, press: +5 },
+        outcome: 'Workers with seniority are protected. New hires are unhappy. The union splits. Liability stops growing but doesn\'t shrink meaningfully.',
+        voteRequired: true,
+        voteIssue: 'Pension Reform Ordinance'
+      },
+      {
+        label: 'Defer — this is a problem for the next administration',
+        effects: [],
+        factionEffects: { press: -12, residents: -5 },
+        outcome: 'Slade puts his concerns in writing and asks that you sign his memo. "For the record," he says. You know what that means.',
+        voteRequired: false
+      }
+    ]
+  }
+];
+
+// ═══════════════════════════════════════════════════
+//  GAME STATE
+// ═══════════════════════════════════════════════════
+
+let state = {};
+let currentTab = 'staff';
+let pendingVote = null;
+let tickerItems = [];
+
+function initState() {
+  state = {
+    turn: 0,
+    year: 1,
+    month: 0, // 0-indexed
+    maxTurns: 48,
+    awaitingDecision: false,
+    currentEvent: null,
+    decisionMade: false,
+
+    city: {
+      name: 'Millhaven',
+      population: 187400,
+      budget: {
+        balance: 2800000,
+        monthlyRevenue: 920000,
+        expenses: {
+          infrastructure: 220000,
+          publicSafety: 195000,
+          social: 130000,
+          admin: 180000
+        }
+      },
+      stats: {
+        approval: 52,
+        unemployment: 6.2,
+        crime: 52,       // higher = safer
+        infrastructure: 58,
+        services: 63,
+        housing: 50,
+        development: 48
+      }
+    },
+
+    staff: JSON.parse(JSON.stringify(INITIAL_STAFF)),
+    council: JSON.parse(JSON.stringify(INITIAL_COUNCIL)),
+    factions: JSON.parse(JSON.stringify(INITIAL_FACTIONS)),
+
+    usedEvents: [],
+    newsLog: ['Millhaven awaits new leadership.', 'City Hall staff preparing transition.'],
+    councilRelations: {}, // key: callahan_loyal, callahan_hostile, etc.
+
+    gameStatus: 'active'
+  };
+}
+
+// ═══════════════════════════════════════════════════
+//  HELPER UTILITIES
+// ═══════════════════════════════════════════════════
+
+function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+function fmtMoney(n) {
+  if (Math.abs(n) >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
+  if (Math.abs(n) >= 1000) return '$' + Math.round(n/1000) + 'k';
+  return '$' + n;
+}
+function fmtMoneyFull(n) {
+  return '$' + n.toLocaleString();
+}
+
+function getNet() {
+  const e = state.city.budget.expenses;
+  const totalExp = e.infrastructure + e.publicSafety + e.social + e.admin;
+  return state.city.budget.monthlyRevenue - totalExp;
+}
+
+function getApprovalColor(val) {
+  if (val >= 60) return '#16a34a';
+  if (val >= 45) return '#d97706';
+  return '#dc2626';
+}
+
+function getStatClass(val) {
+  if (val >= 65) return 'good';
+  if (val >= 40) return 'ok';
+  return 'bad';
+}
+
+// Get advisor advice based on personality
+function getAdvice(event, advisorId) {
+  const staff = state.staff.find(s => s.id === advisorId);
+  if (!staff) return null;
+  const t = staff.traits;
+
+  const adviceMap = {
+    'union_contract': {
+      loyal_analytical: `"The data supports partial concession. Full capitulation sets a bad precedent."`,
+      ambitious_emotional: `"Give them what they want. We need Torres's endorsement come election time."`,
+      principled_grudge: `"Hold firm. We cannot reward a slowdown threat. I have the memo ready."`,
+      pragmatic_analytical: `"A 6% counter-offer is defensible on the numbers. Get it in writing."`,
+      loyal_principled: `"There's a fair deal here. Find it. Don't make enemies you don't have to."`,
+      default: `"I'd recommend a counter-offer. Full concession sets a costly precedent."`,
+    },
+    'rezone_commercial': {
+      principled_grudge: `"This is the third time Callahan has brought this block. I've been watching him since 2019."`,
+      pragmatic_analytical: `"The revenue math works. Demand affordability requirements and take the deal."`,
+      loyal_analytical: `"Residents in Districts 2 and 3 will remember this. Factor that into November."`,
+      ambitious_emotional: `"Approve it. Callahan has deep pockets. We need him more than we need District 3."`,
+      default: `"There's a deal to be made here — but the terms matter enormously."`,
+    },
+    default_advisor: `"You know this situation better than I do. I'll support whatever you decide."`,
+  };
+
+  const key = t.includes('principled') && t.includes('grudge') ? 'principled_grudge' :
+              t.includes('pragmatic') && t.includes('analytical') ? 'pragmatic_analytical' :
+              t.includes('loyal') && t.includes('analytical') ? 'loyal_analytical' :
+              t.includes('ambitious') && t.includes('emotional') ? 'ambitious_emotional' :
+              t.includes('loyal') && t.includes('principled') ? 'loyal_principled' : 'default';
+
+  const evMap = adviceMap[event.id];
+  if (evMap) return evMap[key] || evMap['default'] || adviceMap.default_advisor;
+  return adviceMap.default_advisor;
+}
+
+// ═══════════════════════════════════════════════════
+//  COUNCIL VOTE SYSTEM
+// ═══════════════════════════════════════════════════
+
+function simulateCouncilVote(issue, councilKey) {
+  const votes = [];
+  let yea = 0, nay = 0;
+
+  state.council.forEach(member => {
+    const baseApproval = member.approval;
+    let voteScore = 0;
+
+    // Faction alignment
+    if (councilKey === 'labor_friendly' && member.faction === 'labor') voteScore += 30;
+    if (councilKey === 'labor_friendly' && member.faction === 'business') voteScore -= 20;
+    if (councilKey === 'business_friendly' && member.faction === 'business') voteScore += 30;
+    if (councilKey === 'business_friendly' && member.faction === 'labor') voteScore -= 20;
+    if (councilKey === 'community_friendly' && member.faction === 'community') voteScore += 25;
+    if (councilKey === 'developer_friendly' && member.faction === 'developer') voteScore += 30;
+    if (councilKey === 'developer_friendly' && member.faction === 'community') voteScore -= 25;
+    if (councilKey === 'reform_friendly' && member.faction === 'reform') voteScore += 25;
+    if (councilKey === 'reform_friendly' && member.faction === 'business') voteScore -= 15;
+    if (councilKey === 'callahan_hostile' && member.id === 'c4') voteScore -= 40;
+    if (councilKey === 'callahan_loyal' && member.id === 'c4') voteScore += 40;
+
+    // Personality modifiers
+    if (member.traits.includes('analytical')) voteScore += (baseApproval > 50 ? 10 : -10);
+    if (member.traits.includes('emotional')) voteScore += (baseApproval > 55 ? 15 : -15);
+    if (member.traits.includes('pragmatic')) voteScore += (baseApproval > 45 ? 8 : -8);
+    if (member.traits.includes('principled')) voteScore += 5; // principled members vote on merit
+    if (member.traits.includes('grudge') && state.councilRelations[member.id] === 'hostile') voteScore -= 25;
+    if (member.traits.includes('loyal') && baseApproval > 55) voteScore += 15;
+    if (member.traits.includes('ambitious') && baseApproval < 50) voteScore -= 20;
+
+    // Base mayor approval influence
+    voteScore += (baseApproval - 50) * 0.4;
+
+    const vote = voteScore > 0 ? 'yes' : voteScore < -5 ? 'no' : 'abstain';
+    votes.push({ member, vote });
+    if (vote === 'yes') yea++;
+    else if (vote === 'no') nay++;
+  });
+
+  return { votes, yea, nay, passed: yea > nay };
+}
+
+// ═══════════════════════════════════════════════════
+//  STAT EFFECTS
+// ═══════════════════════════════════════════════════
+
+function applyChoice(choice) {
+  const s = state.city.stats;
+  const b = state.city.budget;
+
+  // Apply stat effects
+  choice.effects.forEach(eff => {
+    if (eff.stat === 'budget') {
+      if (eff.val < -50000) {
+        b.balance += eff.val; // one-time
+      } else {
+        // Monthly change
+        if (eff.val > 0) b.monthlyRevenue += eff.val;
+        else {
+          b.expenses.admin += Math.abs(eff.val);
+        }
+      }
+    } else if (eff.stat === 'crime') {
+      s.crime = clamp(s.crime + eff.val, 0, 100);
+    } else if (eff.stat === 'infrastructure') {
+      s.infrastructure = clamp(s.infrastructure + eff.val, 0, 100);
+    } else if (eff.stat === 'services') {
+      s.services = clamp(s.services + eff.val, 0, 100);
+    } else if (eff.stat === 'housing') {
+      s.housing = clamp(s.housing + eff.val, 0, 100);
+    } else if (eff.stat === 'development') {
+      s.development = clamp(s.development + eff.val, 0, 100);
+    }
+  });
+
+  // Apply faction effects
+  if (choice.factionEffects) {
+    Object.entries(choice.factionEffects).forEach(([fid, delta]) => {
+      // Update faction
+      const faction = state.factions.find(f => f.id === fid);
+      if (faction) faction.approval = clamp(faction.approval + delta, 5, 95);
+
+      // Update aligned council members
+      state.council.forEach(cm => {
+        if (cm.faction === fid) {
+          const councilDelta = delta * 0.5;
+          cm.approval = clamp(cm.approval + councilDelta, 10, 95);
+          // Track grudges
+          if (cm.traits.includes('grudge') && delta < -10) {
+            state.councilRelations[cm.id] = 'hostile';
+          }
+        }
+        // Press affects all slightly
+        if (fid === 'press') {
+          cm.approval = clamp(cm.approval + delta * 0.1, 10, 95);
+        }
+      });
+
+      // Update staff approval for labor faction
+      if (fid === 'labor') {
+        state.staff.forEach(st => {
+          if (st.id === 'cos') st.approval = clamp(st.approval + delta * 0.1, 20, 95);
+        });
+      }
+    });
+  }
+
+  // Recalculate overall approval
+  recalcApproval();
+}
+
+function recalcApproval() {
+  const s = state.city.stats;
+  const factions = state.factions;
+  const avgFaction = factions.reduce((a, f) => a + f.approval, 0) / factions.length;
+  const avgStats = (s.crime + s.infrastructure + s.services + s.housing + s.development) / 5;
+  const unemploymentPenalty = Math.max(0, (s.unemployment - 4) * 3);
+
+  s.approval = clamp(Math.round(avgFaction * 0.55 + avgStats * 0.35 + 10 - unemploymentPenalty), 5, 95);
+}
+
+function processMonthlyTick() {
+  const s = state.city.stats;
+  const b = state.city.budget;
+
+  // Apply budget
+  const net = getNet();
+  b.balance += net;
+
+  // Natural stat decay/growth
+  s.infrastructure = clamp(s.infrastructure - 0.5, 0, 100);
+  s.services = clamp(s.services - 0.3, 0, 100);
+  s.housing = clamp(s.housing - 0.2, 0, 100);
+
+  // Budget-driven improvements
+  const e = b.expenses;
+  if (e.infrastructure > 200000) s.infrastructure = clamp(s.infrastructure + 0.8, 0, 100);
+  if (e.publicSafety > 180000) s.crime = clamp(s.crime + 0.5, 0, 100);
+  if (e.social > 120000) s.services = clamp(s.services + 0.5, 0, 100);
+
+  // Unemployment drift
+  s.unemployment = clamp(s.unemployment + (Math.random() * 0.4 - 0.2), 3, 15);
+  if (s.development > 60) s.unemployment = clamp(s.unemployment - 0.3, 3, 15);
+
+  recalcApproval();
+}
+
+// ═══════════════════════════════════════════════════
+//  EVENT SELECTION
+// ═══════════════════════════════════════════════════
+
+function selectEvent() {
+  const s = state.city.stats;
+  let available = EVENTS_POOL.filter(e => !state.usedEvents.includes(e.id));
+  if (available.length === 0) {
+    state.usedEvents = [];
+    available = EVENTS_POOL;
+  }
+
+  // Weight by city conditions
+  let weighted = [];
+  available.forEach(ev => {
+    let weight = 10;
+    if (ev.type === 'crisis' && s.crime < 45) weight += 15;
+    if (ev.type === 'crisis' && s.infrastructure < 45) weight += 15;
+    if (ev.type === 'crisis' && s.services < 45) weight += 10;
+    if (ev.type === 'opportunity' && s.development > 55) weight += 10;
+    if (ev.id === 'crime_spike' && s.crime < 40) weight += 20;
+    if (ev.id === 'water_main' && s.infrastructure < 45) weight += 20;
+    if (ev.id === 'budget_shortfall' && getNet() < 0) weight += 25;
+    // Prevent repeats
+    for (let i = 0; i < weight; i++) weighted.push(ev);
+  });
+
+  const selected = weighted[Math.floor(Math.random() * weighted.length)];
+  state.usedEvents.push(selected.id);
+  return selected;
+}
+
+// ═══════════════════════════════════════════════════
+//  TURN LOGIC
+// ═══════════════════════════════════════════════════
+
+function advanceMonth() {
+  if (state.awaitingDecision) return;
+  if (state.gameStatus !== 'active') return;
+
+  state.turn++;
+  state.month = (state.turn - 1) % 12;
+  state.year = Math.ceil(state.turn / 12);
+
+  processMonthlyTick();
+
+  // Check bankruptcy
+  if (state.city.budget.balance < -500000) {
+    endGame(false, 'The city has gone bankrupt. The state has assumed control of Millhaven\'s finances. Your term ends in disgrace.');
+    return;
+  }
+
+  // Check recall threshold
+  if (state.city.stats.approval < 22) {
+    endGame(false, 'Your approval rating collapsed below the recall threshold. The city council has voted to hold an emergency recall election. You lose.');
+    return;
+  }
+
+  // Check term end (48 months)
+  if (state.turn > state.maxTurns) {
+    const a = state.city.stats.approval;
+    if (a >= 55) endGame(true, `A ${a}% approval rating. You win re-election in a decisive victory. Millhaven remembers your name.`);
+    else if (a >= 45) endGame(true, `A ${a}% approval rating. You win re-election by a narrow margin. A second term — harder than the first.`);
+    else endGame(false, `A ${a}% approval rating. You lose re-election. Voters chose change. Your record is mixed, and history will decide the rest.`);
+    return;
+  }
+
+  // Select and display event
+  const event = selectEvent();
+  state.currentEvent = event;
+  state.awaitingDecision = true;
+  state.decisionMade = false;
+
+  updateUI();
+  renderEvent(event);
+  addTicker(generateHeadline());
+}
+
+function makeChoice(choiceIndex) {
+  if (!state.awaitingDecision || state.decisionMade) return;
+
+  const event = state.currentEvent;
+  const choice = event.choices[choiceIndex];
+
+  state.decisionMade = true;
+  state.awaitingDecision = false;
+
+  applyChoice(choice);
+
+  // Council vote if required
+  let voteResult = null;
+  if (choice.voteRequired) {
+    voteResult = simulateCouncilVote(choice.voteIssue || event.title, choice.councilKey || 'neutral');
+    pendingVote = { issue: choice.voteIssue || event.title, result: voteResult };
+  }
+
+  renderOutcome(event, choice, voteResult);
+  updateUI();
+  addTicker(`CITY HALL — ${event.title}: "${choice.label.substring(0, 50)}${choice.label.length > 50 ? '...' : ''}"`);
+}
+
+function generateHeadline() {
+  const s = state.city.stats;
+  const headlines = [
+    `MILLHAVEN — Approval at ${s.approval}% as mayor navigates ${MONTHS[state.month]} pressures`,
+    `HERALD — City infrastructure rated ${s.infrastructure}% by state DOT`,
+    `MILLHAVEN HERALD — Unemployment holds at ${s.unemployment.toFixed(1)}% in latest report`,
+    `HERALD — Public safety index ${s.crime > 60 ? 'improving' : 'a concern'} for residents`,
+    `CITY DESK — Housing affordability ranks ${s.housing}% in regional survey`,
+    `MILLHAVEN — Q${Math.ceil(state.turn/3)} budget balance: ${fmtMoneyFull(state.city.budget.balance)}`,
+  ];
+  return headlines[Math.floor(Math.random() * headlines.length)];
+}
+
+function addTicker(item) {
+  tickerItems.unshift(item);
+  if (tickerItems.length > 8) tickerItems = tickerItems.slice(0, 8);
+  renderTicker();
+}
+
+// ═══════════════════════════════════════════════════
+//  UI RENDERING
+// ═══════════════════════════════════════════════════
+
+function updateUI() {
+  updateDate();
+  updateVitals();
+  renderPeopleTab(currentTab);
+}
+
+function updateDate() {
+  const t = state.turn;
+  const m = MONTHS[state.month];
+  const y = state.year;
+  document.getElementById('display-date').textContent = `${m}, Year ${y}`;
+
+  // Election countdown
+  const remaining = state.maxTurns - t;
+  document.getElementById('election-countdown').textContent = `${remaining} mos`;
+  const pct = Math.min(100, (t / state.maxTurns) * 100);
+  document.getElementById('term-progress-fill').style.width = pct + '%';
+}
+
+function updateVitals() {
+  const s = state.city.stats;
+  const b = state.city.budget;
+  const e = b.expenses;
+
+  // Update stat bars
+  const stats = [
+    { id: 'infra', val: s.infrastructure },
+    { id: 'crime', val: s.crime },
+    { id: 'services', val: s.services },
+    { id: 'housing', val: s.housing },
+    { id: 'dev', val: s.development },
+    { id: 'unemp', val: 100 - (s.unemployment * 6.67) } // invert for display
+  ];
+
+  stats.forEach(({ id, val }) => {
+    const bar = document.getElementById(`bar-${id}`);
+    const valEl = document.getElementById(`val-${id}`);
+    if (!bar || !valEl) return;
+    bar.style.width = val + '%';
+    bar.className = 'stat-bar-inner ' + getStatClass(val);
+    if (id === 'unemp') {
+      valEl.textContent = s.unemployment.toFixed(1) + '%';
+    } else {
+      valEl.textContent = Math.round(val);
+    }
+  });
+
+  // Budget
+  const net = getNet();
+  document.getElementById('bud-revenue').textContent = fmtMoney(b.monthlyRevenue);
+  document.getElementById('bud-infra').textContent = '-' + fmtMoney(e.infrastructure);
+  document.getElementById('bud-safety').textContent = '-' + fmtMoney(e.publicSafety);
+  document.getElementById('bud-social').textContent = '-' + fmtMoney(e.social);
+  document.getElementById('bud-admin').textContent = '-' + fmtMoney(e.admin);
+
+  const netEl = document.getElementById('bud-net');
+  netEl.textContent = (net >= 0 ? '+' : '') + fmtMoney(net);
+  netEl.className = net >= 0 ? 'positive' : 'negative';
+
+  document.getElementById('bud-balance').textContent = 'TREASURY: ' + fmtMoneyFull(b.balance);
+
+  // Approval
+  const app = s.approval;
+  const fill = document.getElementById('approval-fill');
+  fill.style.width = app + '%';
+  fill.style.background = `linear-gradient(90deg, ${app < 35 ? '#7f1d1d, #ef4444' : app < 55 ? '#78350f, #f59e0b' : '#14532d, #22c55e'})`;
+  fill.setAttribute('data-pct', app);
+}
+
+// ── RENDER EVENT ──
+function renderEvent(event) {
+  const body = document.getElementById('situation-body');
+  const stamp = document.getElementById('event-type-stamp');
+
+  stamp.textContent = event.type === 'crisis' ? '⚠ URGENT' : event.type === 'opportunity' ? '★ OPPORTUNITY' : 'BRIEFING';
+  stamp.style.color = event.type === 'crisis' ? 'var(--urgent)' : event.type === 'opportunity' ? 'var(--good)' : 'var(--neutral)';
+  stamp.style.borderColor = stamp.style.color;
+
+  // Get advisor advice
+  const advisorAdvice = getAdvice(event, event.advisor);
+  const advisor = state.staff.find(s => s.id === event.advisor);
+
+  let choicesHTML = event.choices.map((c, i) => {
+    const effectsHTML = c.effects.map(eff =>
+      `<span class="effect-tag effect-${eff.type}">${eff.label}</span>`
+    ).join('');
+
+    return `
+      <button class="choice-btn" onclick="makeChoice(${i})">
+        <span class="choice-key">${String.fromCharCode(65 + i)}</span>${c.label}
+        <div class="choice-effects">${effectsHTML}</div>
+      </button>
+    `;
+  }).join('');
+
+  let adviceHTML = '';
+  if (advisor && advisorAdvice) {
+    const traitBadges = advisor.traits.map(t =>
+      `<span class="advisor-trait" style="color:var(--ink-faded)">${TRAIT_LABELS[t]}</span>`
+    ).join('');
+    adviceHTML = `
+      <div class="staff-advice">
+        <span class="advisor-name">${advisor.name}</span> ${traitBadges}<br>
+        ${advisorAdvice}
+      </div>
+    `;
+  }
+
+  document.getElementById('no-event-msg').style.display = 'none';
+
+  const card = document.createElement('div');
+  card.id = 'event-card-main';
+  card.className = `event-card ${event.type === 'crisis' ? 'urgent' : event.type === 'opportunity' ? 'opportunity' : ''}`;
+  card.innerHTML = `
+    <div class="event-tag tag-${event.tag}">${event.tag.toUpperCase()}</div>
+    <div class="event-title">${event.title}</div>
+    <div class="event-body">${event.body}</div>
+    ${adviceHTML}
+    <div class="choices-label">Your Decision, Mayor:</div>
+    ${choicesHTML}
+  `;
+
+  // Clear and add
+  while (body.children.length > 1) body.removeChild(body.lastChild);
+  body.appendChild(card);
+
+  document.getElementById('advance-btn').disabled = true;
+}
+
+// ── RENDER OUTCOME ──
+function renderOutcome(event, choice, voteResult) {
+  const body = document.getElementById('situation-body');
+  const existingCard = document.getElementById('event-card-main');
+  if (existingCard) existingCard.remove();
+
+  // Faction reactions
+  let reactionsHTML = '';
+  if (choice.factionEffects) {
+    const reactions = Object.entries(choice.factionEffects).map(([fid, delta]) => {
+      const faction = state.factions.find(f => f.id === fid);
+      const name = faction ? faction.name : fid;
+      const cls = delta > 0 ? 'pos' : delta < 0 ? 'neg' : 'neu';
+      const sign = delta > 0 ? '+' : '';
+      return `
+        <div class="reaction-item">
+          <span class="reaction-name">${name}</span>
+          <span class="reaction-change ${cls}">${sign}${delta}</span>
+        </div>
+      `;
+    }).join('');
+
+    reactionsHTML = `<div class="reaction-list">${reactions}</div>`;
+  }
+
+  // Vote result
+  let voteHTML = '';
+  if (voteResult) {
+    const memberVotes = voteResult.votes.map(v => {
+      const cls = v.vote === 'yes' ? 'vote-yes' : v.vote === 'no' ? 'vote-no' : 'vote-abstain';
+      const short = v.member.name.split(' ').pop();
+      return `<span class="vote-member ${cls}">${short}: ${v.vote.toUpperCase()}</span>`;
+    }).join('');
+
+    voteHTML = `
+      <div class="vote-display">
+        <div class="vote-title">Council Vote: ${voteResult.issue || ''}</div>
+        <div class="vote-results">${memberVotes}</div>
+        <div class="vote-summary">
+          ${voteResult.passed
+            ? `✓ PASSED — ${voteResult.yea}-${voteResult.nay} in favor`
+            : `✗ FAILED — ${voteResult.yea}-${voteResult.nay}, motion defeated`}
+        </div>
+      </div>
+    `;
+  }
+
+  const outcomeCard = document.createElement('div');
+  outcomeCard.className = 'outcome-card';
+  outcomeCard.innerHTML = `
+    <div class="outcome-title">You decided: "${choice.label}"</div>
+    <div>${choice.outcome}</div>
+    ${reactionsHTML}
+    ${voteHTML}
+  `;
+
+  while (body.children.length > 1) body.removeChild(body.lastChild);
+  body.appendChild(outcomeCard);
+
+  document.getElementById('advance-btn').disabled = false;
+}
+
+// ── PEOPLE TAB ──
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+    const tabs = ['staff', 'council', 'factions'];
+    btn.classList.toggle('active', tabs[i] === tab);
+  });
+  renderPeopleTab(tab);
+}
+
+function renderPeopleTab(tab) {
+  const body = document.getElementById('people-body');
+  body.innerHTML = '';
+
+  if (tab === 'staff') {
+    state.staff.forEach(s => {
+      const traitsHTML = s.traits.map(t =>
+        `<span class="trait-badge trait-${t}">${TRAIT_LABELS[t]}</span>`
+      ).join('');
+      const appColor = getApprovalColor(s.approval);
+      const appFill = `background: linear-gradient(90deg, ${s.approval < 45 ? '#dc2626' : s.approval < 60 ? '#d97706' : '#16a34a'})`;
+
+      const div = document.createElement('div');
+      div.className = 'person-card';
+      div.innerHTML = `
+        <div class="person-name">${s.name}</div>
+        <div class="person-role">${s.role}</div>
+        <div class="person-traits">${traitsHTML}</div>
+        <div class="person-approval">
+          <span class="approval-mini-label">Loyalty</span>
+          <div class="approval-mini-bar"><div class="approval-mini-fill" style="width:${s.approval}%; ${appFill}"></div></div>
+          <span class="approval-mini-val" style="color:${appColor}">${Math.round(s.approval)}%</span>
+        </div>
+        <div style="font-size:0.61rem; color:var(--ink-faded); margin-top:4px; font-style:italic;">${s.bio}</div>
+      `;
+      body.appendChild(div);
+    });
+  } else if (tab === 'council') {
+    state.council.forEach(m => {
+      const traitsHTML = m.traits.map(t =>
+        `<span class="trait-badge trait-${t}">${TRAIT_LABELS[t]}</span>`
+      ).join('');
+      const appColor = getApprovalColor(m.approval);
+      const appFill = `background: linear-gradient(90deg, ${m.approval < 45 ? '#dc2626' : m.approval < 60 ? '#d97706' : '#16a34a'})`;
+      const isHostile = state.councilRelations[m.id] === 'hostile';
+
+      const div = document.createElement('div');
+      div.className = 'council-member-card';
+      div.innerHTML = `
+        <div style="display:flex; align-items:baseline; gap:4px; margin-bottom:2px;">
+          <span class="council-name">${m.name}</span>
+          <span class="council-faction-tag faction-${m.faction}">${m.factionLabel}</span>
+          ${isHostile ? '<span style="font-size:0.58rem; color:var(--urgent);">⚑ HOSTILE</span>' : ''}
+        </div>
+        <div style="font-size:0.6rem; color:var(--ink-faded); margin-bottom:4px;">${m.district}</div>
+        <div class="person-traits">${traitsHTML}</div>
+        <div class="person-approval">
+          <span class="approval-mini-label">Mayor Approval</span>
+          <div class="approval-mini-bar"><div class="approval-mini-fill" style="width:${m.approval}%; ${appFill}"></div></div>
+          <span class="approval-mini-val" style="color:${appColor}">${Math.round(m.approval)}%</span>
+        </div>
+      `;
+      body.appendChild(div);
+    });
+  } else if (tab === 'factions') {
+    state.factions.forEach(f => {
+      const appColor = getApprovalColor(f.approval);
+      const appFill = `background: linear-gradient(90deg, ${f.approval < 45 ? '#dc2626' : f.approval < 60 ? '#d97706' : '#16a34a'})`;
+      const traitsHTML = f.traits.map(t =>
+        `<span class="trait-badge trait-${t}">${TRAIT_LABELS[t]}</span>`
+      ).join('');
+
+      const div = document.createElement('div');
+      div.className = 'faction-card';
+      div.innerHTML = `
+        <div class="faction-name">${f.name}</div>
+        <div class="faction-leader" style="margin-bottom:3px;">Leader: <strong>${f.leader}</strong> — <em style="font-size:0.6rem;">${f.leaderPersonality}</em></div>
+        <div class="person-traits">${traitsHTML}</div>
+        <div class="person-approval" style="margin-top:4px;">
+          <span class="approval-mini-label">Support</span>
+          <div class="approval-mini-bar"><div class="approval-mini-fill" style="width:${f.approval}%; ${appFill}"></div></div>
+          <span class="approval-mini-val" style="color:${appColor}">${Math.round(f.approval)}%</span>
+        </div>
+      `;
+      body.appendChild(div);
+    });
+  }
+}
+
+function renderTicker() {
+  const scroll = document.getElementById('ticker-scroll');
+  scroll.innerHTML = tickerItems.map(item =>
+    `<span class="ticker-item">${item}</span>`
+  ).join('');
+}
+
+// ── GAME OVER ──
+function endGame(won, message) {
+  state.gameStatus = won ? 'won' : 'lost';
+  document.getElementById('overlay-title').textContent = won ? 'Re-Election Won' : 'Term Ended';
+  document.getElementById('overlay-body').innerHTML = `${message}<br><br>
+    <strong>Final Stats:</strong> Approval ${state.city.stats.approval}% · Treasury ${fmtMoneyFull(state.city.budget.balance)} · 
+    Infrastructure ${Math.round(state.city.stats.infrastructure)} · 
+    Turn ${state.turn} of 48`;
+  document.getElementById('game-overlay').classList.add('visible');
+}
+
+function restartGame() {
+  document.getElementById('game-overlay').classList.remove('visible');
+  initState();
+  tickerItems = ['Welcome back to Millhaven. A new term begins.'];
+  currentTab = 'staff';
+  pendingVote = null;
+
+  // Reset situation body
+  const body = document.getElementById('situation-body');
+  body.innerHTML = '<div class="no-event" id="no-event-msg"><div class="desk-icon">📋</div><p>Your desk is clear.</p><p style="font-size:0.7rem; margin-top:4px;">Advance the month to see what arrives.</p></div>';
+  document.getElementById('event-type-stamp').textContent = 'Incoming';
+  document.getElementById('advance-btn').disabled = false;
+
+  updateUI();
+  renderTicker();
+  switchTab('staff');
+}
+
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
+
+initState();
+updateUI();
+renderTicker();
+renderPeopleTab('staff');
+
+</script>
+</body>
+</html>
