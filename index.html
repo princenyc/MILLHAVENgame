@@ -1807,6 +1807,91 @@
     padding: 4px 0;
   }
 
+  /* ── TRANSITION BRIEFING DOSSIER ── */
+  .briefing-section { margin-bottom: 20px; }
+
+  .briefing-section-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 4px;
+    margin-bottom: 10px;
+  }
+
+  .briefing-grid { display: grid; gap: 6px; }
+  .briefing-grid-2 { grid-template-columns: 1fr 1fr; }
+  .briefing-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .briefing-card {
+    background: #faf5e8;
+    border: 1px solid var(--paper-darker);
+    padding: 10px 12px;
+    position: relative;
+  }
+
+  .bc-header { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; flex-wrap: wrap; }
+  .bc-name { font-family: 'Playfair Display', serif; font-size: 0.82rem; font-weight: 700; color: var(--ink); }
+  .bc-role { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faded); }
+  .bc-sub { font-size: 0.6rem; color: var(--ink-faded); margin-bottom: 5px; font-style: italic; }
+  .bc-traits { display: flex; flex-wrap: wrap; gap: 2px; margin-bottom: 6px; }
+
+  .bc-assessment {
+    font-size: 0.63rem;
+    color: var(--ink);
+    line-height: 1.6;
+    border-top: 1px solid var(--paper-darker);
+    padding-top: 6px;
+    margin-top: 2px;
+  }
+
+  .bc-power {
+    display: inline-block;
+    font-size: 0.56rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-bottom: 4px;
+  }
+
+  .bc-power-high { background: #fee2e2; color: #991b1b; }
+  .bc-power-med  { background: #fef3c7; color: #92400e; }
+  .bc-power-low  { background: #f0fdf4; color: #166534; }
+
+  .bc-wants { font-size: 0.6rem; color: var(--ink-faded); margin-top: 4px; line-height: 1.5; }
+  .bc-wants strong { color: var(--ink); font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.06em; }
+
+  .briefing-stamp {
+    position: absolute; top: 8px; right: 8px;
+    font-family: 'Special Elite', cursive;
+    font-size: 0.55rem;
+    color: rgba(180,60,60,0.35);
+    border: 1px solid rgba(180,60,60,0.25);
+    padding: 1px 4px;
+    transform: rotate(2deg);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    pointer-events: none;
+  }
+
+  .briefing-memo-header {
+    background: var(--paper-dark);
+    border: 1px solid var(--paper-darker);
+    border-left: 3px solid var(--brass);
+    padding: 8px 12px;
+    margin-bottom: 14px;
+    font-size: 0.62rem;
+    color: var(--ink-faded);
+    line-height: 1.7;
+  }
+
+  .briefing-memo-header .bmh-to { font-weight: 700; color: var(--ink); font-size: 0.65rem; }
+
 </style>
 </head>
 <body>
@@ -1836,24 +1921,33 @@
         <div class="step-pip" id="pip-3">3</div>
         <div class="step-connector"></div>
         <div class="step-pip" id="pip-4">4</div>
+        <div class="step-connector"></div>
+        <div class="step-pip" id="pip-5">5</div>
       </div>
 
-      <!-- STEP 1: Background -->
+      <!-- STEP 1: Transition Briefing Dossier -->
       <div id="creation-step-1">
+        <div class="creation-step-label">Transition Briefing</div>
+        <div class="creation-step-sub">Before you sign anything, read the room. These are the people already in place — the ones you inherit, the ones you'll need, and the ones who will complicate your term. This is what the transition team put in front of you on day one.</div>
+        <div id="dossier-briefing"></div>
+      </div>
+
+      <!-- STEP 2: Background -->
+      <div id="creation-step-2" style="display:none">
         <div class="creation-step-label">Prior Background</div>
         <div class="creation-step-sub">Before City Hall, what were you? This determines your starting relationships with factions and how Millhaven read your election before you opened your mouth.</div>
         <div class="option-grid" id="bg-options"></div>
       </div>
 
-      <!-- STEP 2: Governing Style -->
-      <div id="creation-step-2" style="display:none">
+      <!-- STEP 3: Governing Style -->
+      <div id="creation-step-3" style="display:none">
         <div class="creation-step-label">Governing Style</div>
         <div class="creation-step-sub">How do you run a room? This is a passive modifier — it shapes how decisions land, how relationships build, and where your instincts take you under pressure.</div>
         <div class="option-grid" id="style-options"></div>
       </div>
 
-      <!-- STEP 3: Cabinet Appointments -->
-      <div id="creation-step-3" style="display:none">
+      <!-- STEP 4: Cabinet Appointments -->
+      <div id="creation-step-4" style="display:none">
         <div class="creation-step-label">Cabinet Appointments</div>
         <div class="creation-step-sub">You inherit four career staff. You appoint three cabinet officers. You know their backgrounds and visible traits. One thing about each of them you'll only learn in the room.</div>
 
@@ -1882,8 +1976,8 @@
         </div>
       </div>
 
-      <!-- STEP 4: Review & Confirm -->
-      <div id="creation-step-4" style="display:none">
+      <!-- STEP 5: Review & Confirm -->
+      <div id="creation-step-5" style="display:none">
         <div class="creation-step-label">Review Appointment Record</div>
         <div class="creation-step-sub">Sign off on your file. Once you take office, your history is fixed.</div>
         <div class="mayor-summary" id="mayor-summary-block"></div>
@@ -1896,8 +1990,8 @@
 
     <div class="creation-nav">
       <button class="creation-nav-btn secondary" id="creation-back-btn" onclick="creationBack()" style="visibility:hidden">← Back</button>
-      <div class="creation-nav-status" id="creation-nav-status">Step 1 of 4 — Select your background</div>
-      <button class="creation-nav-btn primary" id="creation-next-btn" onclick="creationNext()" disabled>Next →</button>
+      <div class="creation-nav-status" id="creation-nav-status">Step 1 of 5 — Read the briefing</div>
+      <button class="creation-nav-btn primary" id="creation-next-btn" onclick="creationNext()">Next →</button>
     </div>
 
   </div>
@@ -2276,7 +2370,156 @@ let creationState = {
   cabinet: { deputy: null, legal: null, econ: null }
 };
 
-// Tracks which dossier panels are open in the UI
+// ─────────────────────────────────────────────────────
+//  TRANSITION BRIEFING DATA
+// ─────────────────────────────────────────────────────
+
+const BRIEFING_DATA = {
+  staff: [
+    {
+      id: 'cos', name: 'Rachel Okafor', role: 'Chief of Staff',
+      sub: 'Career city administrator · 14 years in municipal government',
+      traits: ['loyal','analytical'],
+      power: 'high', powerLabel: 'High Institutional Power',
+      assessment: 'Knows this building better than you do and has already decided whether she trusts you. Her loyalty is real but conditional — she\'ll protect you until protecting you conflicts with protecting herself. Handle her carefully and she\'s your most valuable asset. Freeze her out and you\'ll feel it in ways you won\'t be able to trace.',
+      wants: 'Competence in the office. Access to you. Her memos read.'
+    },
+    {
+      id: 'budget', name: 'Victor Slade', role: 'Budget Director',
+      sub: 'Municipal finance specialist · Served three administrations',
+      traits: ['pragmatic','analytical'],
+      power: 'med', powerLabel: 'Operational Power',
+      assessment: 'Has found creative solutions to budget problems under three mayors. He will not tell you when he\'s cutting corners unless you ask directly. The numbers he presents are accurate. The ones he doesn\'t present are the ones that matter. Ask directly, ask often.',
+      wants: 'Fiscal latitude. A mayor who reads the line items.'
+    },
+    {
+      id: 'comms', name: 'Maya Chen', role: 'Communications Director',
+      sub: 'Former news producer · Joined City Hall eighteen months ago',
+      traits: ['emotional','ambitious'],
+      power: 'med', powerLabel: 'Public Narrative Power',
+      assessment: 'Excellent at her job. Her job is her career. The distance between those two things is usually small enough not to matter — until it isn\'t. She will manage the press with skill. Whether she\'s managing it for you or for herself is a question worth keeping open.',
+      wants: 'Wins she can put in her portfolio. A principal worth working for.'
+    },
+    {
+      id: 'planning', name: 'Douglas Merritt', role: 'City Planner',
+      sub: 'Civil engineer · 22 years with the city · Has outlasted everyone',
+      traits: ['principled','grudge'],
+      power: 'low', powerLabel: 'Institutional Memory',
+      assessment: 'Has submitted the same infrastructure reports since 2019 and watched them get filed away under three mayors. He will be correct about most things and impossible about the ones he\'s been ignored on longest. He is not a political actor. He is a consequence — slow moving, inevitable.',
+      wants: 'His reports acted on. Credit, eventually.'
+    }
+  ],
+  council: [
+    {
+      id: 'c1', name: 'Donna Torres', role: 'Council Member, District 3',
+      sub: 'Labor caucus · 3 terms · Municipal Workers Union aligned',
+      traits: ['emotional','grudge'],
+      power: 'high', powerLabel: 'High Bloc Power',
+      assessment: 'Represents 4,200 municipal workers and votes like it. Personal loyalty is earned through respect for her base — cross it once and she logs it. She is not unreasonable. She is unforgiving. There\'s a difference.',
+      wants: 'Her constituents seen. Labor at the table before decisions are made.'
+    },
+    {
+      id: 'c2', name: 'Frank Beaumont', role: 'Council Member, At-Large',
+      sub: 'Business caucus · 4 terms · Chamber of Commerce connection',
+      traits: ['pragmatic','analytical'],
+      power: 'high', powerLabel: 'High Economic Leverage',
+      assessment: 'The Business Alliance\'s man in the room. He\'s honest about what he wants, useful when aligned, and connected to people you haven\'t met yet. He will not be an enemy unless you make him one. He will not be a friend unless you pay for it.',
+      wants: 'Predictable regulatory environment. A seat at the economic table.'
+    },
+    {
+      id: 'c3', name: 'Priya Nair', role: 'Council Member, District 1',
+      sub: 'Reform caucus · 2nd term · Former city auditor',
+      traits: ['principled','analytical'],
+      power: 'med', powerLabel: 'Reform Coalition Power',
+      assessment: 'Ran on accountability and means it. Will vote against you on principle and sleep fine. The most reliable vote you have — as long as you\'re doing the right thing. Unreliable the moment you aren\'t. She is not a transactional actor. Do not treat her like one.',
+      wants: 'Transparency. Process followed. The right answer, not the convenient one.'
+    },
+    {
+      id: 'c4', name: 'James Callahan', role: 'Council Member, District 5',
+      sub: 'Developer caucus · 4 terms · Land use committee chair',
+      traits: ['pragmatic','ambitious'],
+      power: 'high', powerLabel: 'Zoning & Development Power',
+      assessment: 'Four terms. Every major zoning variance in the last decade has his fingerprints. He is transactional — which makes him legible and manageable at a price. The price is real. What he collects on it is worth watching.',
+      wants: 'Development pipeline moving. His district built out. His name on things.'
+    },
+    {
+      id: 'c5', name: 'Sandra Liu', role: 'Council Member, District 2',
+      sub: 'Community caucus · 2nd term · Tenant advocacy background',
+      traits: ['emotional','forgiving'],
+      power: 'med', powerLabel: 'Community Coalition',
+      assessment: 'Genuinely cares about District 2 and votes accordingly. Can be moved by a good argument or a bad week. More reliable in a slow month than in a crisis — her instinct under pressure is to find consensus that may not be there.',
+      wants: 'Housing stability for renters. Her district not displaced by development.'
+    },
+    {
+      id: 'c6', name: 'Marcus Webb', role: 'Council Member, District 4',
+      sub: 'Independent · 2nd term · No declared caucus',
+      traits: ['analytical','pragmatic'],
+      power: 'med', powerLabel: 'Swing Vote',
+      assessment: 'Votes on the merits, which makes him the most useful and least predictable member on the council. He has no obvious tells and no apparent allegiances. Study him before you need him. By the time you need him it\'s too late to start.',
+      wants: 'District 4 served. His judgment respected. No one wasting his time.'
+    },
+    {
+      id: 'c7', name: 'Carla Reyes', role: 'Council Member, District 6',
+      sub: 'Community caucus · 1st term · District 6 gave you your margin',
+      traits: ['principled','loyal'],
+      power: 'med', powerLabel: 'Base Constituency',
+      assessment: 'The steadiest vote on the council. District 6 delivered your election. She knows it and does not trade on it — which tells you more about her than any dossier will. She will be loyal until you give her a reason not to be. Don\'t.',
+      wants: 'Her community represented. A mayor worth believing in.'
+    }
+  ],
+  factions: [
+    {
+      id: 'labor', name: 'Municipal Workers Union',
+      sub: 'Leader: Donna Torres · ~4,200 members · Citywide contracts',
+      traits: ['emotional','grudge'],
+      power: 'high', powerLabel: 'Strike & Electoral Power',
+      assessment: 'The most direct lever on city operations anyone holds outside your office. A work slowdown costs you approval faster than almost anything. Torres speaks for the membership — usually. Their contract is always the first test of a new administration.',
+      wants: 'Wages that keep pace. Staffing levels. To be negotiated with, not managed.'
+    },
+    {
+      id: 'business', name: 'Millhaven Business Alliance',
+      sub: 'Leader: Frank Beaumont · 340 member businesses · PAC active',
+      traits: ['analytical','pragmatic'],
+      power: 'high', powerLabel: 'Economic & Campaign Power',
+      assessment: 'Quiet, effective, and contingent. Their support doesn\'t make headlines but it funds the ones that matter. They want a predictable city. They will work with you as long as they don\'t feel targeted. The moment they do, Beaumont goes quiet and the PAC goes active.',
+      wants: 'Low friction. Pro-growth zoning. A mayor who returns their calls.'
+    },
+    {
+      id: 'residents', name: "Residents' Association",
+      sub: "Leader: Patricia Nkemelu · Neighborhood-organized · Principled leadership",
+      traits: ['principled','forgiving'],
+      power: 'med', powerLabel: 'Grassroots Mobilization',
+      assessment: 'The most diffuse power base on this list — slow to activate, hard to deactivate once moving. Nkemelu is organized and principled. She doesn\'t want much from you. She wants you to do the job correctly. Her bar is honest work, not loyalty.',
+      wants: 'Livable neighborhoods. Affordable housing preserved. To be consulted before decisions affect them.'
+    },
+    {
+      id: 'developers', name: 'City Developers Consortium',
+      sub: 'Leader: James Callahan · Active projects citywide · Impatient capital',
+      traits: ['ambitious','pragmatic'],
+      power: 'med', powerLabel: 'Development Pipeline Power',
+      assessment: 'Money and impatience. They\'ve been waiting for a friendlier administration and they will test you early. Callahan is the intermediary. What they want is movement on the pipeline. What they\'ll trade for it depends on the day.',
+      wants: 'Zoning variance approvals. Tax incentive structures. Speed.'
+    },
+    {
+      id: 'press', name: 'Millhaven Herald',
+      sub: 'Leader: Tom Vasquez · 14 years on the City Hall beat · Sources unknown',
+      traits: ['principled','analytical'],
+      power: 'high', powerLabel: 'Narrative Power',
+      assessment: 'Vasquez has covered four mayors. He has sources inside every department and he will not tell you who they are. The Herald can define your term before you do. A functional press relationship is not about friendliness — it\'s about not giving them a reason to go looking.',
+      wants: 'Access. Truth on the record. A mayor who doesn\'t manage the story into the ground.'
+    },
+    {
+      id: 'police', name: 'Police & Fire Unions',
+      sub: 'Leader: Chief Ray Kovacs · Staffing concerns on record · Publicly neutral',
+      traits: ['loyal','grudge'],
+      power: 'med', powerLabel: 'Public Safety Leverage',
+      assessment: 'Kovacs commands genuine loyalty from the ranks and has been publicly neutral since your election. He is building something — whether it\'s a platform, a coalition, or leverage against this office is unclear. Treat this relationship as unresolved until proven otherwise.',
+      wants: 'Staffing. Equipment. Deference on operational decisions. Something more — TBD.'
+    }
+  ]
+};
+
+
 const openDossiers = new Set();
 
 // ─────────────────────────────────────────────────────
@@ -3427,16 +3670,16 @@ function renderCreationStep() {
   const s = creationState;
 
   // Update step pips
-  for (let i = 1; i <= 4; i++) {
+  for (let i = 1; i <= 5; i++) {
     const pip = document.getElementById(`pip-${i}`);
     pip.classList.remove('active', 'done');
-    if (i < s.step) pip.classList.add('done'), pip.textContent = '✓';
-    else if (i === s.step) pip.classList.add('active'), pip.textContent = i;
+    if (i < s.step) { pip.classList.add('done'); pip.textContent = '✓'; }
+    else if (i === s.step) { pip.classList.add('active'); pip.textContent = i; }
     else pip.textContent = i;
   }
 
   // Show/hide steps
-  for (let i = 1; i <= 4; i++) {
+  for (let i = 1; i <= 5; i++) {
     document.getElementById(`creation-step-${i}`).style.display = i === s.step ? '' : 'none';
   }
 
@@ -3446,29 +3689,120 @@ function renderCreationStep() {
 
   backBtn.style.visibility = s.step > 1 ? 'visible' : 'hidden';
 
-  const stepLabels = ['Select your background','Choose your governing style','Appoint your cabinet','Review & take office'];
-  statusEl.textContent = `Step ${s.step} of 4 — ${stepLabels[s.step - 1]}`;
+  const stepLabels = [
+    'Read the briefing',
+    'Select your background',
+    'Choose your governing style',
+    'Appoint your cabinet',
+    'Review & take office'
+  ];
+  statusEl.textContent = `Step ${s.step} of 5 — ${stepLabels[s.step - 1]}`;
 
-  if (s.step === 4) {
+  if (s.step === 5) {
     nextBtn.textContent = 'Take Office →';
     nextBtn.disabled = false;
   } else {
     nextBtn.textContent = 'Next →';
   }
 
-  // Determine if next is enabled
-  if (s.step === 1) nextBtn.disabled = !s.background;
-  else if (s.step === 2) nextBtn.disabled = !s.style;
-  else if (s.step === 3) {
-    const filled = s.cabinet.deputy && s.cabinet.legal && s.cabinet.econ;
-    nextBtn.disabled = !filled;
+  // Step 1 (briefing) is always passable
+  if (s.step === 1) nextBtn.disabled = false;
+  else if (s.step === 2) nextBtn.disabled = !s.background;
+  else if (s.step === 3) nextBtn.disabled = !s.style;
+  else if (s.step === 4) {
+    nextBtn.disabled = !(s.cabinet.deputy && s.cabinet.legal && s.cabinet.econ);
   }
 
   // Render step content
-  if (s.step === 1) renderBackgroundOptions();
-  else if (s.step === 2) renderStyleOptions();
-  else if (s.step === 3) renderCabinetOptions();
-  else if (s.step === 4) renderSummary();
+  if (s.step === 1) renderBriefing();
+  else if (s.step === 2) renderBackgroundOptions();
+  else if (s.step === 3) renderStyleOptions();
+  else if (s.step === 4) renderCabinetOptions();
+  else if (s.step === 5) renderSummary();
+}
+
+function renderBriefing() {
+  const container = document.getElementById('dossier-briefing');
+
+  function traitBadges(traits) {
+    return traits.map(t => `<span class="trait-badge ${TRAIT_STYLES[t] || ''}">${TRAIT_LABELS[t] || t}</span>`).join('');
+  }
+
+  function staffCard(p) {
+    return `
+      <div class="briefing-card">
+        <div class="briefing-stamp">Inherited</div>
+        <div class="bc-header">
+          <span class="bc-name">${p.name}</span>
+          <span class="bc-role">${p.role}</span>
+        </div>
+        <div class="bc-sub">${p.sub}</div>
+        <div class="bc-traits">${traitBadges(p.traits)}</div>
+        <span class="bc-power bc-power-${p.power}">${p.powerLabel}</span>
+        <div class="bc-assessment">${p.assessment}</div>
+        <div class="bc-wants"><strong>Wants:</strong> ${p.wants}</div>
+      </div>
+    `;
+  }
+
+  function councilCard(p) {
+    return `
+      <div class="briefing-card">
+        <div class="bc-header">
+          <span class="bc-name">${p.name}</span>
+        </div>
+        <div class="bc-role" style="margin-bottom:3px">${p.role}</div>
+        <div class="bc-sub">${p.sub}</div>
+        <div class="bc-traits">${traitBadges(p.traits)}</div>
+        <span class="bc-power bc-power-${p.power}">${p.powerLabel}</span>
+        <div class="bc-assessment">${p.assessment}</div>
+        <div class="bc-wants"><strong>Wants:</strong> ${p.wants}</div>
+      </div>
+    `;
+  }
+
+  function factionCard(f) {
+    return `
+      <div class="briefing-card">
+        <div class="bc-header">
+          <span class="bc-name">${f.name}</span>
+        </div>
+        <div class="bc-sub">${f.sub}</div>
+        <div class="bc-traits">${traitBadges(f.traits)}</div>
+        <span class="bc-power bc-power-${f.power}">${f.powerLabel}</span>
+        <div class="bc-assessment">${f.assessment}</div>
+        <div class="bc-wants"><strong>Wants:</strong> ${f.wants}</div>
+      </div>
+    `;
+  }
+
+  container.innerHTML = `
+    <div class="briefing-memo-header">
+      <div class="bmh-to">TO: Mayor-Elect · FROM: Transition Office · RE: Key Personnel & Stakeholders</div>
+      The following summaries represent the transition team's assessment of the people and organizations with the most direct bearing on your first term. Read before making appointment decisions.
+    </div>
+
+    <div class="briefing-section">
+      <div class="briefing-section-header">Inherited Staff — Office of the Mayor</div>
+      <div class="briefing-grid briefing-grid-2">
+        ${BRIEFING_DATA.staff.map(staffCard).join('')}
+      </div>
+    </div>
+
+    <div class="briefing-section">
+      <div class="briefing-section-header">City Council</div>
+      <div class="briefing-grid briefing-grid-2">
+        ${BRIEFING_DATA.council.map(councilCard).join('')}
+      </div>
+    </div>
+
+    <div class="briefing-section">
+      <div class="briefing-section-header">Key Stakeholder Factions</div>
+      <div class="briefing-grid briefing-grid-2">
+        ${BRIEFING_DATA.factions.map(factionCard).join('')}
+      </div>
+    </div>
+  `;
 }
 
 function renderBackgroundOptions() {
@@ -3604,11 +3938,10 @@ function selectCabinet(role, id) {
 }
 
 function creationNext() {
-  if (creationState.step < 4) {
+  if (creationState.step < 5) {
     creationState.step++;
     renderCreationStep();
   } else {
-    // Take office — apply all creation choices and start game
     applyCreationChoices();
     document.getElementById('creation-overlay').classList.add('hidden');
   }
