@@ -2550,6 +2550,18 @@
         <button class="tab-btn" onclick="switchTab('factions')">Factions</button>
       </div>
       <div class="people-body" id="people-body"></div>
+
+      <!-- Faction Activity Log -->
+      <div id="faction-activity-panel" style="display:none;">
+        <div style="
+          font-family:'Playfair Display',serif;
+          font-size:0.62rem; font-weight:700;
+          text-transform:uppercase; letter-spacing:0.1em;
+          color:var(--ink); border-top:1px solid var(--paper-darker);
+          padding: 8px 10px 4px; margin-top:6px;
+        ">◈ Political Activity</div>
+        <div id="faction-activity-log" style="padding:0 10px 8px;"></div>
+      </div>
     </div>
 
   </div>
@@ -4336,6 +4348,7 @@ function confirmBudget() {
 
       if (Math.abs(impact) > 0) {
         faction.approval = clamp(faction.approval + impact, 5, 95);
+        onFactionApprovalHit(faction.id, impact);
         const sign = impact > 0 ? '+' : '';
         addToHistory(faction.id,
           `Budget reallocation: ${({ infrastructure:'Infrastructure', publicSafety:'Public Safety', social:'Social Services', admin:'Administration' })[bucket]} ${delta > 0 ? 'increased' : 'cut'} ${Math.round(Math.abs(shift*100))}%. Approval ${sign}${impact}.`,
@@ -5023,13 +5036,331 @@ function initState() {
     adviceFollowed: {},          // personId -> bool (did player follow their rec?)
     skipLog: [],                 // messages from last month's skipped actions
 
-    gameStatus: 'active'
+    gameStatus: 'active',
+
+    // ── FACTION AGENCY SYSTEM ──
+    factionGrievances: {},
+    factionPressure: {},
+    activeCoalitions: [],
+    factionActionLog: [],
+    queuedFactionEvent: null,
+    mayorRecord: {
+      laborFriendly: 0,
+      businessFriendly: 0,
+      communityFriendly: 0,
+      developmentFriendly: 0,
+      pressRelations: 0
+    }
   };
 }
 
 // ═══════════════════════════════════════════════════
-//  HELPER UTILITIES
+//  FACTION AGENCY SYSTEM
 // ═══════════════════════════════════════════════════
+
+const COALITION_COMPATIBILITY = {
+  labor:     ['residents', 'police'],
+  residents: ['labor', 'press'],
+  press:     ['residents'],
+  business:  ['developers'],
+  developers:['business'],
+  police:    ['labor']
+};
+
+function addFactionGrievance(factionId, amount, reason) {
+  if (!state.factionGrievances[factionId]) state.factionGrievances[factionId] = 0;
+  state.factionGrievances[factionId] = clamp(state.factionGrievances[factionId] + amount, 0, 20);
+  if (amount > 0 && reason) addToHistory(factionId, `Grievance +${amount}: ${reason}`, 'neg');
+}
+
+function reduceFactionGrievance(factionId, amount) {
+  if (!state.factionGrievances[factionId]) return;
+  state.factionGrievances[factionId] = clamp(state.factionGrievances[factionId] - amount, 0, 20);
+}
+
+function inCoalition(fid1, fid2) {
+  return state.activeCoalitions.some(c => c.factions.includes(fid1) && c.factions.includes(fid2));
+}
+
+function getFactionCoalition(factionId) {
+  return state.activeCoalitions.find(c => c.factions.includes(factionId));
+}
+
+async function processFactionTick() {
+  const turn = state.turn;
+  for (const faction of state.factions) {
+    const grievance = state.factionGrievances[faction.id] || 0;
+    const lastActionTurn = state.factionPressure[faction.id] || 0;
+    if (turn - lastActionTurn < 2) continue;
+
+    if (grievance >= 10) await tryFactionCoalition(faction);
+
+    if (grievance >= 7 && Math.random() < 0.45) {
+      await factionTriggerEvent(faction);
+      state.factionPressure[faction.id] = turn;
+    } else if (grievance >= 5 && Math.random() < 0.55) {
+      await factionPressureCouncil(faction);
+      state.factionPressure[faction.id] = turn;
+    } else if (grievance >= 3 && Math.random() < 0.6) {
+      await factionGoPublic(faction);
+      state.factionPressure[faction.id] = turn;
+    }
+  }
+
+  for (const coalition of state.activeCoalitions) {
+    const combined = coalition.factions.reduce((s, fid) => s + (state.factionGrievances[fid] || 0), 0);
+    if (combined >= 14 && !coalition.public && Math.random() < 0.5) {
+      await coalitionGoPublic(coalition);
+    }
+  }
+}
+
+async function factionGoPublic(faction) {
+  const grievance = state.factionGrievances[faction.id] || 0;
+  let statement;
+
+  if (aiEnabled) {
+    statement = await callFactionAI(faction, 'public_statement', {
+      grievance, record: state.mayorRecord, city: state.city.stats, turn: state.turn
+    });
+  }
+
+  if (!statement) {
+    const fallbacks = {
+      labor:     `"The Municipal Workers Union has not seen the responsiveness working families deserve from this administration. We are watching closely." — Donna Torres`,
+      business:  `"The Business Alliance has serious concerns about this administration's economic direction. We expect a direct conversation." — Frank Beaumont`,
+      residents: `"Residents are not seeing their priorities reflected in this administration's decisions. The neighborhoods are paying attention." — Patricia Nkemelu`,
+      developers:`"The Developers Consortium reminds City Hall that economic growth requires a predictable regulatory environment." — James Callahan`,
+      press:     `"This paper has noted a pattern of decisions deserving greater public scrutiny. We will continue to report on this administration." — Tom Vasquez`,
+      police:    `"The Police and Fire Unions expect this administration to honor its commitment to public safety staffing levels." — Chief Kovacs`
+    };
+    statement = fallbacks[faction.id] || `${faction.name} expressed dissatisfaction with the current administration.`;
+  }
+
+  state.city.stats.approval = clamp(state.city.stats.approval - 2, 5, 95);
+  state.factionActionLog.unshift({ turn: state.turn, factionId: faction.id, type: 'public_statement', text: statement });
+  if (state.factionActionLog.length > 20) state.factionActionLog = state.factionActionLog.slice(0, 20);
+  addToHistory(faction.id, `Went public with statement to press. Grievance level: ${Math.round(grievance)}.`, 'neg');
+  addTicker(`HERALD — ${statement.substring(0, 140)}`);
+  recalcApproval();
+  updateUI();
+}
+
+async function factionPressureCouncil(faction) {
+  const aligned = state.council.filter(m => m.faction === faction.id);
+  if (!aligned.length) return;
+
+  aligned.forEach(m => {
+    m.approval = clamp(m.approval - 6, 10, 95);
+    addToHistory(m.id, `${faction.name} pressured their aligned council member against the mayor.`, 'neg');
+  });
+
+  let headline;
+  if (aiEnabled) {
+    headline = await callFactionAI(faction, 'council_pressure', {
+      members: aligned.map(m => m.name), grievance: state.factionGrievances[faction.id]
+    });
+  }
+
+  addTicker(`HERALD — ${headline || `${faction.name} caucus with council allies — bloc pressure on administration agenda intensifying`}`);
+  state.factionActionLog.unshift({ turn: state.turn, factionId: faction.id, type: 'council_pressure', text: `Pressured ${aligned.map(m => m.name).join(', ')}` });
+  updateUI();
+}
+
+async function factionTriggerEvent(faction) {
+  if (state.queuedFactionEvent) return; // one queued at a time
+  let eventData = aiEnabled ? await callFactionEventAI(faction) : null;
+  if (!eventData) eventData = getFactionFallbackEvent(faction);
+
+  if (eventData) {
+    state.queuedFactionEvent = eventData;
+    addToHistory(faction.id, `Forced political action onto agenda: "${eventData.title}"`, 'neg');
+    addTicker(`BREAKING — ${faction.name} forces issue before City Hall: ${eventData.title}`);
+  }
+}
+
+async function tryFactionCoalition(faction) {
+  const compatible = COALITION_COMPATIBILITY[faction.id] || [];
+  for (const partnerId of compatible) {
+    if (inCoalition(faction.id, partnerId)) continue;
+    const partner = state.factions.find(f => f.id === partnerId);
+    if (!partner) continue;
+    if ((state.factionGrievances[partnerId] || 0) < 5) continue;
+
+    const coalition = {
+      factions: [faction.id, partnerId],
+      formedTurn: state.turn,
+      strength: Math.round(((state.factionGrievances[faction.id] || 0) + (state.factionGrievances[partnerId] || 0)) / 2),
+      public: false
+    };
+    state.activeCoalitions.push(coalition);
+
+    let announcement;
+    if (aiEnabled) {
+      announcement = await callFactionAI(faction, 'coalition_formed', { partner: partner.name, partnerLeader: partner.leader });
+    }
+
+    addTicker(`HERALD — ${announcement || `${faction.name} and ${partner.name} announce coordination on shared priorities — joint pressure on administration`}`);
+    addToHistory(faction.id, `Formed coalition with ${partner.name}.`, 'neg');
+    addToHistory(partnerId, `Entered coalition with ${faction.name}.`, 'neg');
+    state.city.stats.approval = clamp(state.city.stats.approval - 3, 5, 95);
+    recalcApproval();
+    updateUI();
+    break;
+  }
+}
+
+async function coalitionGoPublic(coalition) {
+  coalition.public = true;
+  const names = coalition.factions.map(fid => {
+    const f = state.factions.find(x => x.id === fid);
+    return f ? f.name : fid;
+  });
+
+  let statement;
+  if (aiEnabled) {
+    const f0 = state.factions.find(f => f.id === coalition.factions[0]);
+    if (f0) statement = await callFactionAI(f0, 'coalition_public', {
+      partner: names[1],
+      combinedGrievance: coalition.factions.reduce((s, fid) => s + (state.factionGrievances[fid] || 0), 0)
+    });
+  }
+
+  addTicker(`HERALD — ${statement || `${names.join(' and ')} issue joint statement demanding change in mayoral priorities — coalition pressure intensifies`}`);
+  state.city.stats.approval = clamp(state.city.stats.approval - 5, 5, 95);
+  coalition.factions.forEach(fid => addToHistory(fid, `Coalition issued joint public statement. Mayor approval -5.`, 'neg'));
+  recalcApproval();
+  updateUI();
+}
+
+async function callFactionAI(faction, actionType, context) {
+  if (!aiEnabled || !openaiKey) return null;
+  const prompts = {
+    public_statement: `You are ${faction.leader}, leader of ${faction.name} in Millhaven city politics.
+Grievance with the mayor: ${context.grievance}/20. City approval: ${context.city?.approval || 50}%. Month ${context.turn}/48.
+Issue a short, sharp public statement (1-2 sentences, attributed to you by name) expressing political dissatisfaction.
+Speak in character. Sound like a real political actor. Return only the quoted statement and attribution, nothing else.`,
+
+    council_pressure: `You are ${faction.leader} of ${faction.name} in Millhaven.
+Write a single terse Herald news item (third person, no quotes) about ${faction.name} pressuring their council allies (${(context.members || []).join(', ')}) against the mayor.
+Start mid-sentence. No "In a stunning development." Just the fact, political framing.`,
+
+    coalition_formed: `You are ${faction.leader} of ${faction.name} in Millhaven.
+Write a single terse Herald news item (third person) about ${faction.name} forming a political coalition with ${context.partner}.
+Start mid-sentence. Factual, terse, political. One sentence only.`,
+
+    coalition_public: `Write a single terse Herald news item about ${faction.name} and ${context.partner} issuing a joint statement against the Millhaven mayor.
+Combined grievance: ${context.combinedGrievance}. One sentence, third person, no preamble.`
+  };
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${openaiKey}` },
+      body: JSON.stringify({
+        model: 'gpt-4o-mini', max_tokens: 130, temperature: 0.82,
+        messages: [{ role: 'user', content: prompts[actionType] }]
+      })
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.choices?.[0]?.message?.content?.trim() || null;
+  } catch { return null; }
+}
+
+async function callFactionEventAI(faction) {
+  if (!aiEnabled || !openaiKey) return null;
+  const s = state.city.stats;
+  const prompt = `Generate a political event JSON for a mayor simulation. The event is FORCED by ${faction.name} (leader: ${faction.leader}). Grievance: ${state.factionGrievances[faction.id] || 0}/20.
+City: approval=${s.approval}%, infrastructure=${Math.round(s.infrastructure)}, safety=${Math.round(s.crime)}, services=${Math.round(s.services)}.
+Return ONLY valid JSON, no markdown:
+{"id":"faction_evt_${faction.id}_${state.turn}","title":"5-7 word title","type":"crisis","tag":"political","body":"2-3 sentences. Specific municipal politics. What ${faction.name} has done or is threatening.","advisor":"cos","choices":[{"label":"Concede to their demands","effects":{"factionApproval":{"${faction.id}":12},"approval":-2}},{"label":"Hold your position","effects":{"factionApproval":{"${faction.id}":-8},"approval":3}},{"label":"Negotiate a middle ground","effects":{"factionApproval":{"${faction.id}":5},"approval":1}}]}`;
+
+  try {
+    const res = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${openaiKey}` },
+      body: JSON.stringify({ model: 'gpt-4o-mini', max_tokens: 400, temperature: 0.85, messages: [{ role: 'user', content: prompt }] })
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    const raw = data.choices?.[0]?.message?.content?.trim();
+    if (!raw) return null;
+    return JSON.parse(raw.replace(/```json|```/g, '').trim());
+  } catch { return null; }
+}
+
+function getFactionFallbackEvent(faction) {
+  const map = {
+    labor: { id:'fev_labor', title:'Union Threatens Work Slowdown', type:'crisis', tag:'political',
+      body:'Donna Torres has announced Municipal Workers Union members will begin strict "work-to-rule" — no overtime, no discretionary effort — unless the administration addresses their contract concerns within 30 days. City services will visibly degrade.',
+      advisor:'cos', choices:[
+        {label:'Open emergency contract talks',effects:{factionApproval:{labor:10},approval:-1}},
+        {label:'Call their bluff publicly',effects:{factionApproval:{labor:-10},approval:2}},
+        {label:'Send Okafor as intermediary',effects:{factionApproval:{labor:4},personApproval:{cos:3}}}
+      ]},
+    business: { id:'fev_business', title:'Business Alliance Threatens Relocation Survey', type:'crisis', tag:'political',
+      body:'Frank Beaumont announces the Business Alliance will publish a "Business Climate Scorecard" comparing Millhaven to neighboring municipalities. The implicit threat: member companies are considering relocating.',
+      advisor:'budget', choices:[
+        {label:'Meet privately with Beaumont',effects:{factionApproval:{business:8},personApproval:{c2:5}}},
+        {label:'Dismiss it as lobbying theater',effects:{factionApproval:{business:-8},approval:1}},
+        {label:'Commission your own counter-report',effects:{factionApproval:{business:-3},approval:-1}}
+      ]},
+    residents: { id:'fev_residents', title:'Residents Organize Public Accountability Forum', type:'crisis', tag:'political',
+      body:'Patricia Nkemelu has organized a public forum across four neighborhoods — a point-by-point accounting of administration promises versus actions. The Herald will cover every session.',
+      advisor:'comms', choices:[
+        {label:'Attend and face the room',effects:{factionApproval:{residents:10},approval:3}},
+        {label:'Send a deputy instead',effects:{factionApproval:{residents:-4},approval:-1}},
+        {label:'Meet Nkemelu privately first',effects:{factionApproval:{residents:6}}}
+      ]},
+    developers: { id:'fev_developers', title:'Developers Consortium Halts Two Major Projects', type:'crisis', tag:'political',
+      body:'The Developers Consortium voluntarily pauses two projects worth $47M pending "regulatory clarity." James Callahan is explicit: this is a message, not a financial decision.',
+      advisor:'planning', choices:[
+        {label:'Fast-track their pending variances',effects:{factionApproval:{developers:12},factionApproval2:{residents:-7}}},
+        {label:'Call it political theater publicly',effects:{factionApproval:{developers:-10},approval:1}},
+        {label:'Negotiate case-by-case privately',effects:{factionApproval:{developers:5},personApproval:{c4:4}}}
+      ]},
+    press: { id:'fev_press', title:"Herald Announces Six-Week Investigation Series", type:'crisis', tag:'political',
+      body:'Tom Vasquez announces "The Millhaven Account" — a six-week investigative series on city hall decision-making. He has sources inside multiple departments. First piece runs Sunday.',
+      advisor:'comms', choices:[
+        {label:'Grant Herald exclusive access',effects:{factionApproval:{press:12},approval:-2}},
+        {label:'Refuse comment entirely',effects:{factionApproval:{press:-6},approval:-4}},
+        {label:'Have Chen manage a counter-narrative',effects:{factionApproval:{press:-3},personApproval:{comms:4}}}
+      ]},
+    police: { id:'fev_police', title:'Kovacs Issues Public Staffing Warning', type:'crisis', tag:'political',
+      body:'Chief Kovacs releases a "confidential" memo — now public — warning current staffing makes response time standards impossible to guarantee. The timing, three days before budget session, is not accidental.',
+      advisor:'cos', choices:[
+        {label:'Announce emergency safety hiring',effects:{factionApproval:{police:10},approval:2}},
+        {label:'Challenge the memo publicly',effects:{factionApproval:{police:-10},approval:-2}},
+        {label:'Meet Kovacs privately before council',effects:{factionApproval:{police:5}}}
+      ]}
+  };
+  return map[faction.id] || null;
+}
+
+function updateMayorRecord(event, choiceIndex) {
+  const effects = event.choices?.[choiceIndex]?.effects || {};
+  const fa = effects.factionApproval || {};
+  if ((fa.labor || 0) > 3)       state.mayorRecord.laborFriendly++;
+  if ((fa.labor || 0) < -3)      state.mayorRecord.laborFriendly--;
+  if ((fa.business || 0) > 3)    state.mayorRecord.businessFriendly++;
+  if ((fa.business || 0) < -3)   state.mayorRecord.businessFriendly--;
+  if ((fa.residents || 0) > 3)   state.mayorRecord.communityFriendly++;
+  if ((fa.residents || 0) < -3)  state.mayorRecord.communityFriendly--;
+  if ((fa.developers || 0) > 3)  state.mayorRecord.developmentFriendly++;
+  if ((fa.developers || 0) < -3) state.mayorRecord.developmentFriendly--;
+  if ((fa.press || 0) > 3)       state.mayorRecord.pressRelations++;
+  if ((fa.press || 0) < -3)      state.mayorRecord.pressRelations--;
+}
+
+function onFactionApprovalHit(factionId, delta) {
+  if (delta <= -8)      addFactionGrievance(factionId, 2, `Major hit (${delta} approval)`);
+  else if (delta <= -4) addFactionGrievance(factionId, 1, `Policy setback (${delta} approval)`);
+  if (delta >= 8)       reduceFactionGrievance(factionId, 2);
+  else if (delta >= 4)  reduceFactionGrievance(factionId, 1);
+}
+
+
 
 function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
 function fmtMoney(n) {
@@ -5317,8 +5648,8 @@ function applyChoice(choice) {
   const s = state.city.stats;
   const b = state.city.budget;
 
-  // Apply stat effects
-  choice.effects.forEach(eff => {
+  // Apply stat effects (array format from authored events)
+  if (Array.isArray(choice.effects)) { choice.effects.forEach(eff => {
     if (eff.stat === 'budget') {
       if (eff.val < -50000) {
         b.balance += eff.val; // one-time
@@ -5340,32 +5671,31 @@ function applyChoice(choice) {
     } else if (eff.stat === 'development') {
       s.development = clamp(s.development + eff.val, 0, 100);
     }
-  });
+  }); } // end Array.isArray guard
 
   // Apply faction effects
   if (choice.factionEffects) {
     Object.entries(choice.factionEffects).forEach(([fid, delta]) => {
-      // Update faction
       const faction = state.factions.find(f => f.id === fid);
       if (faction) faction.approval = clamp(faction.approval + delta, 5, 95);
+
+      // Track grievance changes
+      onFactionApprovalHit(fid, delta);
 
       // Update aligned council members
       state.council.forEach(cm => {
         if (cm.faction === fid) {
           const councilDelta = delta * 0.5;
           cm.approval = clamp(cm.approval + councilDelta, 10, 95);
-          // Track grudges
           if (cm.traits.includes('grudge') && delta < -10) {
             state.councilRelations[cm.id] = 'hostile';
           }
         }
-        // Press affects all slightly
         if (fid === 'press') {
           cm.approval = clamp(cm.approval + delta * 0.1, 10, 95);
         }
       });
 
-      // Update staff approval for labor faction
       if (fid === 'labor') {
         state.staff.forEach(st => {
           if (st.id === 'cos') st.approval = clamp(st.approval + delta * 0.1, 20, 95);
@@ -5374,7 +5704,31 @@ function applyChoice(choice) {
     });
   }
 
-  // Recalculate overall approval
+  // Handle flat effects format from faction-generated events
+  if (choice.effects && !Array.isArray(choice.effects)) {
+    const fx = choice.effects;
+    if (fx.approval) state.city.stats.approval = clamp(state.city.stats.approval + fx.approval, 5, 95);
+    if (fx.factionApproval) {
+      Object.entries(fx.factionApproval).forEach(([fid, delta]) => {
+        const faction = state.factions.find(f => f.id === fid);
+        if (faction) faction.approval = clamp(faction.approval + delta, 5, 95);
+        onFactionApprovalHit(fid, delta);
+      });
+    }
+    if (fx.personApproval) {
+      Object.entries(fx.personApproval).forEach(([pid, delta]) => {
+        const person = findPerson(pid);
+        if (person) person.approval = clamp(person.approval + delta, 10, 95);
+      });
+    }
+    if (fx.statBonus) {
+      const stat = fx.statBonus.stat;
+      if (state.city.stats[stat] !== undefined) {
+        state.city.stats[stat] = clamp(state.city.stats[stat] + fx.statBonus.val, 0, 100);
+      }
+    }
+  }
+
   recalcApproval();
 }
 
@@ -5454,6 +5808,8 @@ function processMonthlyTick() {
   if (socialTier === 'skeleton') s.unemployment = clamp(s.unemployment + 0.25, 3, 15);
 
   recalcApproval();
+  // Run faction agency (async — fires in background, doesn't block turn)
+  processFactionTick();
 }
 
 // ═══════════════════════════════════════════════════
@@ -5461,6 +5817,13 @@ function processMonthlyTick() {
 // ═══════════════════════════════════════════════════
 
 function selectEvent() {
+  // If a faction has queued an event, use it
+  if (state.queuedFactionEvent) {
+    const ev = state.queuedFactionEvent;
+    state.queuedFactionEvent = null;
+    return ev;
+  }
+
   const s = state.city.stats;
   let available = EVENTS_POOL.filter(e => !state.usedEvents.includes(e.id));
   if (available.length === 0) {
@@ -5788,6 +6151,9 @@ function makeChoice(choiceIndex) {
   state.decisionMade = true;
   state.awaitingDecision = false;
 
+  // Update mayor's political record
+  updateMayorRecord(event, choiceIndex);
+
   // Track whether advice was followed for principled characters + record in dossier
   Object.entries(state.lastAdviceGiven).forEach(([pid, advData]) => {
     if (advData.eventId !== event.id) return;
@@ -5872,6 +6238,7 @@ function updateUI() {
   updateDate();
   updateVitals();
   renderPeopleTab(currentTab);
+  renderFactionActivity();
 }
 
 function updateDate() {
@@ -6096,6 +6463,7 @@ function switchTab(tab) {
     btn.classList.toggle('active', tabs[i] === tab);
   });
   renderPeopleTab(tab);
+  renderFactionActivity();
 }
 
 function buildHiddenTraitBadge(personId) {
@@ -6209,6 +6577,35 @@ function renderPeopleTab(tab) {
       const hiddenBadge = buildHiddenTraitBadge(f.id);
       const consultBtn = buildConsultBtn(f.id, 'faction');
 
+      // Grievance indicator
+      const grievance = Math.round(state.factionGrievances?.[f.id] || 0);
+      const coalition = state.activeCoalitions?.find(c => c.factions.includes(f.id));
+      let grievanceHtml = '';
+      if (grievance > 0 || coalition) {
+        const gLevel = grievance >= 10 ? 'high' : grievance >= 5 ? 'mid' : 'low';
+        const gColor = { high: '#dc2626', mid: '#d97706', low: '#78716c' }[gLevel];
+        const gPips = Math.min(10, Math.ceil(grievance / 2));
+        const pipRow = Array.from({length: 10}, (_, i) =>
+          `<span style="display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:1px;background:${i < gPips ? gColor : 'var(--paper-darker)'};"></span>`
+        ).join('');
+        grievanceHtml = `
+          <div style="display:flex; align-items:center; gap:6px; margin-top:4px; padding:3px 0;">
+            <span style="font-size:0.55rem; text-transform:uppercase; letter-spacing:0.07em; color:${gColor}; font-weight:700; min-width:52px;">Grievance</span>
+            <div>${pipRow}</div>
+            <span style="font-size:0.58rem; color:${gColor}; font-weight:600;">${grievance}/20</span>
+          </div>`;
+        if (coalition) {
+          const partnerIds = coalition.factions.filter(fid => fid !== f.id);
+          const partnerNames = partnerIds.map(fid => {
+            const pf = state.factions.find(x => x.id === fid);
+            return pf ? pf.name.split(' ').slice(-1)[0] : fid;
+          });
+          grievanceHtml += `<div style="font-size:0.57rem; color:#92400e; background:#fef3c7; padding:2px 6px; margin-top:2px; border-radius:2px;">
+            ⚑ Coalition w/ ${partnerNames.join(', ')}${coalition.public ? ' — PUBLIC' : ' — forming'}
+          </div>`;
+        }
+      }
+
       const div = document.createElement('div');
       div.className = 'faction-card';
       div.innerHTML = `
@@ -6226,12 +6623,64 @@ function renderPeopleTab(tab) {
           <div class="approval-mini-bar"><div class="approval-mini-fill" style="width:${f.approval}%; ${appFill}"></div></div>
           <span class="approval-mini-val" style="color:${appColor}">${Math.round(f.approval)}%</span>
         </div>
+        ${grievanceHtml}
         ${consultBtn}
         ${buildDossierBlock(f.id)}
       `;
       body.appendChild(div);
     });
   }
+}
+
+function renderFactionActivity() {
+  const log = state.factionActionLog || [];
+  const coalitions = state.activeCoalitions || [];
+  const panel = document.getElementById('faction-activity-panel');
+  const container = document.getElementById('faction-activity-log');
+  if (!panel || !container) return;
+
+  const hasActivity = log.length > 0 || coalitions.length > 0;
+  panel.style.display = hasActivity ? 'block' : 'none';
+  if (!hasActivity) return;
+
+  let html = '';
+
+  // Active coalitions first
+  coalitions.forEach(c => {
+    const names = c.factions.map(fid => {
+      const f = state.factions.find(x => x.id === fid);
+      return f ? f.name.split(' ').slice(-1)[0] : fid; // last word e.g. "Union", "Alliance"
+    });
+    const age = state.turn - c.formedTurn;
+    html += `<div style="
+      font-size:0.6rem; padding:4px 6px; margin-bottom:3px;
+      background:#fef3c7; border-left:2px solid #d97706;
+      color:#78350f; line-height:1.5;
+    ">⚑ <strong>Coalition active:</strong> ${names.join(' + ')} · ${age} month${age !== 1 ? 's' : ''} · ${c.public ? 'Public' : 'Forming'}
+    </div>`;
+  });
+
+  // Recent faction actions (last 5)
+  log.slice(0, 5).forEach(entry => {
+    const faction = state.factions.find(f => f.id === entry.factionId);
+    const fName = faction ? faction.name.split(' ').slice(-1)[0] : entry.factionId;
+    const typeLabel = {
+      public_statement: 'Statement',
+      council_pressure: 'Pressure',
+      triggered_event:  'Action'
+    }[entry.type] || 'Move';
+
+    html += `<div style="
+      font-size:0.58rem; padding:3px 6px; margin-bottom:2px;
+      border-left:1px solid var(--paper-darker);
+      color:var(--ink-faded); line-height:1.5;
+    "><span style="color:var(--ink); font-weight:600;">${fName}</span>
+    <span style="text-transform:uppercase; font-size:0.52rem; letter-spacing:0.06em; margin:0 3px; color:var(--urgent);">${typeLabel}</span>
+    <span style="color:var(--ink-faded); font-size:0.54rem;">T${entry.turn}</span>
+    </div>`;
+  });
+
+  container.innerHTML = html;
 }
 
 function renderTicker() {
