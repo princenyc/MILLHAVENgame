@@ -1876,7 +1876,210 @@
     padding: 4px 0;
   }
 
-  /* ── TRANSITION BRIEFING DOSSIER ── */
+  /* ── BUDGET FUNDING PIPS ── */
+  .budget-row { position: relative; }
+  .bud-funding-pip {
+    display: inline-block;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    margin-left: 4px;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .bud-funding-pip.funded   { background: #16a34a; }
+  .bud-funding-pip.lean     { background: #d97706; }
+  .bud-funding-pip.skeleton { background: #dc2626; }
+  .bud-funding-pip.flush    { background: #2563eb; }
+
+  /* ── BUDGET ALLOCATION PANEL ── */
+  #budget-panel {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 50;
+    overflow-y: auto;
+  }
+
+  .budget-panel-inner {
+    background: var(--paper);
+    border: 1px solid var(--paper-darker);
+    border-left: 3px solid var(--brass);
+    padding: 12px 14px;
+    min-height: 100%;
+  }
+
+  .bp-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 1px solid var(--paper-darker);
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+  }
+
+  .bp-note {
+    font-size: 0.6rem;
+    color: var(--ink-faded);
+    line-height: 1.6;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
+  .bp-total-row, .bp-remaining-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.64rem;
+    color: var(--ink-faded);
+    margin-bottom: 3px;
+  }
+
+  .bp-pool-val {
+    font-family: 'Courier Prime', monospace;
+    color: var(--ink);
+    font-weight: 700;
+  }
+
+  .bp-rem-val {
+    font-family: 'Courier Prime', monospace;
+    font-weight: 700;
+  }
+
+  .bp-rem-val.over  { color: #dc2626; }
+  .bp-rem-val.exact { color: #16a34a; }
+  .bp-rem-val.under { color: #d97706; }
+
+  .bp-sliders {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bp-slider-row {
+    background: var(--paper-dark);
+    border: 1px solid var(--paper-darker);
+    padding: 8px 10px;
+  }
+
+  .bp-slider-header {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 5px;
+  }
+
+  .bp-bucket-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--ink);
+    flex: 1;
+  }
+
+  .bp-bucket-stat {
+    font-size: 0.58rem;
+    color: var(--ink-faded);
+  }
+
+  .bp-bucket-amount {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--ink);
+    min-width: 52px;
+    text-align: right;
+  }
+
+  .bp-slider {
+    width: 100%;
+    accent-color: var(--brass);
+    cursor: pointer;
+    height: 3px;
+    margin-bottom: 2px;
+  }
+
+  .bp-slider-ticks {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.5rem;
+    color: var(--ink-faded);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+  }
+
+  .bp-effect-label {
+    font-size: 0.58rem;
+    font-style: italic;
+    min-height: 14px;
+    line-height: 1.4;
+  }
+  .bp-effect-label.good { color: #15803d; }
+  .bp-effect-label.warn { color: #b45309; }
+  .bp-effect-label.bad  { color: #b91c1c; }
+
+  .bp-faction-warnings {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .bp-faction-warn {
+    font-size: 0.6rem;
+    padding: 3px 7px;
+    border-left: 2px solid;
+    background: var(--paper-dark);
+  }
+  .bp-faction-warn.warn { border-color: #d97706; color: #92400e; }
+  .bp-faction-warn.ok   { border-color: #16a34a; color: #166534; }
+
+  .bp-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid var(--paper-darker);
+  }
+
+  .bp-btn-cancel {
+    padding: 6px 14px;
+    background: var(--paper);
+    border: 1px solid var(--paper-darker);
+    color: var(--ink-faded);
+    font-size: 0.65rem;
+    cursor: pointer;
+    font-family: 'Special Elite', cursive;
+    letter-spacing: 0.08em;
+  }
+
+  .bp-btn-confirm {
+    padding: 6px 14px;
+    background: var(--ink);
+    border: 1px solid var(--brass);
+    color: var(--brass-light);
+    font-size: 0.65rem;
+    cursor: pointer;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+  }
+
+  .bp-btn-confirm:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  /* Make city-status panel relative so budget panel can overlay it */
+  .city-status-inner { position: relative; }
+
+
   .briefing-section { margin-bottom: 20px; }
 
   .briefing-section-header {
@@ -2170,19 +2373,132 @@
         </div>
 
         <!-- Budget -->
+        <div class="city-status-inner">
         <div class="budget-block">
-          <div class="b-header">Monthly Budget</div>
+          <div class="b-header">
+            Monthly Budget
+            <button id="budget-edit-btn" onclick="openBudgetPanel()" style="
+              float:right; font-size:0.56rem; padding:2px 7px;
+              background:var(--paper-dark); border:1px solid var(--paper-darker);
+              color:var(--ink-faded); cursor:pointer; font-family:'Special Elite',cursive;
+              letter-spacing:0.06em; text-transform:uppercase;
+            ">Reallocate</button>
+          </div>
           <div class="budget-row"><span>Revenue</span><span class="positive" id="bud-revenue">—</span></div>
-          <div class="budget-row"><span>Infrastructure</span><span id="bud-infra">—</span></div>
-          <div class="budget-row"><span>Public Safety</span><span id="bud-safety">—</span></div>
-          <div class="budget-row"><span>Social Services</span><span id="bud-social">—</span></div>
-          <div class="budget-row"><span>Administration</span><span id="bud-admin">—</span></div>
+          <div class="budget-row">
+            <span>Infrastructure</span>
+            <span id="bud-infra">—</span>
+            <div class="bud-funding-pip" id="pip-infra" title="Funding level"></div>
+          </div>
+          <div class="budget-row">
+            <span>Public Safety</span>
+            <span id="bud-safety">—</span>
+            <div class="bud-funding-pip" id="pip-safety" title="Funding level"></div>
+          </div>
+          <div class="budget-row">
+            <span>Social Services</span>
+            <span id="bud-social">—</span>
+            <div class="bud-funding-pip" id="pip-social" title="Funding level"></div>
+          </div>
+          <div class="budget-row">
+            <span>Administration</span>
+            <span id="bud-admin">—</span>
+            <div class="bud-funding-pip" id="pip-admin" title="Funding level"></div>
+          </div>
           <div class="budget-row total">
             <span>Monthly Net</span>
             <span id="bud-net">—</span>
           </div>
           <div class="balance-display" id="bud-balance">TREASURY: $—</div>
         </div>
+
+        <!-- Budget Allocation Overlay (inline panel) -->
+        <div id="budget-panel" style="display:none;">
+          <div class="budget-panel-inner">
+            <div class="bp-header">
+              <span>◈ Budget Reallocation — <span id="bp-month-label">Jan Y1</span></span>
+              <button onclick="closeBudgetPanel()" style="background:none;border:none;cursor:pointer;color:var(--ink-faded);font-size:0.9rem;">✕</button>
+            </div>
+            <div class="bp-note">Distribute expendable budget across departments. Underfunding a department degrades its stats. Factions monitor your priorities.</div>
+
+            <div class="bp-total-row">
+              <span>Expendable Budget</span>
+              <span id="bp-total-pool" class="bp-pool-val">—</span>
+            </div>
+            <div class="bp-remaining-row">
+              <span>Remaining to Allocate</span>
+              <span id="bp-remaining" class="bp-rem-val">—</span>
+            </div>
+
+            <div class="bp-sliders">
+
+              <div class="bp-slider-row">
+                <div class="bp-slider-header">
+                  <span class="bp-bucket-label">Infrastructure</span>
+                  <span class="bp-bucket-stat" id="bps-stat-infra">Stat: —</span>
+                  <span class="bp-bucket-amount" id="bps-amt-infra">$—</span>
+                </div>
+                <input type="range" class="bp-slider" id="bps-infra" min="0" max="100" value="30"
+                  oninput="onBudgetSlider()" data-bucket="infrastructure">
+                <div class="bp-slider-ticks">
+                  <span>Skeleton</span><span>Lean</span><span>Funded</span><span>Flush</span>
+                </div>
+                <div class="bp-effect-label" id="bpe-infra"></div>
+              </div>
+
+              <div class="bp-slider-row">
+                <div class="bp-slider-header">
+                  <span class="bp-bucket-label">Public Safety</span>
+                  <span class="bp-bucket-stat" id="bps-stat-safety">Stat: —</span>
+                  <span class="bp-bucket-amount" id="bps-amt-safety">$—</span>
+                </div>
+                <input type="range" class="bp-slider" id="bps-safety" min="0" max="100" value="25"
+                  oninput="onBudgetSlider()" data-bucket="publicSafety">
+                <div class="bp-slider-ticks">
+                  <span>Skeleton</span><span>Lean</span><span>Funded</span><span>Flush</span>
+                </div>
+                <div class="bp-effect-label" id="bpe-safety"></div>
+              </div>
+
+              <div class="bp-slider-row">
+                <div class="bp-slider-header">
+                  <span class="bp-bucket-label">Social Services</span>
+                  <span class="bp-bucket-stat" id="bps-stat-social">Stat: —</span>
+                  <span class="bp-bucket-amount" id="bps-amt-social">$—</span>
+                </div>
+                <input type="range" class="bp-slider" id="bps-social" min="0" max="100" value="20"
+                  oninput="onBudgetSlider()" data-bucket="social">
+                <div class="bp-slider-ticks">
+                  <span>Skeleton</span><span>Lean</span><span>Funded</span><span>Flush</span>
+                </div>
+                <div class="bp-effect-label" id="bpe-social"></div>
+              </div>
+
+              <div class="bp-slider-row">
+                <div class="bp-slider-header">
+                  <span class="bp-bucket-label">Administration</span>
+                  <span class="bp-bucket-stat" id="bps-stat-admin">Stat: —</span>
+                  <span class="bp-bucket-amount" id="bps-amt-admin">$—</span>
+                </div>
+                <input type="range" class="bp-slider" id="bps-admin" min="0" max="100" value="25"
+                  oninput="onBudgetSlider()" data-bucket="admin">
+                <div class="bp-slider-ticks">
+                  <span>Skeleton</span><span>Lean</span><span>Funded</span><span>Flush</span>
+                </div>
+                <div class="bp-effect-label" id="bpe-admin"></div>
+              </div>
+
+            </div><!-- /bp-sliders -->
+
+            <div id="bp-faction-warnings" class="bp-faction-warnings"></div>
+
+            <div class="bp-actions">
+              <button onclick="closeBudgetPanel()" class="bp-btn-cancel">Cancel</button>
+              <button onclick="confirmBudget()" id="bp-confirm-btn" class="bp-btn-confirm" disabled>Sign Off on Allocation →</button>
+            </div>
+          </div>
+        </div><!-- /budget-panel -->
+        </div><!-- /city-status-inner -->
 
         <!-- Approval -->
         <div class="approval-block">
@@ -2484,45 +2800,54 @@ let creationState = {
 };
 
 // ─────────────────────────────────────────────────────
-//  AVATAR MAP — DiceBear personas, explicit skin tones
-//  skinColor hex: light=fad9c1, tan=d4956a, brown=a0522d, dark=6b3a2a, deeper=3d1a10
+//  AVATAR SYSTEM — CSS monogram circles
+//  Color-coded by role category
 // ─────────────────────────────────────────────────────
-const AVATAR_MAP = {
+
+const AVATAR_CONFIG = {
   // Inherited Staff
-  cos:      'https://api.dicebear.com/7.x/personas/svg?seed=rachel-okafor&skinColor=3d1a10',      // Rachel Okafor — Black woman
-  budget:   'https://api.dicebear.com/7.x/personas/svg?seed=victor-slade&skinColor=fad9c1',       // Victor Slade — white man
-  comms:    'https://api.dicebear.com/7.x/personas/svg?seed=maya-chen&skinColor=d4956a',           // Maya Chen — East Asian woman
-  planning: 'https://api.dicebear.com/7.x/personas/svg?seed=douglas-merritt-22yr&skinColor=f2cba0', // Douglas Merritt — older white man
+  cos:      { initials: 'RO', color: '#4a3728', bg: '#d4a574' },
+  budget:   { initials: 'VS', color: '#2c3e50', bg: '#b8c9d9' },
+  comms:    { initials: 'MC', color: '#2d3a1e', bg: '#a8c090' },
+  planning: { initials: 'DM', color: '#3d2b1a', bg: '#c4a882' },
 
   // City Council
-  c1: 'https://api.dicebear.com/7.x/personas/svg?seed=donna-torres-d3&skinColor=c68642',    // Donna Torres — Latina woman
-  c2: 'https://api.dicebear.com/7.x/personas/svg?seed=frank-beaumont-al&skinColor=fad9c1',  // Frank Beaumont — white man
-  c3: 'https://api.dicebear.com/7.x/personas/svg?seed=priya-nair-d1&skinColor=a0522d',      // Priya Nair — South Asian woman
-  c4: 'https://api.dicebear.com/7.x/personas/svg?seed=james-callahan-d5&skinColor=f2cba0',  // James Callahan — white man
-  c5: 'https://api.dicebear.com/7.x/personas/svg?seed=sandra-liu-d2&skinColor=d4956a',      // Sandra Liu — East Asian woman
-  c6: 'https://api.dicebear.com/7.x/personas/svg?seed=marcus-webb-d4&skinColor=6b3a2a',     // Marcus Webb — Black man
-  c7: 'https://api.dicebear.com/7.x/personas/svg?seed=carla-reyes-d6&skinColor=c68642',     // Carla Reyes — Latina woman
+  c1: { initials: 'DT', color: '#4a1a1a', bg: '#d4888a' },
+  c2: { initials: 'FB', color: '#1a2d4a', bg: '#88a8d4' },
+  c3: { initials: 'PN', color: '#2d1a4a', bg: '#a888d4' },
+  c4: { initials: 'JC', color: '#1a2d4a', bg: '#88a8d4' },
+  c5: { initials: 'SL', color: '#4a1a1a', bg: '#d4888a' },
+  c6: { initials: 'MW', color: '#1a3a2d', bg: '#88c4a8' },
+  c7: { initials: 'CR', color: '#4a1a1a', bg: '#d4888a' },
 
-  // Factions (leader portraits)
-  labor:     'https://api.dicebear.com/7.x/personas/svg?seed=torres-union-leader&skinColor=c68642',   // Torres (labor)
-  business:  'https://api.dicebear.com/7.x/personas/svg?seed=beaumont-biz-al&skinColor=fad9c1',       // Beaumont (business)
-  residents: 'https://api.dicebear.com/7.x/personas/svg?seed=nkemelu-residents&skinColor=3d1a10',     // Patricia Nkemelu — Black woman
-  developers:'https://api.dicebear.com/7.x/personas/svg?seed=callahan-devs-d5&skinColor=f2cba0',      // Callahan (developers)
-  press:     'https://api.dicebear.com/7.x/personas/svg?seed=vasquez-herald-ed&skinColor=c68642',     // Tom Vasquez — Latino man
-  police:    'https://api.dicebear.com/7.x/personas/svg?seed=kovacs-pf-chief&skinColor=fad9c1',       // Ray Kovacs — white man
+  // Factions
+  labor:     { initials: 'MU', color: '#4a2800', bg: '#d4903c' },
+  business:  { initials: 'BA', color: '#1a2d4a', bg: '#88a8d4' },
+  residents: { initials: 'RA', color: '#1a3a1a', bg: '#80b880' },
+  developers:{ initials: 'DC', color: '#2d1a00', bg: '#c49a50' },
+  press:     { initials: 'MH', color: '#2a2a2a', bg: '#b0b0b0' },
+  police:    { initials: 'PF', color: '#1a1a3a', bg: '#8888c4' },
 };
 
 function getAvatar(personId, size = 44) {
-  const url = AVATAR_MAP[personId];
-  if (!url) return '';
-  return `<img src="${url}" alt="" style="
+  const cfg = AVATAR_CONFIG[personId];
+  if (!cfg) return '';
+  const fs = Math.round(size * 0.36);
+  return `<div style="
     width:${size}px; height:${size}px;
     border-radius:50%;
-    border: 2px solid var(--paper-darker);
-    background: var(--paper-dark);
-    object-fit:cover;
+    background:${cfg.bg};
+    color:${cfg.color};
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Playfair Display',serif;
+    font-size:${fs}px;
+    font-weight:700;
+    letter-spacing:0.03em;
     flex-shrink:0;
-  " onerror="this.style.display='none'">`;
+    border: 1.5px solid rgba(0,0,0,0.15);
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.15);
+    user-select:none;
+  ">${cfg.initials}</div>`;
 }
 
 
@@ -3816,8 +4141,228 @@ let pendingVote = null;
 let tickerItems = [];
 
 // ═══════════════════════════════════════════════════
-//  AI ADVISOR SYSTEM
+//  BUDGET ALLOCATION SYSTEM
 // ═══════════════════════════════════════════════════
+
+// Baseline spending levels (what each bucket needs to be "funded")
+const BUDGET_BASELINES = {
+  infrastructure: 220000,
+  publicSafety:   195000,
+  social:         130000,
+  admin:          180000
+};
+
+// Which stats each bucket affects
+const BUCKET_AFFECTS = {
+  infrastructure: ['infrastructure'],
+  publicSafety:   ['crime'],
+  social:         ['services', 'housing'],
+  admin:          ['services']
+};
+
+// Faction watch: which factions care about which buckets
+const BUCKET_FACTION_WATCH = {
+  infrastructure: [{ id: 'residents', label: "Residents' Association", wants: 'high' }],
+  publicSafety:   [{ id: 'police',    label: 'Police & Fire Unions',   wants: 'high' }],
+  social:         [{ id: 'labor',     label: 'Municipal Workers Union', wants: 'high' }],
+  admin:          [{ id: 'labor',     label: 'Municipal Workers Union', wants: 'high' },
+                   { id: 'business',  label: 'Business Alliance',       wants: 'low'  }]
+};
+
+// Pending allocation (set when panel opens, confirmed on sign-off)
+let pendingAllocation = null;
+
+function openBudgetPanel() {
+  const b = state.city.budget;
+  const e = b.expenses;
+  const totalExp = e.infrastructure + e.publicSafety + e.social + e.admin;
+  const pool = b.monthlyRevenue; // full revenue is the pool
+
+  // Convert current expenses to slider values (0-100 where 50 = baseline)
+  function expenseToSlider(bucket, amount) {
+    const baseline = BUDGET_BASELINES[bucket];
+    return Math.round((amount / baseline) * 50);
+  }
+
+  document.getElementById('bps-infra').value  = expenseToSlider('infrastructure', e.infrastructure);
+  document.getElementById('bps-safety').value = expenseToSlider('publicSafety', e.publicSafety);
+  document.getElementById('bps-social').value = expenseToSlider('social', e.social);
+  document.getElementById('bps-admin').value  = expenseToSlider('admin', e.admin);
+
+  document.getElementById('bp-month-label').textContent =
+    `${MONTHS[state.month]} Y${state.year}`;
+  document.getElementById('bp-total-pool').textContent = fmtMoney(pool);
+
+  pendingAllocation = { ...e };
+
+  document.getElementById('budget-panel').style.display = 'block';
+  onBudgetSlider(); // initial render
+}
+
+function closeBudgetPanel() {
+  document.getElementById('budget-panel').style.display = 'none';
+  pendingAllocation = null;
+}
+
+function sliderToExpense(bucket, sliderVal) {
+  // slider 0-100: 0=10%, 50=100% of baseline, 100=200% of baseline
+  const baseline = BUDGET_BASELINES[bucket];
+  const ratio = sliderVal === 0 ? 0.1 : (sliderVal / 50);
+  return Math.round(baseline * ratio);
+}
+
+function getFundingTier(sliderVal) {
+  if (sliderVal < 20)  return { tier: 'skeleton', label: 'Skeleton budget — stat decay accelerates', cls: 'bad' };
+  if (sliderVal < 40)  return { tier: 'lean',     label: 'Lean — minor decay, some recovery blocked', cls: 'warn' };
+  if (sliderVal < 70)  return { tier: 'funded',   label: 'Adequately funded — normal stat behavior', cls: 'good' };
+  return                      { tier: 'flush',    label: 'Flush — stat recovery accelerated', cls: 'good' };
+}
+
+function onBudgetSlider() {
+  const pool = state.city.budget.monthlyRevenue;
+  const buckets = ['infra','safety','social','admin'];
+  const bucketKeys = { infra: 'infrastructure', safety: 'publicSafety', social: 'social', admin: 'admin' };
+  const stats = state.city.stats;
+
+  let totalSpend = 0;
+  const amounts = {};
+
+  buckets.forEach(b => {
+    const key = bucketKeys[b];
+    const slider = document.getElementById(`bps-${b}`);
+    const val = parseInt(slider.value);
+    const amount = sliderToExpense(key, val);
+    amounts[key] = amount;
+    totalSpend += amount;
+
+    // Update amount display
+    document.getElementById(`bps-amt-${b}`).textContent = fmtMoney(amount);
+
+    // Update stat label
+    const affected = BUCKET_AFFECTS[key];
+    const statVal = affected ? Math.round(stats[affected[0]] || 0) : 0;
+    document.getElementById(`bps-stat-${b}`).textContent = `Stat: ${statVal}`;
+
+    // Effect label
+    const ft = getFundingTier(val);
+    const el = document.getElementById(`bpe-${b}`);
+    el.textContent = ft.label;
+    el.className = `bp-effect-label ${ft.cls}`;
+  });
+
+  pendingAllocation = amounts;
+
+  // Remaining
+  const remaining = pool - totalSpend;
+  const remEl = document.getElementById('bp-remaining');
+  remEl.textContent = (remaining >= 0 ? '+' : '') + fmtMoney(remaining);
+  remEl.className = `bp-rem-val ${remaining < -50000 ? 'over' : remaining > 50000 ? 'under' : 'exact'}`;
+
+  // Confirm button: enable if within ±10% of pool
+  const withinBudget = Math.abs(remaining) <= pool * 0.1;
+  document.getElementById('bp-confirm-btn').disabled = !withinBudget;
+
+  // Funding pips on main readout
+  buckets.forEach(b => {
+    const key = bucketKeys[b];
+    const slider = document.getElementById(`bps-${b}`);
+    const ft = getFundingTier(parseInt(slider.value));
+    const pip = document.getElementById(`pip-${b}`);
+    if (pip) { pip.className = `bud-funding-pip ${ft.tier}`; }
+  });
+
+  // Faction warnings
+  renderBudgetFactionWarnings(amounts);
+}
+
+function renderBudgetFactionWarnings(amounts) {
+  const warnings = [];
+
+  Object.entries(BUCKET_FACTION_WATCH).forEach(([bucket, factions]) => {
+    const slider = document.getElementById(`bps-${bucket === 'infrastructure' ? 'infra' : bucket === 'publicSafety' ? 'safety' : bucket === 'social' ? 'social' : 'admin'}`);
+    const val = parseInt(slider.value);
+    const ft = getFundingTier(val);
+
+    factions.forEach(fw => {
+      const faction = state.factions.find(f => f.id === fw.id);
+      if (!faction) return;
+      const bucketLabel = { infrastructure: 'Infrastructure', publicSafety: 'Public Safety', social: 'Social Services', admin: 'Administration' }[bucket];
+
+      if (fw.wants === 'high' && ft.tier === 'skeleton') {
+        warnings.push({ cls: 'warn', text: `${fw.label} will notice the ${bucketLabel} cut. Expect approval drop.` });
+      } else if (fw.wants === 'high' && ft.tier === 'flush') {
+        warnings.push({ cls: 'ok', text: `${fw.label} will respond positively to strong ${bucketLabel} investment.` });
+      } else if (fw.wants === 'low' && ft.tier === 'flush') {
+        warnings.push({ cls: 'warn', text: `${fw.label} wants leaner Administration. High spend will cost you.` });
+      }
+    });
+  });
+
+  const container = document.getElementById('bp-faction-warnings');
+  container.innerHTML = warnings.map(w =>
+    `<div class="bp-faction-warn ${w.cls}">◈ ${w.text}</div>`
+  ).join('');
+}
+
+function confirmBudget() {
+  if (!pendingAllocation) return;
+
+  const b = state.city.budget;
+  const old = { ...b.expenses };
+
+  // Apply new allocations
+  b.expenses = { ...pendingAllocation };
+
+  // Apply immediate faction reactions to big shifts
+  Object.entries(BUCKET_FACTION_WATCH).forEach(([bucket, factions]) => {
+    const oldAmt  = old[bucket] || 0;
+    const newAmt  = pendingAllocation[bucket] || 0;
+    const delta   = newAmt - oldAmt;
+    const baseline = BUDGET_BASELINES[bucket];
+    const shift = delta / baseline; // normalized shift
+
+    factions.forEach(fw => {
+      const faction = state.factions.find(f => f.id === fw.id);
+      if (!faction) return;
+
+      let impact = 0;
+      if (fw.wants === 'high') {
+        if (shift > 0.3)       impact = +4;
+        else if (shift < -0.3) impact = -5;
+      } else if (fw.wants === 'low') {
+        if (shift < -0.3)      impact = +3;
+        else if (shift > 0.3)  impact = -4;
+      }
+
+      if (Math.abs(impact) > 0) {
+        faction.approval = clamp(faction.approval + impact, 5, 95);
+        const sign = impact > 0 ? '+' : '';
+        addToHistory(faction.id,
+          `Budget reallocation: ${({ infrastructure:'Infrastructure', publicSafety:'Public Safety', social:'Social Services', admin:'Administration' })[bucket]} ${delta > 0 ? 'increased' : 'cut'} ${Math.round(Math.abs(shift*100))}%. Approval ${sign}${impact}.`,
+          impact > 0 ? 'positive' : 'negative'
+        );
+      }
+    });
+  });
+
+  // Herald tick
+  const biggest = Object.entries(pendingAllocation).sort(([,a],[,b]) => b - a)[0];
+  const biggestLabel = { infrastructure: 'Infrastructure', publicSafety: 'Public Safety', social: 'Social Services', admin: 'Administration' }[biggest[0]];
+  addTicker(`HERALD — Mayor signs off on revised municipal budget. ${biggestLabel} receives largest allocation at ${fmtMoney(biggest[1])}/month.`);
+
+  recalcApproval();
+  updateUI();
+  closeBudgetPanel();
+
+  // Flash the budget block briefly
+  const bb = document.querySelector('.budget-block');
+  if (bb) {
+    bb.style.outline = '2px solid var(--brass)';
+    setTimeout(() => { bb.style.outline = ''; }, 800);
+  }
+}
+
+
 
 let openaiKey = null;
 let aiEnabled = false;
@@ -4851,20 +5396,62 @@ function processMonthlyTick() {
   const net = getNet();
   b.balance += net;
 
-  // Natural stat decay/growth
-  s.infrastructure = clamp(s.infrastructure - 0.5, 0, 100);
-  s.services = clamp(s.services - 0.3, 0, 100);
-  s.housing = clamp(s.housing - 0.2, 0, 100);
-
-  // Budget-driven improvements
+  // Budget-driven stat decay/growth — based on funding tier
   const e = b.expenses;
-  if (e.infrastructure > 200000) s.infrastructure = clamp(s.infrastructure + 0.8, 0, 100);
-  if (e.publicSafety > 180000) s.crime = clamp(s.crime + 0.5, 0, 100);
-  if (e.social > 120000) s.services = clamp(s.services + 0.5, 0, 100);
 
-  // Unemployment drift
+  function getSliderValFromExpense(bucket) {
+    const baseline = BUDGET_BASELINES[bucket];
+    const ratio = e[bucket] / baseline;
+    return Math.round(ratio * 50);
+  }
+
+  function applyBudgetEffect(bucket, stat, s) {
+    const sv = getSliderValFromExpense(bucket);
+    const ft = getFundingTier(sv);
+    switch(ft.tier) {
+      case 'skeleton':
+        // heavy decay — stat falls fast
+        s[stat] = clamp(s[stat] - 1.8, 0, 100);
+        break;
+      case 'lean':
+        // mild decay — stat inches down
+        s[stat] = clamp(s[stat] - 0.6, 0, 100);
+        break;
+      case 'funded':
+        // natural baseline — slight recovery
+        s[stat] = clamp(s[stat] + 0.3, 0, 100);
+        break;
+      case 'flush':
+        // strong recovery
+        s[stat] = clamp(s[stat] + 1.0, 0, 100);
+        break;
+    }
+  }
+
+  // Infrastructure bucket → infrastructure stat
+  applyBudgetEffect('infrastructure', 'infrastructure', s);
+
+  // Public Safety bucket → crime/safety stat
+  applyBudgetEffect('publicSafety', 'crime', s);
+
+  // Social Services bucket → services + small housing nudge
+  applyBudgetEffect('social', 'services', s);
+  const socialSV = getSliderValFromExpense('social');
+  const socialTier = getFundingTier(socialSV).tier;
+  if (socialTier === 'flush')    s.housing = clamp(s.housing + 0.4, 0, 100);
+  else if (socialTier === 'skeleton') s.housing = clamp(s.housing - 0.8, 0, 100);
+  else s.housing = clamp(s.housing - 0.2, 0, 100);
+
+  // Admin bucket → mild services effect
+  applyBudgetEffect('admin', 'services', s);
+  // services is hit by both buckets — cap recovery to avoid double-flush
+  s.services = clamp(s.services, 0, 100);
+
+  // Unemployment drift (development and social spending)
   s.unemployment = clamp(s.unemployment + (Math.random() * 0.4 - 0.2), 3, 15);
   if (s.development > 60) s.unemployment = clamp(s.unemployment - 0.3, 3, 15);
+  if (socialTier === 'flush')    s.unemployment = clamp(s.unemployment - 0.15, 3, 15);
+  if (socialTier === 'skeleton') s.unemployment = clamp(s.unemployment + 0.25, 3, 15);
 
   recalcApproval();
 }
@@ -5341,6 +5928,24 @@ function updateVitals() {
   netEl.className = net >= 0 ? 'positive' : 'negative';
 
   document.getElementById('bud-balance').textContent = 'TREASURY: ' + fmtMoneyFull(b.balance);
+
+  // Funding pips — show tier color on each budget line
+  const pipMap = {
+    'pip-infra':   { bucket: 'infrastructure' },
+    'pip-safety':  { bucket: 'publicSafety' },
+    'pip-social':  { bucket: 'social' },
+    'pip-admin':   { bucket: 'admin' }
+  };
+  Object.entries(pipMap).forEach(([pipId, { bucket }]) => {
+    const pip = document.getElementById(pipId);
+    if (!pip) return;
+    const baseline = BUDGET_BASELINES[bucket];
+    const ratio = (e[bucket] || 0) / baseline;
+    const sv = Math.round(ratio * 50);
+    const ft = getFundingTier(sv);
+    pip.className = `bud-funding-pip ${ft.tier}`;
+    pip.title = ft.label;
+  });
 
   // Approval
   const app = s.approval;
