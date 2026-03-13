@@ -1046,7 +1046,7 @@
 
   .ce-header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     gap: 6px;
     margin-bottom: 3px;
   }
@@ -1902,7 +1902,7 @@
     position: relative;
   }
 
-  .bc-header { display: flex; align-items: baseline; gap: 6px; margin-bottom: 3px; flex-wrap: wrap; }
+  .bc-header { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: nowrap; }
   .bc-name { font-family: 'Playfair Display', serif; font-size: 0.82rem; font-weight: 700; color: var(--ink); }
   .bc-role { font-size: 0.58rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-faded); }
   .bc-sub { font-size: 0.6rem; color: var(--ink-faded); margin-bottom: 5px; font-style: italic; }
@@ -2484,8 +2484,48 @@ let creationState = {
 };
 
 // ─────────────────────────────────────────────────────
-//  TRANSITION BRIEFING DATA
+//  AVATAR MAP — DiceBear personas, explicit skin tones
+//  skinColor hex: light=fad9c1, tan=d4956a, brown=a0522d, dark=6b3a2a, deeper=3d1a10
 // ─────────────────────────────────────────────────────
+const AVATAR_MAP = {
+  // Inherited Staff
+  cos:      'https://api.dicebear.com/7.x/personas/svg?seed=rachel-okafor&skinColor=3d1a10',      // Rachel Okafor — Black woman
+  budget:   'https://api.dicebear.com/7.x/personas/svg?seed=victor-slade&skinColor=fad9c1',       // Victor Slade — white man
+  comms:    'https://api.dicebear.com/7.x/personas/svg?seed=maya-chen&skinColor=d4956a',           // Maya Chen — East Asian woman
+  planning: 'https://api.dicebear.com/7.x/personas/svg?seed=douglas-merritt-22yr&skinColor=f2cba0', // Douglas Merritt — older white man
+
+  // City Council
+  c1: 'https://api.dicebear.com/7.x/personas/svg?seed=donna-torres-d3&skinColor=c68642',    // Donna Torres — Latina woman
+  c2: 'https://api.dicebear.com/7.x/personas/svg?seed=frank-beaumont-al&skinColor=fad9c1',  // Frank Beaumont — white man
+  c3: 'https://api.dicebear.com/7.x/personas/svg?seed=priya-nair-d1&skinColor=a0522d',      // Priya Nair — South Asian woman
+  c4: 'https://api.dicebear.com/7.x/personas/svg?seed=james-callahan-d5&skinColor=f2cba0',  // James Callahan — white man
+  c5: 'https://api.dicebear.com/7.x/personas/svg?seed=sandra-liu-d2&skinColor=d4956a',      // Sandra Liu — East Asian woman
+  c6: 'https://api.dicebear.com/7.x/personas/svg?seed=marcus-webb-d4&skinColor=6b3a2a',     // Marcus Webb — Black man
+  c7: 'https://api.dicebear.com/7.x/personas/svg?seed=carla-reyes-d6&skinColor=c68642',     // Carla Reyes — Latina woman
+
+  // Factions (leader portraits)
+  labor:     'https://api.dicebear.com/7.x/personas/svg?seed=torres-union-leader&skinColor=c68642',   // Torres (labor)
+  business:  'https://api.dicebear.com/7.x/personas/svg?seed=beaumont-biz-al&skinColor=fad9c1',       // Beaumont (business)
+  residents: 'https://api.dicebear.com/7.x/personas/svg?seed=nkemelu-residents&skinColor=3d1a10',     // Patricia Nkemelu — Black woman
+  developers:'https://api.dicebear.com/7.x/personas/svg?seed=callahan-devs-d5&skinColor=f2cba0',      // Callahan (developers)
+  press:     'https://api.dicebear.com/7.x/personas/svg?seed=vasquez-herald-ed&skinColor=c68642',     // Tom Vasquez — Latino man
+  police:    'https://api.dicebear.com/7.x/personas/svg?seed=kovacs-pf-chief&skinColor=fad9c1',       // Ray Kovacs — white man
+};
+
+function getAvatar(personId, size = 44) {
+  const url = AVATAR_MAP[personId];
+  if (!url) return '';
+  return `<img src="${url}" alt="" style="
+    width:${size}px; height:${size}px;
+    border-radius:50%;
+    border: 2px solid var(--paper-darker);
+    background: var(--paper-dark);
+    object-fit:cover;
+    flex-shrink:0;
+  " onerror="this.style.display='none'">`;
+}
+
+
 
 const BRIEFING_DATA = {
   staff: [
@@ -4023,8 +4063,11 @@ function renderBriefing() {
       <div class="briefing-card">
         <div class="briefing-stamp">Inherited</div>
         <div class="bc-header">
-          <span class="bc-name">${p.name}</span>
-          <span class="bc-role">${p.role}</span>
+          ${getAvatar(p.id, 40)}
+          <div style="flex:1; min-width:0;">
+            <span class="bc-name">${p.name}</span><br>
+            <span class="bc-role">${p.role}</span>
+          </div>
         </div>
         <div class="bc-sub">${p.sub}</div>
         <div class="bc-traits">${traitBadges(p.traits)}</div>
@@ -4039,9 +4082,12 @@ function renderBriefing() {
     return `
       <div class="briefing-card">
         <div class="bc-header">
-          <span class="bc-name">${p.name}</span>
+          ${getAvatar(p.id, 40)}
+          <div style="flex:1; min-width:0;">
+            <span class="bc-name">${p.name}</span><br>
+            <span class="bc-role">${p.role}</span>
+          </div>
         </div>
-        <div class="bc-role" style="margin-bottom:3px">${p.role}</div>
         <div class="bc-sub">${p.sub}</div>
         <div class="bc-traits">${traitBadges(p.traits)}</div>
         <span class="bc-power bc-power-${p.power}">${p.powerLabel}</span>
@@ -4055,7 +4101,11 @@ function renderBriefing() {
     return `
       <div class="briefing-card">
         <div class="bc-header">
-          <span class="bc-name">${f.name}</span>
+          ${getAvatar(f.id, 40)}
+          <div style="flex:1; min-width:0;">
+            <span class="bc-name">${f.name}</span><br>
+            <span class="bc-role">Leader: ${f.sub.split('·')[0].replace('Leader: ','').trim()}</span>
+          </div>
         </div>
         <div class="bc-sub">${f.sub}</div>
         <div class="bc-traits">${traitBadges(f.traits)}</div>
@@ -4647,6 +4697,7 @@ function renderConsultLog() {
     return `
       <div class="consult-entry">
         <div class="ce-header">
+          ${getAvatar(entry.personId, 28)}
           <span class="ce-name">${entry.name}</span>
           <span class="ce-role">${entry.role}</span>
           ${entry.isAI ? '<span class="ai-badge" style="margin-left:auto">AI</span>' : ''}
@@ -5486,8 +5537,13 @@ function renderPeopleTab(tab) {
       const div = document.createElement('div');
       div.className = 'person-card';
       div.innerHTML = `
-        <div class="person-name">${s.name}</div>
-        <div class="person-role">${s.role}</div>
+        <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:6px;">
+          ${getAvatar(s.id)}
+          <div style="flex:1; min-width:0;">
+            <div class="person-name">${s.name}</div>
+            <div class="person-role">${s.role}</div>
+          </div>
+        </div>
         <div class="person-traits">${knownBadges}${hiddenBadge}</div>
         <div class="person-approval">
           <span class="approval-mini-label">Loyalty</span>
@@ -5515,12 +5571,17 @@ function renderPeopleTab(tab) {
       const div = document.createElement('div');
       div.className = 'council-member-card';
       div.innerHTML = `
-        <div style="display:flex; align-items:baseline; gap:4px; margin-bottom:2px; flex-wrap:wrap;">
-          <span class="council-name">${m.name}</span>
-          <span class="council-faction-tag faction-${m.faction}">${m.factionLabel}</span>
-          ${isHostile ? '<span style="font-size:0.58rem; color:var(--urgent);">⚑ HOSTILE</span>' : ''}
+        <div style="display:flex; gap:10px; align-items:flex-start; margin-bottom:4px;">
+          ${getAvatar(m.id)}
+          <div style="flex:1; min-width:0;">
+            <div style="display:flex; align-items:baseline; gap:4px; flex-wrap:wrap;">
+              <span class="council-name">${m.name}</span>
+              <span class="council-faction-tag faction-${m.faction}">${m.factionLabel}</span>
+              ${isHostile ? '<span style="font-size:0.58rem; color:var(--urgent);">⚑ HOSTILE</span>' : ''}
+            </div>
+            <div style="font-size:0.6rem; color:var(--ink-faded);">${m.district}</div>
+          </div>
         </div>
-        <div style="font-size:0.6rem; color:var(--ink-faded); margin-bottom:4px;">${m.district}</div>
         <div class="person-traits">${knownBadges}${hiddenBadge}</div>
         <div class="person-approval">
           <span class="approval-mini-label">Approval</span>
@@ -5547,9 +5608,12 @@ function renderPeopleTab(tab) {
       div.className = 'faction-card';
       div.innerHTML = `
         <div class="faction-name">${f.name}</div>
-        <div class="faction-leader" style="margin-bottom:3px;">
-          Leader: <strong>${f.leader}</strong>
-          <em style="font-size:0.6rem; display:block; margin-top:1px;">${f.leaderPersonality}</em>
+        <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;">
+          ${getAvatar(f.id, 38)}
+          <div>
+            <div class="faction-leader" style="margin-bottom:1px;">Leader: <strong>${f.leader}</strong></div>
+            <em style="font-size:0.6rem; color:var(--ink-faded);">${f.leaderPersonality}</em>
+          </div>
         </div>
         <div class="person-traits">${knownBadges}${hiddenBadge}</div>
         <div class="person-approval" style="margin-top:4px;">
