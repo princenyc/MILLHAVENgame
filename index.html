@@ -1092,6 +1092,214 @@
     font-style: italic;
   }
 
+  /* ── SCHEDULE PHASE ── */
+  .schedule-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .schedule-subheader {
+    font-size: 0.65rem;
+    color: var(--ink-faded);
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  .schedule-slots {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .slot-pip {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--paper-darker);
+    background: var(--paper-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.55rem;
+    color: var(--ink-faded);
+    transition: all 0.2s;
+  }
+
+  .slot-pip.filled {
+    background: var(--ink);
+    color: var(--brass-light);
+    border-color: var(--ink);
+  }
+
+  .action-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .action-card {
+    background: #faf5e8;
+    border: 1px solid var(--paper-darker);
+    padding: 7px 9px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+    user-select: none;
+  }
+
+  .action-card:hover:not(.selected):not(.disabled) {
+    border-color: var(--brass);
+    background: #f5ead8;
+  }
+
+  .action-card.selected {
+    border-color: var(--ink);
+    background: #1a1208;
+    color: var(--paper);
+  }
+
+  .action-card.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .action-card .ac-category {
+    font-size: 0.55rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 3px;
+    font-weight: 700;
+  }
+
+  .action-card.selected .ac-category { color: var(--brass); }
+  .action-card:not(.selected) .ac-category { color: var(--ink-faded); }
+
+  .ac-cat-admin { }
+  .ac-cat-finance { }
+  .ac-cat-community { }
+  .ac-cat-political { }
+  .ac-cat-press { }
+  .ac-cat-field { }
+
+  .action-card .ac-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 3px;
+    line-height: 1.2;
+  }
+
+  .action-card.selected .ac-title { color: var(--paper); }
+  .action-card:not(.selected) .ac-title { color: var(--ink); }
+
+  .action-card .ac-desc {
+    font-size: 0.6rem;
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+
+  .action-card.selected .ac-desc { color: #c8b898; }
+  .action-card:not(.selected) .ac-desc { color: var(--ink-faded); }
+
+  .action-card .ac-benefit {
+    font-size: 0.58rem;
+    font-weight: 700;
+    color: var(--good);
+  }
+
+  .action-card.selected .ac-benefit { color: #86efac; }
+
+  .action-card .ac-skip {
+    font-size: 0.57rem;
+    color: var(--warning);
+    margin-top: 2px;
+    font-style: italic;
+    display: none;
+  }
+
+  .action-card:hover .ac-skip { display: block; }
+  .action-card.selected .ac-skip { display: none !important; }
+
+  .action-card .ac-check {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    font-size: 0.65rem;
+    color: var(--brass-light);
+    display: none;
+  }
+
+  .action-card.selected .ac-check { display: block; }
+
+  .schedule-confirm-btn {
+    width: 100%;
+    background: var(--ink);
+    color: var(--brass-light);
+    border: none;
+    padding: 9px 16px;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-top: 2px solid var(--brass);
+  }
+
+  .schedule-confirm-btn:hover { background: #2e2212; letter-spacing: 0.16em; }
+  .schedule-confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; letter-spacing: 0.12em; }
+
+  .skip-consequences {
+    background: #fff8f0;
+    border: 1px solid #d4850a;
+    border-left: 3px solid var(--warning);
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    font-size: 0.67rem;
+    color: var(--ink-faded);
+  }
+
+  .skip-consequences .sc-title {
+    font-weight: 700;
+    color: var(--warning);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  .skip-item {
+    margin-bottom: 2px;
+    line-height: 1.4;
+  }
+
+  .skip-item::before {
+    content: '— ';
+    color: var(--warning);
+  }
+
+  /* Consult approval flash */
+  @keyframes approvalFlash {
+    0%   { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-12px); }
+  }
+
+  .approval-bump-indicator {
+    position: absolute;
+    right: 8px;
+    top: 0;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: var(--good);
+    pointer-events: none;
+    animation: approvalFlash 1.2s ease forwards;
+  }
+
 </style>
 </head>
 <body>
@@ -1205,7 +1413,7 @@
         </div>
       </div>
       <button class="advance-btn" id="advance-btn" onclick="advanceMonth()">
-        ▶ Advance to Next Month
+        ▶ Begin First Month
       </button>
     </div>
 
@@ -1508,6 +1716,147 @@ const INITIAL_FACTIONS = [
   { id: 'developers', name: 'City Developers Consortium', leader: 'James Callahan', leaderPersonality: 'Ambitious, transactional', approval: 52, traits: ['ambitious', 'pragmatic'] },
   { id: 'press', name: 'Millhaven Herald', leader: 'Tom Vasquez', leaderPersonality: 'Principled, analytical', approval: 50, traits: ['principled', 'analytical'] },
   { id: 'police', name: 'Police & Fire Unions', leader: 'Chief Ray Kovacs', leaderPersonality: 'Loyal (to precedent), grudge', approval: 60, traits: ['loyal', 'grudge'] }
+];
+
+// ─────────────────────────────────────────────────────
+//  MONTHLY SCHEDULE ACTIONS POOL
+//  Each month the player picks ACTION_SLOTS of ACTIONS_SHOWN
+//  Unpicked actions apply their skipCost
+// ─────────────────────────────────────────────────────
+const ACTION_SLOTS   = 4; // how many the mayor can take
+const ACTIONS_SHOWN  = 7; // how many are offered each month
+
+const MONTHLY_ACTIONS_POOL = [
+  {
+    id: 'staff_briefing',
+    title: 'Morning Staff Briefing',
+    category: 'admin',
+    personId: 'cos',
+    desc: 'Weekly check-in with Rachel Okafor. Stay ahead of what\'s developing in the building.',
+    benefit: { label: 'Okafor loyalty +3 · Early warning on incoming issues', personApproval: { cos: 3 } },
+    skipCost: { label: 'Okafor: "Access to you has become irregular."', personApproval: { cos: -5 }, note: 'Rachel Okafor noted your absence at three consecutive briefings.' },
+    weight: 12
+  },
+  {
+    id: 'budget_review',
+    title: 'Budget Review with Slade',
+    category: 'finance',
+    personId: 'budget',
+    desc: 'Deep-dive on the monthly numbers with Victor Slade. Catch problems before they become crises.',
+    benefit: { label: 'Slade loyalty +2 · Reveals treasury trend', personApproval: { budget: 2 }, statBonus: { stat: 'budget_awareness', val: 1 } },
+    skipCost: { label: 'Slade logs it as "fiscal oversight lapse."', personApproval: { budget: -4 }, note: 'Victor Slade\'s memos have been going unread. He has started noting this.' },
+    weight: 11
+  },
+  {
+    id: 'press_availability',
+    title: 'Press Availability',
+    category: 'press',
+    personId: 'comms',
+    desc: 'Thirty minutes with the Herald and local press. Shape the narrative before others do.',
+    benefit: { label: 'Press relations +5 · Approval +1', factionApproval: { press: 5 }, statBonus: { stat: 'approval', val: 1 } },
+    skipCost: { label: 'Vasquez runs a "silent mayor" item in Friday\'s edition.', factionApproval: { press: -8 }, note: 'The Herald ran a short piece on mayoral inaccessibility.' },
+    weight: 10
+  },
+  {
+    id: 'community_visit_d1',
+    title: 'District Site Visit',
+    category: 'field',
+    personId: null,
+    desc: 'Walk a district. Shake hands, hear complaints directly. You can\'t govern what you don\'t see.',
+    benefit: { label: 'Residents support +6 · Approval +2', factionApproval: { residents: 6 }, statBonus: { stat: 'approval', val: 2 } },
+    skipCost: { label: 'Residents note the mayor hasn\'t visited in months.', factionApproval: { residents: -5 }, note: 'Patricia Nkemelu mentioned publicly that the mayor hasn\'t been seen in the neighborhoods.' },
+    weight: 10
+  },
+  {
+    id: 'council_caucus',
+    title: 'Informal Council Caucus',
+    category: 'political',
+    personId: null,
+    desc: 'Off-the-record session with council members before the formal agenda. Politics is made in hallways.',
+    benefit: { label: 'Council relations +4 across board', councilApproval: 4 },
+    skipCost: { label: 'Council members feel frozen out.', councilApproval: -5, note: 'Two council members privately complained about lack of executive access.' },
+    weight: 9
+  },
+  {
+    id: 'union_outreach',
+    title: 'Union Outreach',
+    category: 'political',
+    personId: 'c1',
+    desc: 'Sit down with Torres before issues become grievances. Relationship maintenance is cheaper than crisis management.',
+    benefit: { label: 'Torres approval +7 · Labor support +5', personApproval: { c1: 7 }, factionApproval: { labor: 5 } },
+    skipCost: { label: 'Torres: "The mayor has time for everyone except workers."', personApproval: { c1: -6 }, factionApproval: { labor: -7 }, note: 'Torres made a comment to the Herald about executive distance.' },
+    weight: 8
+  },
+  {
+    id: 'infrastructure_review',
+    title: 'Infrastructure Inspection',
+    category: 'field',
+    personId: 'planning',
+    desc: 'Walk the field with Merritt. What\'s in the reports becomes real when you see it yourself.',
+    benefit: { label: 'Merritt loyalty +5 · Infrastructure stat +2', personApproval: { planning: 5 }, statBonus: { stat: 'infrastructure', val: 2 } },
+    skipCost: { label: 'Merritt logs another deferred inspection in the record.', personApproval: { planning: -4 }, note: 'Merritt submitted another infrastructure inspection request that went unacknowledged.' },
+    weight: 8
+  },
+  {
+    id: 'business_lunch',
+    title: 'Business Alliance Lunch',
+    category: 'political',
+    personId: 'c2',
+    desc: 'Quarterly relationship maintenance with Beaumont and the Business Alliance. These relationships have a balance sheet.',
+    benefit: { label: 'Business support +8 · Beaumont approval +5', personApproval: { c2: 5 }, factionApproval: { business: 8 } },
+    skipCost: { label: 'Alliance interprets absence as a political signal.', factionApproval: { business: -6 }, note: 'The Business Alliance newsletter noted your absence from the quarterly luncheon.' },
+    weight: 7
+  },
+  {
+    id: 'policy_review',
+    title: 'Policy Briefing Session',
+    category: 'admin',
+    personId: 'cos',
+    desc: 'Deep-dive on long-term city planning with Okafor. Decisions made here prevent crises later.',
+    benefit: { label: 'Services +2 · Housing +2', statBonus: { stat: 'services', val: 2 }, statBonus2: { stat: 'housing', val: 2 } },
+    skipCost: { label: 'Long-range policy drifts without executive direction.', statPenalty: { stat: 'services', val: -2 } },
+    weight: 7
+  },
+  {
+    id: 'reformers_meeting',
+    title: 'Meeting with Council Reformers',
+    category: 'political',
+    personId: 'c3',
+    desc: 'Nair and the reform caucus have proposals worth hearing — even when they\'re inconvenient.',
+    benefit: { label: 'Nair approval +6 · Press +3', personApproval: { c3: 6 }, factionApproval: { press: 3 } },
+    skipCost: { label: 'Reform caucus drifts toward public opposition.', personApproval: { c3: -5 }, note: 'Priya Nair gave an interview questioning executive engagement on reform priorities.' },
+    weight: 6
+  },
+  {
+    id: 'public_safety_briefing',
+    title: 'Public Safety Briefing',
+    category: 'admin',
+    personId: null,
+    desc: 'Monthly briefing from Kovacs on crime trends, staffing, and field conditions.',
+    benefit: { label: 'Police relations +6 · Public safety +1', factionApproval: { police: 6 }, statBonus: { stat: 'crime', val: 1 } },
+    skipCost: { label: 'Kovacs: "The mayor has not attended a safety briefing in weeks."', factionApproval: { police: -8 }, note: 'Chief Kovacs publicly noted the mayor\'s absence from safety briefings.' },
+    weight: 8
+  },
+  {
+    id: 'town_hall',
+    title: 'Public Town Hall',
+    category: 'community',
+    personId: null,
+    desc: 'Open forum with residents. Uncomfortable but irreplaceable. They talk; you listen.',
+    benefit: { label: 'Approval +4 · Residents +8 · Press +4', statBonus: { stat: 'approval', val: 4 }, factionApproval: { residents: 8, press: 4 } },
+    skipCost: { label: 'Community groups post "Where is the Mayor?" flyers downtown.', factionApproval: { residents: -7 }, statPenalty: { stat: 'approval', val: -2 }, note: 'Multiple community groups issued a joint statement on mayoral accessibility.' },
+    weight: 7
+  },
+  {
+    id: 'developer_sit_down',
+    title: 'Developer Roundtable',
+    category: 'political',
+    personId: 'c4',
+    desc: 'Callahan\'s coalition wants a read on zoning and development priorities. Useful — and requires careful navigation.',
+    benefit: { label: 'Developer support +8 · Development +2', factionApproval: { developers: 8 }, statBonus: { stat: 'development', val: 2 } },
+    skipCost: { label: 'Callahan interprets absence as opposition.', factionApproval: { developers: -6 }, note: 'Jim Callahan was conspicuously cold at the last council session.' },
+    weight: 6
+  }
 ];
 
 // ─────────────────────────────────────────────────────
@@ -2229,6 +2578,14 @@ function initState() {
     revealedTraits: {},    // personId -> bool, true when hidden trait revealed
     consultLog: [],        // [{name, role, advice, isReveal, revealData}] — shown in situation room
 
+    // ── SCHEDULE SYSTEM ──
+    schedulePhase: false,        // true when player is picking actions
+    scheduleDeck: [],            // available actions this month
+    selectedActions: [],         // action ids picked by player
+    lastAdviceGiven: {},         // personId -> {eventId, adviceText}
+    adviceFollowed: {},          // personId -> bool (did player follow their rec?)
+    skipLog: [],                 // messages from last month's skipped actions
+
     gameStatus: 'active'
   };
 }
@@ -2272,14 +2629,15 @@ function getStatClass(val) {
 // Get the pre-written advice for a person on the current event
 function getConsultationAdvice(personId, event) {
   const table = CONSULTATION_ADVICE[personId];
-  if (!table) return `"I don't have a strong view on this one. You'll have to read the room."`;
+  const baseAdvice = table
+    ? (table[event.id] || table[`default_${event.type}`] || table[`default_${event.tag}`] || table['default'])
+    : null;
 
-  // Try exact event match first, then fallback chain
-  return table[event.id]
-      || table[`default_${event.type}`]
-      || table[`default_${event.tag}`]
-      || table['default']
-      || `"I don't have a strong view on this one."`;
+  const advice = baseAdvice || `"I don't have a strong view on this one. You'll have to read the room."`;
+
+  // Prepend contextual preamble based on current game state
+  const preamble = getContextPreamble(personId);
+  return preamble ? `${preamble}<br>${advice}` : advice;
 }
 
 // Main consultation handler — called from person card CONSULT buttons
@@ -2313,6 +2671,42 @@ function consultPerson(personId, personType) {
     state.consultedThisEvent[personId] = true;
     state.consultCounts[personId] = (state.consultCounts[personId] || 0) + 1;
   }
+
+  // ── CONSULT APPROVAL BUMP based on personality ──
+  if (!alreadyThisEvent && person) {
+    const traits = person.traits || [];
+    let bump = 0;
+    if (traits.includes('loyal'))      bump = 5;   // loyal people value being asked
+    else if (traits.includes('emotional')) bump = 4; // emotional people respond to being heard
+    else if (traits.includes('forgiving'))  bump = 3;
+    else if (traits.includes('pragmatic'))  bump = 2; // pragmatists are politely pleased
+    else if (traits.includes('ambitious'))  bump = 1; // they care about outcomes, not the ask
+    else if (traits.includes('principled')) bump = 0; // principled: bump only if advice is followed (handled in makeChoice)
+    else if (traits.includes('grudge'))    bump = 1;
+
+    if (bump > 0) {
+      person.approval = clamp(person.approval + bump, 10, 95);
+      // Show floating indicator
+      setTimeout(() => {
+        const cards = document.querySelectorAll('.person-card, .council-member-card, .faction-card');
+        cards.forEach(card => {
+          if (card.innerHTML.includes(person.name)) {
+            const ind = document.createElement('span');
+            ind.className = 'approval-bump-indicator';
+            ind.textContent = `+${bump} consulting`;
+            ind.style.position = 'relative';
+            card.style.position = 'relative';
+            card.appendChild(ind);
+            setTimeout(() => ind.remove(), 1300);
+          }
+        });
+      }, 200);
+    }
+  }
+
+  // Track advice given for principled-follow mechanic
+  const adviceText = getConsultationAdvice(personId, event);
+  state.lastAdviceGiven[personId] = { eventId: event.id, adviceText };
 
   // Webb informant mechanic: consulting Webb has a chance to leak to Herald
   if (personId === 'c6' && !alreadyThisEvent) {
@@ -2612,7 +3006,7 @@ function selectEvent() {
 // ═══════════════════════════════════════════════════
 
 function advanceMonth() {
-  if (state.awaitingDecision) return;
+  if (state.awaitingDecision || state.schedulePhase) return;
   if (state.gameStatus !== 'active') return;
 
   state.turn++;
@@ -2622,6 +3016,7 @@ function advanceMonth() {
   // Reset per-event consultation tracking
   state.consultedThisEvent = {};
   state.consultLog = [];
+  state.selectedActions = [];
 
   processMonthlyTick();
 
@@ -2630,14 +3025,10 @@ function advanceMonth() {
     endGame(false, 'The city has gone bankrupt. The state has assumed control of Millhaven\'s finances. Your term ends in disgrace.');
     return;
   }
-
-  // Check recall threshold
   if (state.city.stats.approval < 22) {
     endGame(false, 'Your approval rating collapsed below the recall threshold. The city council has voted to hold an emergency recall election. You lose.');
     return;
   }
-
-  // Check term end (48 months)
   if (state.turn > state.maxTurns) {
     const a = state.city.stats.approval;
     if (a >= 55) endGame(true, `A ${a}% approval rating. You win re-election in a decisive victory. Millhaven remembers your name.`);
@@ -2646,15 +3037,245 @@ function advanceMonth() {
     return;
   }
 
-  // Select and display event
+  updateUI();
+  enterSchedulePhase();
+}
+
+// ── SCHEDULE PHASE ──
+
+function buildScheduleDeck() {
+  // Weighted random selection of ACTIONS_SHOWN from pool
+  let pool = [...MONTHLY_ACTIONS_POOL];
+  let weighted = [];
+  pool.forEach(a => { for (let i = 0; i < (a.weight || 8); i++) weighted.push(a); });
+
+  let selected = [];
+  let used = new Set();
+  let attempts = 0;
+  while (selected.length < ACTIONS_SHOWN && attempts < 200) {
+    const pick = weighted[Math.floor(Math.random() * weighted.length)];
+    if (!used.has(pick.id)) { selected.push(pick); used.add(pick.id); }
+    attempts++;
+  }
+  return selected;
+}
+
+function enterSchedulePhase() {
+  state.schedulePhase = true;
+  state.scheduleDeck = buildScheduleDeck();
+  state.selectedActions = [];
+
+  renderSchedule();
+  document.getElementById('advance-btn').disabled = true;
+  document.getElementById('event-type-stamp').textContent = 'SCHEDULE';
+  document.getElementById('event-type-stamp').style.color = 'var(--blue-stat)';
+  document.getElementById('event-type-stamp').style.borderColor = 'var(--blue-stat)';
+}
+
+function toggleAction(actionId) {
+  if (!state.schedulePhase) return;
+  const idx = state.selectedActions.indexOf(actionId);
+  if (idx > -1) {
+    state.selectedActions.splice(idx, 1);
+  } else {
+    if (state.selectedActions.length >= ACTION_SLOTS) return;
+    state.selectedActions.push(actionId);
+  }
+  renderSchedule();
+}
+
+function confirmSchedule() {
+  if (!state.schedulePhase) return;
+  if (state.selectedActions.length === 0) return;
+
+  state.schedulePhase = false;
+  state.skipLog = [];
+
+  const s = state.city.stats;
+
+  // Apply selected action benefits
+  state.selectedActions.forEach(actionId => {
+    const action = MONTHLY_ACTIONS_POOL.find(a => a.id === actionId);
+    if (!action) return;
+    const b = action.benefit;
+
+    if (b.personApproval) {
+      Object.entries(b.personApproval).forEach(([pid, val]) => {
+        const staffMember = state.staff.find(st => st.id === pid);
+        const councilMember = state.council.find(c => c.id === pid);
+        if (staffMember) staffMember.approval = clamp(staffMember.approval + val, 10, 95);
+        if (councilMember) councilMember.approval = clamp(councilMember.approval + val, 10, 95);
+      });
+    }
+    if (b.factionApproval) {
+      Object.entries(b.factionApproval).forEach(([fid, val]) => {
+        const faction = state.factions.find(f => f.id === fid);
+        if (faction) faction.approval = clamp(faction.approval + val, 5, 95);
+      });
+    }
+    if (b.councilApproval) {
+      state.council.forEach(c => { c.approval = clamp(c.approval + b.councilApproval, 10, 95); });
+    }
+    if (b.statBonus) {
+      if (b.statBonus.stat === 'approval') s.approval = clamp(s.approval + b.statBonus.val, 5, 95);
+      else if (s[b.statBonus.stat] !== undefined) s[b.statBonus.stat] = clamp(s[b.statBonus.stat] + b.statBonus.val, 0, 100);
+    }
+    if (b.statBonus2) {
+      if (s[b.statBonus2.stat] !== undefined) s[b.statBonus2.stat] = clamp(s[b.statBonus2.stat] + b.statBonus2.val, 0, 100);
+    }
+  });
+
+  // Apply skip costs for unpicked actions
+  state.scheduleDeck.forEach(action => {
+    if (state.selectedActions.includes(action.id)) return;
+    const sc = action.skipCost;
+    if (!sc) return;
+
+    if (sc.personApproval) {
+      Object.entries(sc.personApproval).forEach(([pid, val]) => {
+        const staffMember = state.staff.find(st => st.id === pid);
+        const councilMember = state.council.find(c => c.id === pid);
+        if (staffMember) staffMember.approval = clamp(staffMember.approval + val, 10, 95);
+        if (councilMember) councilMember.approval = clamp(councilMember.approval + val, 10, 95);
+      });
+    }
+    if (sc.factionApproval) {
+      Object.entries(sc.factionApproval).forEach(([fid, val]) => {
+        const faction = state.factions.find(f => f.id === fid);
+        if (faction) faction.approval = clamp(faction.approval + val, 5, 95);
+      });
+    }
+    if (sc.councilApproval) {
+      state.council.forEach(c => { c.approval = clamp(c.approval + sc.councilApproval, 10, 95); });
+    }
+    if (sc.statPenalty) {
+      if (sc.statPenalty.stat === 'approval') s.approval = clamp(s.approval + sc.statPenalty.val, 5, 95);
+      else if (s[sc.statPenalty.stat] !== undefined) s[sc.statPenalty.stat] = clamp(s[sc.statPenalty.stat] + sc.statPenalty.val, 0, 100);
+    }
+    if (sc.note) state.skipLog.push(sc.note);
+  });
+
+  recalcApproval();
+
+  // Now proceed to event
   const event = selectEvent();
   state.currentEvent = event;
   state.awaitingDecision = true;
   state.decisionMade = false;
 
-  updateUI();
   renderEvent(event);
   addTicker(generateHeadline());
+  updateUI();
+}
+
+function renderSchedule() {
+  const body = document.getElementById('situation-body');
+  document.getElementById('no-event-msg').style.display = 'none';
+
+  const filled = state.selectedActions.length;
+  const pips = Array.from({length: ACTION_SLOTS}, (_, i) =>
+    `<div class="slot-pip ${i < filled ? 'filled' : ''}">${i < filled ? '✓' : '○'}</div>`
+  ).join('');
+
+  const actionsHTML = state.scheduleDeck.map(action => {
+    const isSelected = state.selectedActions.includes(action.id);
+    const isDisabled = !isSelected && state.selectedActions.length >= ACTION_SLOTS;
+    const catColors = { admin:'#1e3a8a', finance:'#14532d', press:'#6b21a8', field:'#92400e', political:'#9a3412', community:'#155e75' };
+    const catColor = catColors[action.category] || '#333';
+
+    return `
+      <div class="action-card ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
+           onclick="toggleAction('${action.id}')">
+        <span class="ac-check">✓</span>
+        <div class="ac-category" style="${isSelected ? '' : `color:${catColor}`}">${action.category.toUpperCase()}</div>
+        <div class="ac-title">${action.title}</div>
+        <div class="ac-desc">${action.desc}</div>
+        <div class="ac-benefit">↑ ${action.benefit.label}</div>
+        <div class="ac-skip">Skip cost: ${action.skipCost.label}</div>
+      </div>
+    `;
+  }).join('');
+
+  // Skip log from last month
+  let skipHTML = '';
+  if (state.skipLog && state.skipLog.length > 0) {
+    const items = state.skipLog.map(s => `<div class="skip-item">${s}</div>`).join('');
+    skipHTML = `
+      <div class="skip-consequences">
+        <div class="sc-title">⚑ Consequences from last month's skipped obligations</div>
+        ${items}
+      </div>
+    `;
+  }
+
+  const confirmDisabled = state.selectedActions.length === 0 ? 'disabled' : '';
+
+  // Build card
+  let existing = document.getElementById('schedule-card');
+  if (existing) existing.remove();
+
+  const card = document.createElement('div');
+  card.id = 'schedule-card';
+  card.innerHTML = `
+    ${skipHTML}
+    <div class="event-card">
+      <div class="schedule-header">${MONTHS[state.month]}, Year ${state.year} — Your Schedule</div>
+      <div class="schedule-subheader">
+        Choose <strong>${ACTION_SLOTS} priorities</strong> from ${state.scheduleDeck.length} available obligations.
+        Everything you skip has a cost. Not everything that costs something is worth avoiding.
+      </div>
+      <div class="schedule-slots">${pips}</div>
+      <div class="action-grid">${actionsHTML}</div>
+      <button class="schedule-confirm-btn" onclick="confirmSchedule()" ${confirmDisabled}>
+        ▶ Lock in Schedule — Proceed to Month
+      </button>
+    </div>
+  `;
+
+  while (body.children.length > 1) body.removeChild(body.lastChild);
+  body.appendChild(card);
+}
+
+// ── CONTEXTUAL ADVICE (state-aware) ──
+
+function getContextPreamble(personId) {
+  const s = state.city.stats;
+  const b = state.city.budget;
+  const balance = b.balance;
+  const approval = s.approval;
+  const consultCount = state.consultCounts[personId] || 0;
+
+  // Find person
+  const staffMember = state.staff.find(st => st.id === personId);
+  const councilMember = state.council.find(c => c.id === personId);
+  const person = staffMember || councilMember;
+  const traits = person ? person.traits : [];
+
+  let preamble = '';
+
+  // State-reactive openers (pick the most urgent context)
+  if (balance < 500000 && ['budget','cos','c2'].includes(personId)) {
+    preamble = `[The treasury is running thin — ${fmtMoney(balance)} left.] `;
+  } else if (approval < 35 && traits.includes('loyal')) {
+    preamble = `[Approval at ${approval}%. The loyalty here is visible in the concern.] `;
+  } else if (approval < 35 && traits.includes('ambitious')) {
+    preamble = `[Approval at ${approval}%. There's a calculation happening behind the eyes.] `;
+  } else if (s.crime < 40) {
+    preamble = `[The crime numbers are bad. Everyone in this building knows it.] `;
+  } else if (s.infrastructure < 40) {
+    preamble = `[The infrastructure reports are on every desk. The mood is tense.] `;
+  }
+
+  // Repeat consultation tone shift
+  if (consultCount >= 4 && traits.includes('loyal')) {
+    preamble += `[There's a note of familiarity now — this is the fourth time you've asked.] `;
+  } else if (consultCount >= 3 && traits.includes('ambitious')) {
+    preamble += `[A slight edge — they're keeping score of who gets asked what.] `;
+  } else if (consultCount >= 4 && traits.includes('principled')) {
+    preamble += `[Same question, different month. They're consistent — that's the point.] `;
+  }
+
+  return preamble;
 }
 
 function makeChoice(choiceIndex) {
@@ -2666,9 +3287,24 @@ function makeChoice(choiceIndex) {
   state.decisionMade = true;
   state.awaitingDecision = false;
 
+  // Track whether advice was followed for principled characters
+  Object.entries(state.lastAdviceGiven).forEach(([pid, advData]) => {
+    if (advData.eventId !== event.id) return;
+    const person = state.staff.find(s => s.id === pid) || state.council.find(c => c.id === pid);
+    if (!person) return;
+    // Principled characters get approval bump if their recommendation was followed
+    if (person.traits.includes('principled')) {
+      const followed = choiceIndex === advData.recommendedChoice;
+      state.adviceFollowed[pid] = followed;
+      if (followed) {
+        person.approval = clamp(person.approval + 6, 10, 95);
+        addTicker(`${person.name} approves of your decision on ${event.title}.`);
+      }
+    }
+  });
+
   applyChoice(choice);
 
-  // Council vote if required
   let voteResult = null;
   if (choice.voteRequired) {
     voteResult = simulateCouncilVote(choice.voteIssue || event.title, choice.councilKey || 'neutral');
@@ -2684,10 +3320,10 @@ function generateHeadline() {
   const s = state.city.stats;
   const headlines = [
     `MILLHAVEN — Approval at ${s.approval}% as mayor navigates ${MONTHS[state.month]} pressures`,
-    `HERALD — City infrastructure rated ${s.infrastructure}% by state DOT`,
+    `HERALD — City infrastructure rated ${Math.round(s.infrastructure)} by state DOT survey`,
     `MILLHAVEN HERALD — Unemployment holds at ${s.unemployment.toFixed(1)}% in latest report`,
-    `HERALD — Public safety index ${s.crime > 60 ? 'improving' : 'a concern'} for residents`,
-    `CITY DESK — Housing affordability ranks ${s.housing}% in regional survey`,
+    `HERALD — Public safety index ${s.crime > 60 ? 'improving' : 'drawing concern'} citywide`,
+    `CITY DESK — Housing affordability index at ${Math.round(s.housing)} in regional survey`,
     `MILLHAVEN — Q${Math.ceil(state.turn/3)} budget balance: ${fmtMoneyFull(state.city.budget.balance)}`,
   ];
   return headlines[Math.floor(Math.random() * headlines.length)];
@@ -2895,7 +3531,14 @@ function renderOutcome(event, choice, voteResult) {
   while (body.children.length > 1) body.removeChild(body.lastChild);
   body.appendChild(outcomeCard);
 
-  document.getElementById('advance-btn').disabled = false;
+  const advBtn = document.getElementById('advance-btn');
+  advBtn.disabled = false;
+  advBtn.textContent = '▶ Advance to Next Month';
+
+  // Reset stamp
+  document.getElementById('event-type-stamp').textContent = 'Resolved';
+  document.getElementById('event-type-stamp').style.color = 'var(--neutral)';
+  document.getElementById('event-type-stamp').style.borderColor = 'var(--neutral)';
 }
 
 // ── PEOPLE TAB ──
@@ -3053,9 +3696,12 @@ function restartGame() {
 
   // Reset situation body
   const body = document.getElementById('situation-body');
-  body.innerHTML = '<div class="no-event" id="no-event-msg"><div class="desk-icon">📋</div><p>Your desk is clear.</p><p style="font-size:0.7rem; margin-top:4px;">Advance the month to see what arrives.</p></div>';
+  body.innerHTML = '<div class="no-event" id="no-event-msg"><div class="desk-icon">📋</div><p>Your desk is clear.</p><p style="font-size:0.7rem; margin-top:4px;">Advance to see your first month\'s schedule.</p></div>';
   document.getElementById('event-type-stamp').textContent = 'Incoming';
+  document.getElementById('event-type-stamp').style.color = '';
+  document.getElementById('event-type-stamp').style.borderColor = '';
   document.getElementById('advance-btn').disabled = false;
+  document.getElementById('advance-btn').textContent = '▶ Begin First Month';
 
   updateUI();
   renderTicker();
