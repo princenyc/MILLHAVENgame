@@ -1725,6 +1725,88 @@
     margin: 16px 0;
   }
 
+  /* ── DOSSIER / FIELD NOTES ── */
+  .dossier-toggle {
+    width: 100%;
+    background: none;
+    border: none;
+    border-top: 1px solid var(--paper-darker);
+    padding: 5px 0 0;
+    margin-top: 7px;
+    font-size: 0.6rem;
+    color: var(--ink-faded);
+    text-align: left;
+    cursor: pointer;
+    font-family: 'Courier Prime', monospace;
+    letter-spacing: 0.06em;
+    transition: color 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .dossier-toggle:hover { color: var(--ink); }
+
+  .dossier-toggle .dt-arrow {
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+
+  .dossier-toggle.open .dt-arrow { transform: rotate(90deg); }
+
+  .dossier-toggle .dt-count {
+    margin-left: auto;
+    background: var(--paper-darker);
+    padding: 0 4px;
+    border-radius: 2px;
+    font-size: 0.55rem;
+  }
+
+  .dossier-entries {
+    margin-top: 6px;
+    border-left: 2px solid var(--paper-darker);
+    padding-left: 8px;
+    display: none;
+  }
+
+  .dossier-entries.open { display: block; }
+
+  .dossier-entry {
+    font-size: 0.62rem;
+    color: var(--ink-faded);
+    line-height: 1.5;
+    padding: 4px 0;
+    border-bottom: 1px dashed var(--paper-darker);
+    display: flex;
+    gap: 6px;
+    align-items: baseline;
+  }
+
+  .dossier-entry:last-child { border-bottom: none; }
+
+  .de-date {
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.55rem;
+    color: var(--paper-darker);
+    white-space: nowrap;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .de-text { color: var(--ink-faded); }
+
+  .de-text.pos { color: var(--good); }
+  .de-text.neg { color: var(--urgent); }
+  .de-text.neutral { color: var(--ink-faded); }
+
+  .dossier-empty {
+    font-size: 0.6rem;
+    color: var(--paper-darker);
+    font-style: italic;
+    padding: 4px 0;
+  }
+
 </style>
 </head>
 <body>
@@ -2193,6 +2275,77 @@ let creationState = {
   style: null,
   cabinet: { deputy: null, legal: null, econ: null }
 };
+
+// Tracks which dossier panels are open in the UI
+const openDossiers = new Set();
+
+// ─────────────────────────────────────────────────────
+//  DOSSIER / RELATIONSHIP HISTORY SYSTEM
+// ─────────────────────────────────────────────────────
+
+const MAX_HISTORY = 6;
+
+function currentDateLabel() {
+  return `${MONTHS[state.month].slice(0,3).toUpperCase()} Y${state.year}`;
+}
+
+function addToHistory(personId, text, tone) {
+  // tone: 'pos' | 'neg' | 'neutral'
+  const person = findPerson(personId);
+  if (!person) return;
+  if (!person.relationHistory) person.relationHistory = [];
+  person.relationHistory.unshift({
+    date: currentDateLabel(),
+    text,
+    tone: tone || 'neutral'
+  });
+  if (person.relationHistory.length > MAX_HISTORY) {
+    person.relationHistory = person.relationHistory.slice(0, MAX_HISTORY);
+  }
+}
+
+function findPerson(id) {
+  return state.staff.find(s => s.id === id)
+      || state.council.find(c => c.id === id)
+      || state.factions.find(f => f.id === id)
+      || null;
+}
+
+function toggleDossier(personId) {
+  if (openDossiers.has(personId)) {
+    openDossiers.delete(personId);
+  } else {
+    openDossiers.add(personId);
+  }
+  renderPeopleTab(currentTab);
+}
+
+function buildDossierBlock(personId) {
+  const person = findPerson(personId);
+  const history = person && person.relationHistory ? person.relationHistory : [];
+  const isOpen = openDossiers.has(personId);
+  const count = history.length;
+
+  const entriesHTML = count === 0
+    ? `<div class="dossier-empty">No notable interactions on record.</div>`
+    : history.map(e => `
+        <div class="dossier-entry">
+          <span class="de-date">${e.date}</span>
+          <span class="de-text ${e.tone || 'neutral'}">${e.text}</span>
+        </div>
+      `).join('');
+
+  return `
+    <button class="dossier-toggle ${isOpen ? 'open' : ''}" onclick="toggleDossier('${personId}')">
+      <span class="dt-arrow">▶</span>
+      Field Notes
+      <span class="dt-count">${count}</span>
+    </button>
+    <div class="dossier-entries ${isOpen ? 'open' : ''}">
+      ${entriesHTML}
+    </div>
+  `;
+}
 
 const TRAIT_STYLES = {
   loyal: 'trait-loyal', ambitious: 'trait-ambitious',
@@ -3797,6 +3950,9 @@ function consultPerson(personId, personType) {
       state.revealedTraits[personId] = true;
       const meta = HIDDEN_TRAIT_META[hiddenData.trait];
 
+      // Record trait reveal in dossier
+      addToHistory(personId, `Hidden trait revealed: ${meta.label}. ${hiddenData.desc.split('.')[0]}.`, 'neutral');
+
       // Add reveal entry after the advice entry
       state.consultLog.unshift({
         name: person.name,
@@ -3821,6 +3977,14 @@ function consultPerson(personId, personType) {
   }
 
   // Normal log entry
+  // Record first consult in dossier
+  if (!alreadyThisEvent) {
+    const consultCount = state.consultCounts[personId];
+    if (consultCount === 1) {
+      addToHistory(personId, `First consultation — briefed on ${event.title}.`, 'neutral');
+    }
+  }
+
   state.consultLog.unshift(entry);
   if (state.consultLog.length > 5) state.consultLog = state.consultLog.slice(0, 5);
 
@@ -4211,7 +4375,21 @@ function confirmSchedule() {
       if (sc.statPenalty.stat === 'approval') s.approval = clamp(s.approval + sc.statPenalty.val, 5, 95);
       else if (s[sc.statPenalty.stat] !== undefined) s[sc.statPenalty.stat] = clamp(s[sc.statPenalty.stat] + sc.statPenalty.val, 0, 100);
     }
-    if (sc.note) state.skipLog.push(sc.note);
+    if (sc.note) {
+      state.skipLog.push(sc.note);
+      // Also log in the relevant person/faction dossier
+      if (action.personId) {
+        addToHistory(action.personId, `You skipped: ${action.title}. ${sc.note}`, 'neg');
+      }
+      // Faction-level skip logging
+      if (sc.factionApproval) {
+        Object.entries(sc.factionApproval).forEach(([fid, val]) => {
+          if (val <= -5) {
+            addToHistory(fid, `Mayor skipped ${action.title}. Relations cooled.`, 'neg');
+          }
+        });
+      }
+    }
   });
 
   recalcApproval();
@@ -4346,28 +4524,56 @@ function makeChoice(choiceIndex) {
   state.decisionMade = true;
   state.awaitingDecision = false;
 
-  // Track whether advice was followed for principled characters
+  // Track whether advice was followed for principled characters + record in dossier
   Object.entries(state.lastAdviceGiven).forEach(([pid, advData]) => {
     if (advData.eventId !== event.id) return;
     const person = state.staff.find(s => s.id === pid) || state.council.find(c => c.id === pid);
     if (!person) return;
-    // Principled characters get approval bump if their recommendation was followed
     if (person.traits.includes('principled')) {
       const followed = choiceIndex === advData.recommendedChoice;
       state.adviceFollowed[pid] = followed;
       if (followed) {
         person.approval = clamp(person.approval + 6, 10, 95);
         addTicker(`${person.name} approves of your decision on ${event.title}.`);
+        addToHistory(pid, `You followed their recommendation on ${event.title}.`, 'pos');
+      } else {
+        addToHistory(pid, `You ignored their recommendation on ${event.title}. Noted.`, 'neg');
       }
+    } else {
+      // Non-principled: just note they were consulted on this decision
+      addToHistory(pid, `Consulted on ${event.title}. Decision: "${choice.label.substring(0,35)}${choice.label.length>35?'…':''}"`, 'neutral');
     }
   });
 
+  // Record faction impacts in their dossiers
+  if (choice.factionEffects) {
+    Object.entries(choice.factionEffects).forEach(([fid, delta]) => {
+      if (Math.abs(delta) >= 8) {
+        const faction = state.factions.find(f => f.id === fid);
+        const fName = faction ? faction.name : fid;
+        const sign = delta > 0 ? '+' : '';
+        const tone = delta > 0 ? 'pos' : 'neg';
+        addToHistory(fid, `"${choice.label.substring(0,40)}${choice.label.length>40?'…':''}" on ${event.title}. Support ${sign}${delta}.`, tone);
+      }
+    });
+  }
+
+  // Record council vote consequences in member dossiers (after vote)
   applyChoice(choice);
 
   let voteResult = null;
   if (choice.voteRequired) {
     voteResult = simulateCouncilVote(choice.voteIssue || event.title, choice.councilKey || 'neutral');
     pendingVote = { issue: choice.voteIssue || event.title, result: voteResult };
+
+    // Log vote in each council member's dossier
+    voteResult.votes.forEach(v => {
+      const tone = v.vote === 'yes' ? 'pos' : v.vote === 'no' ? 'neg' : 'neutral';
+      const voteText = v.vote === 'yes' ? `Voted with you on "${voteResult.issue || event.title}".`
+                     : v.vote === 'no'  ? `Voted against you on "${voteResult.issue || event.title}".`
+                     :                    `Abstained on "${voteResult.issue || event.title}".`;
+      addToHistory(v.member.id, voteText, tone);
+    });
   }
 
   renderOutcome(event, choice, voteResult);
@@ -4662,6 +4868,7 @@ function renderPeopleTab(tab) {
         </div>
         <div style="font-size:0.61rem; color:var(--ink-faded); margin-top:4px; font-style:italic;">${s.bio}</div>
         ${consultBtn}
+        ${buildDossierBlock(s.id)}
       `;
       body.appendChild(div);
     });
@@ -4693,6 +4900,7 @@ function renderPeopleTab(tab) {
           <span class="approval-mini-val" style="color:${appColor}">${Math.round(m.approval)}%</span>
         </div>
         ${consultBtn}
+        ${buildDossierBlock(m.id)}
       `;
       body.appendChild(div);
     });
@@ -4722,6 +4930,7 @@ function renderPeopleTab(tab) {
           <span class="approval-mini-val" style="color:${appColor}">${Math.round(f.approval)}%</span>
         </div>
         ${consultBtn}
+        ${buildDossierBlock(f.id)}
       `;
       body.appendChild(div);
     });
