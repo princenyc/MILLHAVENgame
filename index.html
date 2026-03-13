@@ -1300,9 +1300,526 @@
     animation: approvalFlash 1.2s ease forwards;
   }
 
+  /* ── CHARACTER CREATION OVERLAY ── */
+  #creation-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--desk);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-image:
+      radial-gradient(ellipse at 30% 20%, rgba(50,30,10,0.4) 0%, transparent 60%),
+      radial-gradient(ellipse at 70% 80%, rgba(30,20,5,0.3) 0%, transparent 50%);
+  }
+
+  #creation-overlay.hidden { display: none; }
+
+  .creation-document {
+    background: var(--paper);
+    width: 860px;
+    max-width: 96vw;
+    max-height: 92vh;
+    overflow-y: auto;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+    border: 1px solid var(--paper-darker);
+    position: relative;
+  }
+
+  .creation-document::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--folder-dark), var(--folder-tan), var(--folder-dark));
+  }
+
+  .creation-letterhead {
+    background: linear-gradient(180deg, var(--paper-dark) 0%, var(--paper) 100%);
+    border-bottom: 2px solid var(--paper-darker);
+    padding: 18px 28px 14px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .creation-seal {
+    width: 52px;
+    height: 52px;
+    border: 2px solid var(--brass);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    color: var(--brass);
+    background: radial-gradient(circle, #2a1e08, #1a1208);
+    flex-shrink: 0;
+  }
+
+  .creation-letterhead-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    color: var(--ink);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  .creation-letterhead-text .sub {
+    font-size: 0.62rem;
+    color: var(--ink-faded);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  .creation-body {
+    padding: 22px 28px;
+  }
+
+  .creation-step-indicator {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 18px;
+    align-items: center;
+  }
+
+  .step-pip {
+    width: 24px;
+    height: 24px;
+    border: 1px solid var(--paper-darker);
+    background: var(--paper-dark);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    color: var(--ink-faded);
+    font-family: 'Courier Prime', monospace;
+    transition: all 0.2s;
+  }
+
+  .step-pip.active {
+    background: var(--ink);
+    color: var(--brass-light);
+    border-color: var(--ink);
+    font-weight: 700;
+  }
+
+  .step-pip.done {
+    background: #166534;
+    color: white;
+    border-color: #166534;
+  }
+
+  .step-connector {
+    flex: 1;
+    height: 1px;
+    background: var(--paper-darker);
+    max-width: 40px;
+  }
+
+  .creation-step-label {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+
+  .creation-step-sub {
+    font-size: 0.68rem;
+    color: var(--ink-faded);
+    margin-bottom: 16px;
+    line-height: 1.5;
+    max-width: 600px;
+  }
+
+  /* Option cards - used for background and style */
+  .option-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .option-card {
+    background: #faf5e8;
+    border: 1px solid var(--paper-darker);
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .option-card:hover:not(.selected) {
+    border-color: var(--brass);
+    background: #f5ead8;
+  }
+
+  .option-card.selected {
+    border: 2px solid var(--ink);
+    background: var(--ink);
+  }
+
+  .option-card .oc-check {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    font-size: 0.7rem;
+    color: var(--brass-light);
+    display: none;
+  }
+
+  .option-card.selected .oc-check { display: block; }
+
+  .option-card .oc-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+    padding-right: 16px;
+  }
+
+  .option-card:not(.selected) .oc-title { color: var(--ink); }
+  .option-card.selected .oc-title { color: var(--brass-light); }
+
+  .option-card .oc-desc {
+    font-size: 0.67rem;
+    line-height: 1.55;
+    margin-bottom: 7px;
+  }
+
+  .option-card:not(.selected) .oc-desc { color: var(--ink-faded); }
+  .option-card.selected .oc-desc { color: #c8b898; }
+
+  .option-card .oc-mechanics {
+    font-size: 0.6rem;
+    font-weight: 700;
+    border-top: 1px solid;
+    padding-top: 5px;
+    margin-top: 5px;
+    line-height: 1.6;
+  }
+
+  .option-card:not(.selected) .oc-mechanics {
+    border-color: var(--paper-darker);
+    color: var(--ink-faded);
+  }
+
+  .option-card.selected .oc-mechanics {
+    border-color: #4a3f2e;
+    color: var(--brass);
+  }
+
+  .oc-pro { color: var(--good) !important; }
+  .oc-con { color: var(--urgent) !important; }
+  .option-card.selected .oc-pro { color: #86efac !important; }
+  .option-card.selected .oc-con { color: #fca5a5 !important; }
+
+  /* Cabinet section */
+  .cabinet-role-section {
+    margin-bottom: 18px;
+  }
+
+  .cabinet-role-header {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--ink);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .cabinet-role-header .crh-status {
+    font-size: 0.58rem;
+    padding: 1px 6px;
+    border-radius: 2px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .crh-filled { background: #dcfce7; color: #166534; }
+  .crh-empty  { background: #fee2e2; color: #991b1b; }
+
+  .cabinet-candidates {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+  }
+
+  .cabinet-card {
+    background: #faf5e8;
+    border: 1px solid var(--paper-darker);
+    padding: 9px 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    position: relative;
+  }
+
+  .cabinet-card:hover:not(.selected):not(.disabled) {
+    border-color: var(--brass);
+    background: #f5ead8;
+  }
+
+  .cabinet-card.selected {
+    border: 2px solid var(--ink);
+    background: var(--ink);
+  }
+
+  .cabinet-card.disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .cabinet-card .cc-check {
+    position: absolute;
+    top: 6px;
+    right: 8px;
+    font-size: 0.65rem;
+    color: var(--brass-light);
+    display: none;
+  }
+
+  .cabinet-card.selected .cc-check { display: block; }
+
+  .cabinet-card .cc-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding-right: 14px;
+    margin-bottom: 1px;
+  }
+
+  .cabinet-card:not(.selected) .cc-name { color: var(--ink); }
+  .cabinet-card.selected .cc-name { color: var(--brass-light); }
+
+  .cabinet-card .cc-bg {
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 5px;
+  }
+
+  .cabinet-card:not(.selected) .cc-bg { color: var(--ink-faded); }
+  .cabinet-card.selected .cc-bg { color: #9a8060; }
+
+  .cabinet-card .cc-traits {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    margin-bottom: 5px;
+  }
+
+  .cabinet-card .cc-hidden {
+    font-size: 0.57rem;
+    padding: 1px 4px;
+    background: #1e1b2e;
+    color: #818cf8;
+    border: 1px dashed #818cf8;
+    border-radius: 2px;
+    font-weight: 700;
+  }
+
+  .cabinet-card .cc-desc {
+    font-size: 0.6rem;
+    line-height: 1.45;
+  }
+
+  .cabinet-card:not(.selected) .cc-desc { color: var(--ink-faded); font-style: italic; }
+  .cabinet-card.selected .cc-desc { color: #c8b898; font-style: italic; }
+
+  /* Creation nav */
+  .creation-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px;
+    border-top: 1px solid var(--paper-darker);
+    background: var(--paper-dark);
+  }
+
+  .creation-nav-btn {
+    padding: 8px 22px;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .creation-nav-btn.primary {
+    background: var(--ink);
+    color: var(--brass-light);
+    border-top: 2px solid var(--brass);
+  }
+
+  .creation-nav-btn.primary:hover { background: #2e2212; letter-spacing: 0.16em; }
+  .creation-nav-btn.primary:disabled { opacity: 0.4; cursor: not-allowed; letter-spacing: 0.12em; }
+
+  .creation-nav-btn.secondary {
+    background: transparent;
+    color: var(--ink-faded);
+    border: 1px solid var(--paper-darker);
+  }
+
+  .creation-nav-btn.secondary:hover { color: var(--ink); border-color: var(--ink-faded); }
+
+  .creation-nav-status {
+    font-size: 0.65rem;
+    color: var(--ink-faded);
+    font-family: 'Courier Prime', monospace;
+    text-align: center;
+  }
+
+  /* Mayor file summary */
+  .mayor-summary {
+    background: #faf5e8;
+    border: 1px solid var(--paper-darker);
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .ms-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 6px;
+    align-items: baseline;
+  }
+
+  .ms-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faded);
+    min-width: 120px;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .ms-value {
+    font-size: 0.72rem;
+    color: var(--ink);
+    font-weight: 700;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .ms-value.pending {
+    color: var(--warning);
+    font-style: italic;
+    font-weight: 400;
+  }
+
+  .creation-section-divider {
+    border: none;
+    border-top: 1px solid var(--paper-darker);
+    margin: 16px 0;
+  }
+
 </style>
 </head>
 <body>
+
+<!-- ═══════════════════════════════════════════════════
+     CHARACTER CREATION OVERLAY
+═══════════════════════════════════════════════════ -->
+<div id="creation-overlay">
+  <div class="creation-document">
+
+    <div class="creation-letterhead">
+      <div class="creation-seal">⚖</div>
+      <div class="creation-letterhead-text">
+        <h1>City of Millhaven — Executive Personnel File</h1>
+        <div class="sub">Office of the Mayor · Pre-Term Appointment Record · Confidential</div>
+      </div>
+    </div>
+
+    <div class="creation-body">
+
+      <!-- Step indicator -->
+      <div class="creation-step-indicator" id="creation-steps">
+        <div class="step-pip active" id="pip-1">1</div>
+        <div class="step-connector"></div>
+        <div class="step-pip" id="pip-2">2</div>
+        <div class="step-connector"></div>
+        <div class="step-pip" id="pip-3">3</div>
+        <div class="step-connector"></div>
+        <div class="step-pip" id="pip-4">4</div>
+      </div>
+
+      <!-- STEP 1: Background -->
+      <div id="creation-step-1">
+        <div class="creation-step-label">Prior Background</div>
+        <div class="creation-step-sub">Before City Hall, what were you? This determines your starting relationships with factions and how Millhaven read your election before you opened your mouth.</div>
+        <div class="option-grid" id="bg-options"></div>
+      </div>
+
+      <!-- STEP 2: Governing Style -->
+      <div id="creation-step-2" style="display:none">
+        <div class="creation-step-label">Governing Style</div>
+        <div class="creation-step-sub">How do you run a room? This is a passive modifier — it shapes how decisions land, how relationships build, and where your instincts take you under pressure.</div>
+        <div class="option-grid" id="style-options"></div>
+      </div>
+
+      <!-- STEP 3: Cabinet Appointments -->
+      <div id="creation-step-3" style="display:none">
+        <div class="creation-step-label">Cabinet Appointments</div>
+        <div class="creation-step-sub">You inherit four career staff. You appoint three cabinet officers. You know their backgrounds and visible traits. One thing about each of them you'll only learn in the room.</div>
+
+        <div class="cabinet-role-section">
+          <div class="cabinet-role-header">
+            Deputy Mayor
+            <span class="crh-status crh-empty" id="cabinet-status-deputy">Unfilled</span>
+          </div>
+          <div class="cabinet-candidates" id="cabinet-deputy"></div>
+        </div>
+
+        <div class="cabinet-role-section">
+          <div class="cabinet-role-header">
+            Legal Counsel
+            <span class="crh-status crh-empty" id="cabinet-status-legal">Unfilled</span>
+          </div>
+          <div class="cabinet-candidates" id="cabinet-legal"></div>
+        </div>
+
+        <div class="cabinet-role-section">
+          <div class="cabinet-role-header">
+            Economic Development Director
+            <span class="crh-status crh-empty" id="cabinet-status-econ">Unfilled</span>
+          </div>
+          <div class="cabinet-candidates" id="cabinet-econ"></div>
+        </div>
+      </div>
+
+      <!-- STEP 4: Review & Confirm -->
+      <div id="creation-step-4" style="display:none">
+        <div class="creation-step-label">Review Appointment Record</div>
+        <div class="creation-step-sub">Sign off on your file. Once you take office, your history is fixed.</div>
+        <div class="mayor-summary" id="mayor-summary-block"></div>
+        <div style="font-size:0.65rem; color:var(--ink-faded); line-height:1.6; font-style:italic; margin-top:8px;">
+          ◈ Your background and governing style will affect starting faction relationships, passive gameplay modifiers, and how your cabinet and inherited staff relate to you from day one. Cabinet appointments expand your consultation pool for the full four-year term.
+        </div>
+      </div>
+
+    </div><!-- /creation-body -->
+
+    <div class="creation-nav">
+      <button class="creation-nav-btn secondary" id="creation-back-btn" onclick="creationBack()" style="visibility:hidden">← Back</button>
+      <div class="creation-nav-status" id="creation-nav-status">Step 1 of 4 — Select your background</div>
+      <button class="creation-nav-btn primary" id="creation-next-btn" onclick="creationNext()" disabled>Next →</button>
+    </div>
+
+  </div>
+</div>
 
 <div id="game-wrapper">
   <!-- NAMEPLATE -->
@@ -1457,6 +1974,225 @@
 
 const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
+
+// ─────────────────────────────────────────────────────
+//  CHARACTER CREATION DATA
+// ─────────────────────────────────────────────────────
+
+const MAYOR_BACKGROUNDS = [
+  {
+    id: 'council',
+    title: 'Former Council Member',
+    desc: 'Eight years on the Millhaven City Council. You know where the bodies are buried — and so does everyone else. Factions have pre-formed opinions. You can\'t be a blank slate.',
+    pros: 'Council relations start high · Nair already trusts you · You know the building',
+    cons: 'Herald has a file on you · Business Alliance is cautious · No honeymoon period',
+    factionMods: { labor: +8, business: -5, residents: +6, developers: 0, press: -8, police: +5 },
+    councilMods: { c1: +10, c2: +5, c3: +12, c4: 0, c5: +8, c6: +5, c7: +10 },
+    staffMods: { cos: +8, budget: +5, comms: +3, planning: +10 },
+    approvalStart: 52,
+    budgetBonus: 0,
+  },
+  {
+    id: 'business',
+    title: 'Business Executive',
+    desc: 'Former VP at Millhaven Commerce Group. You ran payroll for 400 people. You know how to read a budget. Labor thinks they know exactly who you are. They\'re not entirely wrong.',
+    pros: 'Business Alliance starts warm · Treasury starts higher · Budget Director loyal from day one',
+    cons: 'Labor suspicious · Residents\' Association skeptical · Will spend the term proving you\'re not Beaumont\'s proxy',
+    factionMods: { labor: -12, business: +15, residents: -5, developers: +8, press: 0, police: +5 },
+    councilMods: { c1: -10, c2: +12, c3: -5, c4: +8, c5: 0, c6: 0, c7: -5 },
+    staffMods: { cos: 0, budget: +12, comms: +3, planning: -5 },
+    approvalStart: 50,
+    budgetBonus: 150000,
+  },
+  {
+    id: 'organizer',
+    title: 'Community Organizer',
+    desc: 'Fifteen years running the Millhaven Housing Coalition. You know every district by name. You got here because people trusted you. Now you have to govern the people who didn\'t vote for you.',
+    pros: 'Residents & Labor start warm · Press gives benefit of the doubt · Merritt and Torres both respect you',
+    cons: 'Business Alliance cold · Developers are watching · Smaller starting treasury',
+    factionMods: { labor: +12, business: -10, residents: +15, developers: -8, press: +6, police: -3 },
+    councilMods: { c1: +12, c2: -8, c3: +10, c4: -8, c5: +6, c6: +3, c7: +12 },
+    staffMods: { cos: +5, budget: -3, comms: +8, planning: +8 },
+    approvalStart: 54,
+    budgetBonus: -100000,
+  },
+  {
+    id: 'outsider',
+    title: 'Political Outsider',
+    desc: 'You ran on disruption and won by six points. Nobody owns you — including the people who voted for you. Every faction is wait-and-see. The hardest start and the highest ceiling.',
+    pros: 'No pre-existing hostilities · Voters gave you a mandate · No one expects you to fail any particular test yet',
+    cons: 'No established relationships · Council has no read on you · Every faction starts neutral — must be earned entirely',
+    factionMods: { labor: 0, business: 0, residents: +3, developers: 0, press: +5, police: 0 },
+    councilMods: { c1: 0, c2: 0, c3: +3, c4: 0, c5: 0, c6: 0, c7: +3 },
+    staffMods: { cos: 0, budget: 0, comms: 0, planning: 0 },
+    approvalStart: 50,
+    budgetBonus: 0,
+  }
+];
+
+const MAYOR_STYLES = [
+  {
+    id: 'operator',
+    title: 'The Operator',
+    desc: 'You\'re good at deals. Hallway conversations, counter-offers, quiet trades. You didn\'t get here on speeches — you got here on handshakes.',
+    pros: 'Compromise choices get better outcomes · Grudge relationships repair faster',
+    cons: 'Ideological or principled choices cost more · Principled characters trust you less initially',
+    passiveLabel: 'Compromise bonus · Faster relationship repair',
+  },
+  {
+    id: 'communicator',
+    title: 'The Communicator',
+    desc: 'You can work a room and you know it. Your public-facing decisions hit harder than they should. Your approval is harder to move in either direction — your base knows who you are.',
+    pros: 'Press relations decay slower · Approval more stable · Public events hit harder',
+    cons: 'Less effective in closed-room negotiations · Council less receptive to quiet lobbying',
+    passiveLabel: 'Approval stickiness · Press decay resistance',
+  },
+  {
+    id: 'administrator',
+    title: 'The Administrator',
+    desc: 'You run the city like a organization. Efficient, methodical, unglamorous. The numbers are always right even when the politics aren\'t.',
+    pros: 'Budget effects 20% more efficient · Infrastructure & services decay slower',
+    cons: 'Less effective at political/relationship decisions · Approval ceiling slightly lower',
+    passiveLabel: 'Budget efficiency +20% · Stat decay resistance',
+  },
+  {
+    id: 'reformer',
+    title: 'The Reformer',
+    desc: 'You ran on changing how this city works. Principled characters believe you. Pragmatic ones are waiting for the other shoe to drop. Your voters are your floor and your ceiling.',
+    pros: 'Principled characters start loyal · Approval ceiling higher · Reform decisions get bonus outcomes',
+    cons: 'Pragmatic/ambitious characters harder to read · Approval floor lower — no middle with voters',
+    passiveLabel: 'Principled loyalty bonus · Higher ceiling/lower floor',
+  }
+];
+
+const CABINET_CANDIDATES = {
+  deputy: [
+    {
+      id: 'dep_union',
+      name: 'Marcus Webb Jr.',
+      background: 'Former Union Rep, District 3',
+      traits: ['loyal', 'emotional'],
+      hiddenLabel: '? HIDDEN',
+      hiddenTrait: 'territorial', // gets possessive of turf, conflicts with cos
+      hiddenDesc: 'Territorial — guards his lane aggressively. Can create friction with Okafor over authority.',
+      desc: 'Torres knows him. The union membership respects him. Soft on financials but strong in the districts.',
+      roleId: 'deputy'
+    },
+    {
+      id: 'dep_lawyer',
+      name: 'Sandra Osei',
+      background: 'Corporate Attorney, formerly Millhaven Commerce Group',
+      traits: ['analytical', 'ambitious'],
+      hiddenLabel: '? HIDDEN',
+      hiddenTrait: 'networked', // has outside contacts that can help
+      hiddenDesc: 'Networked — quiet relationships with state-level officials. Can open doors, but on her own timeline.',
+      desc: 'Useful in a crisis. Hard to read in a quiet month. Beaumont\'s people know her name.',
+      roleId: 'deputy'
+    },
+    {
+      id: 'dep_pastor',
+      name: 'Rev. Calvin Oduya',
+      background: 'Community Pastor, Millhaven South',
+      traits: ['principled', 'forgiving'],
+      hiddenLabel: '? HIDDEN',
+      hiddenTrait: 'media_draw', // press loves covering him
+      hiddenDesc: 'Media draw — the Herald covers him favorably. His presence at events improves press reception.',
+      desc: 'The community trusts him in a way they never fully trust City Hall. Zero political baggage.',
+      roleId: 'deputy'
+    }
+  ],
+  legal: [
+    {
+      id: 'leg_defender',
+      name: 'Patricia Hollis',
+      background: 'Former Public Defender, 12 years',
+      traits: ['principled', 'analytical'],
+      hiddenLabel: '? HIDDEN',
+      hiddenTrait: 'overcommitted', // takes on too much, slow on urgent items
+      hiddenDesc: 'Overcommitted — her thoroughness becomes a liability when you need a fast answer.',
+      desc: 'She will not bend on legal ethics. Not once. That\'s a feature and a liability depending on the day.',
+      roleId: 'legal'
+    },
+    {
+      id: 'leg_operator',
+      name: 'Dennis Farrow',
+      background: 'City Prosecutor, formerly private sector',
+      traits: ['pragmatic', 'grudge'],
+      hiddenLabel: '? HIDDEN',
+      hiddenTrait: 'opposition_file', // has dirt on multiple council members
+      hiddenDesc: 'Has a file — quiet collection of leverage on council members. Useful. Unsettling.',
+      desc: 'He gets things done. The question is what he does when you\'re not watching.',
+      roleId: 'legal'
+    },
+    {
+      id: 'leg_reporter',
+      name: 'Naomi Achebe',
+      background: 'Former Herald Investigative Reporter, now attorney',
+      traits: ['analytical', 'principled'],
+      hiddenLabel: '? HIDDEN',
+      hiddenTrait: 'still_connected', // still has sources at the Herald, cuts both ways
+      hiddenDesc: 'Still connected — her Herald relationships are active. Can manage coverage, but old loyalties run deep.',
+      desc: 'She knows where every body is buried in this city. The question is whether she tells you or the Herald.',
+      roleId: 'legal'
+    }
+  ],
+  econ: [
+    {
+      id: 'econ_developer',
+      name: 'James Whitfield',
+      background: 'Real Estate Developer, former Chamber President',
+      traits: ['ambitious', 'pragmatic'],
+      hiddenLabel: '? HIDDEN',
+      hiddenTrait: 'conflict_interest', // personal stakes in several development projects
+      hiddenDesc: 'Conflict of interest — has personal stakes in three active development sites. Never discloses unless pressed.',
+      desc: 'He will close deals. He will not tell you everything about the deals he\'s closing.',
+      roleId: 'econ'
+    },
+    {
+      id: 'econ_advocate',
+      name: 'Dr. Yewande Adisa',
+      background: 'Housing Policy Director, Millhaven University',
+      traits: ['principled', 'emotional'],
+      hiddenLabel: '? HIDDEN',
+      hiddenTrait: 'council_aspirant', // wants a council seat in two years
+      hiddenDesc: 'Council aspirant — using this role to build a profile. Will prioritize visibility over effectiveness.',
+      desc: 'The residents trust her. Developers tolerate her. She\'ll fight for outcomes that don\'t pay for themselves.',
+      roleId: 'econ'
+    },
+    {
+      id: 'econ_economist',
+      name: 'Howard Crane',
+      background: 'City Economist, 18 years, non-partisan',
+      traits: ['analytical', 'forgiving'],
+      hiddenLabel: '? HIDDEN',
+      hiddenTrait: 'risk_averse', // always recommends the safe option, suppresses upside
+      hiddenDesc: 'Risk averse — his advice is always defensible, rarely bold. Will talk you out of good bets alongside bad ones.',
+      desc: 'The most accurate person in any room. Never the most decisive. You will never do better than his model predicts.',
+      roleId: 'econ'
+    }
+  ]
+};
+
+// Cabinet hidden traits added to HIDDEN_TRAITS_DATA at game start
+const CABINET_HIDDEN_TRAIT_META = {
+  territorial:       { label: 'TERRITORIAL',      badge: 'trait-grudge',     desc: 'Guards his lane. Can create friction with Okafor.' },
+  networked:         { label: 'NETWORKED',         badge: 'trait-analytical', desc: 'State-level connections. Useful on her timeline.' },
+  media_draw:        { label: 'MEDIA DRAW',        badge: 'trait-loyal',      desc: 'The Herald covers him favorably. Good at public events.' },
+  overcommitted:     { label: 'OVERCOMMITTED',     badge: 'trait-emotional',  desc: 'Thoroughness becomes liability when speed matters.' },
+  opposition_file:   { label: 'HAS A FILE',        badge: 'trait-grudge',     desc: 'Quiet leverage on council members. Useful. Unsettling.' },
+  still_connected:   { label: 'STILL CONNECTED',   badge: 'trait-ambitious',  desc: 'Active Herald relationships. Cuts both ways.' },
+  conflict_interest: { label: 'CONFLICT: INTEREST',badge: 'trait-ambitious',  desc: 'Personal stakes in active development projects.' },
+  council_aspirant:  { label: 'COUNCIL ASPIRANT',  badge: 'trait-ambitious',  desc: 'Building a profile. Visibility over effectiveness.' },
+  risk_averse:       { label: 'RISK AVERSE',       badge: 'trait-analytical', desc: 'Will talk you out of good bets alongside bad ones.' },
+};
+
+// State for creation wizard
+let creationState = {
+  step: 1,
+  background: null,
+  style: null,
+  cabinet: { deputy: null, legal: null, econ: null }
+};
 
 const TRAIT_STYLES = {
   loyal: 'trait-loyal', ambitious: 'trait-ambitious',
@@ -2530,7 +3266,330 @@ let currentTab = 'staff';
 let pendingVote = null;
 let tickerItems = [];
 
-function initState() {
+// ═══════════════════════════════════════════════════
+//  CHARACTER CREATION LOGIC
+// ═══════════════════════════════════════════════════
+
+function renderCreationStep() {
+  const s = creationState;
+
+  // Update step pips
+  for (let i = 1; i <= 4; i++) {
+    const pip = document.getElementById(`pip-${i}`);
+    pip.classList.remove('active', 'done');
+    if (i < s.step) pip.classList.add('done'), pip.textContent = '✓';
+    else if (i === s.step) pip.classList.add('active'), pip.textContent = i;
+    else pip.textContent = i;
+  }
+
+  // Show/hide steps
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById(`creation-step-${i}`).style.display = i === s.step ? '' : 'none';
+  }
+
+  const backBtn = document.getElementById('creation-back-btn');
+  const nextBtn = document.getElementById('creation-next-btn');
+  const statusEl = document.getElementById('creation-nav-status');
+
+  backBtn.style.visibility = s.step > 1 ? 'visible' : 'hidden';
+
+  const stepLabels = ['Select your background','Choose your governing style','Appoint your cabinet','Review & take office'];
+  statusEl.textContent = `Step ${s.step} of 4 — ${stepLabels[s.step - 1]}`;
+
+  if (s.step === 4) {
+    nextBtn.textContent = 'Take Office →';
+    nextBtn.disabled = false;
+  } else {
+    nextBtn.textContent = 'Next →';
+  }
+
+  // Determine if next is enabled
+  if (s.step === 1) nextBtn.disabled = !s.background;
+  else if (s.step === 2) nextBtn.disabled = !s.style;
+  else if (s.step === 3) {
+    const filled = s.cabinet.deputy && s.cabinet.legal && s.cabinet.econ;
+    nextBtn.disabled = !filled;
+  }
+
+  // Render step content
+  if (s.step === 1) renderBackgroundOptions();
+  else if (s.step === 2) renderStyleOptions();
+  else if (s.step === 3) renderCabinetOptions();
+  else if (s.step === 4) renderSummary();
+}
+
+function renderBackgroundOptions() {
+  const container = document.getElementById('bg-options');
+  container.innerHTML = MAYOR_BACKGROUNDS.map(bg => `
+    <div class="option-card ${creationState.background === bg.id ? 'selected' : ''}"
+         onclick="selectBackground('${bg.id}')">
+      <span class="oc-check">✓</span>
+      <div class="oc-title">${bg.title}</div>
+      <div class="oc-desc">${bg.desc}</div>
+      <div class="oc-mechanics">
+        <span class="oc-pro">↑ ${bg.pros}</span><br>
+        <span class="oc-con">↓ ${bg.cons}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderStyleOptions() {
+  const container = document.getElementById('style-options');
+  container.innerHTML = MAYOR_STYLES.map(st => `
+    <div class="option-card ${creationState.style === st.id ? 'selected' : ''}"
+         onclick="selectStyle('${st.id}')">
+      <span class="oc-check">✓</span>
+      <div class="oc-title">${st.title}</div>
+      <div class="oc-desc">${st.desc}</div>
+      <div class="oc-mechanics">
+        <span class="oc-pro">↑ ${st.pros}</span><br>
+        <span class="oc-con">↓ ${st.cons}</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderCabinetOptions() {
+  ['deputy','legal','econ'].forEach(role => {
+    const container = document.getElementById(`cabinet-${role}`);
+    const statusEl = document.getElementById(`cabinet-status-${role}`);
+    const selected = creationState.cabinet[role];
+
+    if (selected) {
+      statusEl.textContent = 'Appointed';
+      statusEl.className = 'crh-status crh-filled';
+    } else {
+      statusEl.textContent = 'Unfilled';
+      statusEl.className = 'crh-status crh-empty';
+    }
+
+    container.innerHTML = CABINET_CANDIDATES[role].map(c => {
+      const traitsHTML = c.traits.map(t =>
+        `<span class="trait-badge ${TRAIT_STYLES[t] || ''}">${t}</span>`
+      ).join('');
+      const isSelected = selected === c.id;
+
+      return `
+        <div class="cabinet-card ${isSelected ? 'selected' : ''}"
+             onclick="selectCabinet('${role}', '${c.id}')">
+          <span class="cc-check">✓</span>
+          <div class="cc-name">${c.name}</div>
+          <div class="cc-bg">${c.background}</div>
+          <div class="cc-traits">
+            ${traitsHTML}
+            <span class="cc-hidden">? HIDDEN</span>
+          </div>
+          <div class="cc-desc">${c.desc}</div>
+        </div>
+      `;
+    }).join('');
+  });
+}
+
+function renderSummary() {
+  const bg = MAYOR_BACKGROUNDS.find(b => b.id === creationState.background);
+  const st = MAYOR_STYLES.find(s => s.id === creationState.style);
+  const dep = Object.values(CABINET_CANDIDATES.deputy).find(c => c.id === creationState.cabinet.deputy);
+  const leg = Object.values(CABINET_CANDIDATES.legal).find(c => c.id === creationState.cabinet.legal);
+  const eco = Object.values(CABINET_CANDIDATES.econ).find(c => c.id === creationState.cabinet.econ);
+
+  const budBonus = bg.budgetBonus > 0 ? `+${fmtMoneyFull(bg.budgetBonus)}` :
+                   bg.budgetBonus < 0 ? fmtMoneyFull(bg.budgetBonus) : 'Standard';
+
+  document.getElementById('mayor-summary-block').innerHTML = `
+    <div class="ms-row">
+      <div class="ms-label">Background</div>
+      <div class="ms-value">${bg.title}</div>
+    </div>
+    <div class="ms-row">
+      <div class="ms-label">Governing Style</div>
+      <div class="ms-value">${st.title}</div>
+    </div>
+    <div class="ms-row">
+      <div class="ms-label">Starting Approval</div>
+      <div class="ms-value">${bg.approvalStart}%</div>
+    </div>
+    <div class="ms-row">
+      <div class="ms-label">Treasury Adjustment</div>
+      <div class="ms-value">${budBonus}</div>
+    </div>
+    <hr class="creation-section-divider">
+    <div class="ms-row">
+      <div class="ms-label">Deputy Mayor</div>
+      <div class="ms-value">${dep ? dep.name : '—'}</div>
+    </div>
+    <div class="ms-row">
+      <div class="ms-label">Legal Counsel</div>
+      <div class="ms-value">${leg ? leg.name : '—'}</div>
+    </div>
+    <div class="ms-row">
+      <div class="ms-label">Econ. Development</div>
+      <div class="ms-value">${eco ? eco.name : '—'}</div>
+    </div>
+    <hr class="creation-section-divider">
+    <div class="ms-row">
+      <div class="ms-label">Passive Modifier</div>
+      <div class="ms-value" style="font-size:0.65rem; color:var(--brass)">${st.passiveLabel}</div>
+    </div>
+  `;
+}
+
+function selectBackground(id) {
+  creationState.background = id;
+  renderCreationStep();
+}
+
+function selectStyle(id) {
+  creationState.style = id;
+  renderCreationStep();
+}
+
+function selectCabinet(role, id) {
+  creationState.cabinet[role] = id;
+  renderCreationStep();
+}
+
+function creationNext() {
+  if (creationState.step < 4) {
+    creationState.step++;
+    renderCreationStep();
+  } else {
+    // Take office — apply all creation choices and start game
+    applyCreationChoices();
+    document.getElementById('creation-overlay').classList.add('hidden');
+  }
+}
+
+function creationBack() {
+  if (creationState.step > 1) {
+    creationState.step--;
+    renderCreationStep();
+  }
+}
+
+function applyCreationChoices() {
+  // initState first with defaults
+  initState();
+
+  const bg = MAYOR_BACKGROUNDS.find(b => b.id === creationState.background);
+  const st = MAYOR_STYLES.find(s => s.id === creationState.style);
+
+  // Store on state
+  state.mayorBackground = bg.id;
+  state.mayorStyle = st.id;
+
+  // Apply background faction mods
+  Object.entries(bg.factionMods).forEach(([fid, val]) => {
+    const f = state.factions.find(f => f.id === fid);
+    if (f) f.approval = clamp(f.approval + val, 5, 95);
+  });
+
+  // Apply background council mods
+  Object.entries(bg.councilMods).forEach(([cid, val]) => {
+    const c = state.council.find(c => c.id === cid);
+    if (c) c.approval = clamp(c.approval + val, 10, 95);
+  });
+
+  // Apply background staff mods
+  Object.entries(bg.staffMods).forEach(([sid, val]) => {
+    const s = state.staff.find(s => s.id === sid);
+    if (s) s.approval = clamp(s.approval + val, 10, 95);
+  });
+
+  // Apply starting approval and budget
+  state.city.stats.approval = bg.approvalStart;
+  state.city.budget.balance += bg.budgetBonus;
+
+  // Governing style passives stored for use in gameplay
+  if (st.id === 'administrator') {
+    state.city.budget.adminEfficiency = 1.2;
+  }
+  if (st.id === 'reformer') {
+    // Boost principled staff/council
+    [...state.staff, ...state.council].forEach(p => {
+      if (p.traits && p.traits.includes('principled')) p.approval = clamp(p.approval + 8, 10, 95);
+    });
+  }
+  if (st.id === 'business' && creationState.background !== 'business') {
+    // council background gets this differently
+  }
+
+  // Add cabinet members
+  ['deputy','legal','econ'].forEach(role => {
+    const chosen = creationState.cabinet[role];
+    const candidates = CABINET_CANDIDATES[role];
+    const candidate = candidates.find(c => c.id === chosen);
+    if (!candidate) return;
+
+    // Add to staff
+    state.staff.push({
+      id: candidate.id,
+      name: candidate.name,
+      role: role === 'deputy' ? 'Deputy Mayor' : role === 'legal' ? 'Legal Counsel' : 'Econ. Development Director',
+      traits: candidate.traits,
+      approval: 65,
+      bio: candidate.desc,
+      relationHistory: [],
+      isCabinet: true
+    });
+
+    // Register hidden trait
+    const hiddenTraitMeta = CABINET_HIDDEN_TRAIT_META[candidate.hiddenTrait];
+    HIDDEN_TRAITS_DATA[candidate.id] = {
+      trait: candidate.hiddenTrait,
+      revealAt: 3,
+      desc: candidate.hiddenDesc
+    };
+    HIDDEN_TRAIT_META[candidate.hiddenTrait] = hiddenTraitMeta;
+
+    // Cabinet consultation advice defaults
+    if (!CONSULTATION_ADVICE[candidate.id]) {
+      CONSULTATION_ADVICE[candidate.id] = {
+        default: generateCabinetDefaultAdvice(candidate)
+      };
+    }
+  });
+
+  recalcApproval();
+  updateUI();
+  renderTicker();
+  switchTab('staff');
+}
+
+function generateCabinetDefaultAdvice(candidate) {
+  const role = candidate.roleId;
+  const traitVoices = {
+    loyal:      'voice: measured, careful, asks clarifying questions',
+    ambitious:  'voice: confident, frames everything as an opportunity',
+    analytical: 'voice: numbers-first, hedges recommendations',
+    emotional:  'voice: leads with community impact',
+    principled: 'voice: states the right answer without apology',
+    pragmatic:  'voice: what\'s achievable vs what\'s ideal',
+    forgiving:  'voice: slow to judge, tries to see all sides',
+    grudge:     'voice: remembers everything, cautious recommendations'
+  };
+  const trait = candidate.traits[0];
+
+  if (role === 'deputy') {
+    if (trait === 'loyal') return `"I'd want to see how the council reads this before we commit. Let me do a quiet round of calls first."`;
+    if (trait === 'analytical') return `"The political exposure here is manageable if we frame the decision before the Herald does."`;
+    return `"The optics are workable. I can run point on the community side if you want a softer rollout."`;
+  }
+  if (role === 'legal') {
+    if (trait === 'principled') return `"There's a right answer here and a defensible one. They're not always the same thing. I'll tell you which is which."`;
+    if (trait === 'pragmatic') return `"I can draft something that holds up. Whether it should hold up is a different question — that's yours to answer."`;
+    return `"The legal exposure is real but manageable. The question is how much process you want on the record."`;
+  }
+  if (role === 'econ') {
+    if (trait === 'ambitious') return `"There's a deal structure here. It'll take three meetings and one concession you won't love, but it closes."`;
+    if (trait === 'principled') return `"The numbers have to work for the residents first. I won't sign off on something that looks good in a press release and costs people their homes."`;
+    return `"My model shows a 60-40 probability of positive fiscal impact over 18 months. That's not a recommendation, that's the data."`;
+  }
+  return `"I'll have a memo on your desk by end of day."`;
+}
+
+
   state = {
     turn: 0,
     year: 1,
@@ -3689,12 +4748,12 @@ function endGame(won, message) {
 
 function restartGame() {
   document.getElementById('game-overlay').classList.remove('visible');
-  initState();
+
+  creationState = { step: 1, background: null, style: null, cabinet: { deputy: null, legal: null, econ: null } };
   tickerItems = ['Welcome back to Millhaven. A new term begins.'];
   currentTab = 'staff';
   pendingVote = null;
 
-  // Reset situation body
   const body = document.getElementById('situation-body');
   body.innerHTML = '<div class="no-event" id="no-event-msg"><div class="desk-icon">📋</div><p>Your desk is clear.</p><p style="font-size:0.7rem; margin-top:4px;">Advance to see your first month\'s schedule.</p></div>';
   document.getElementById('event-type-stamp').textContent = 'Incoming';
@@ -3703,19 +4762,19 @@ function restartGame() {
   document.getElementById('advance-btn').disabled = false;
   document.getElementById('advance-btn').textContent = '▶ Begin First Month';
 
-  updateUI();
-  renderTicker();
-  switchTab('staff');
+  document.getElementById('creation-overlay').classList.remove('hidden');
+  renderCreationStep();
 }
 
 // ═══════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════
 
+// Initialize a bare state for helpers that need it (fmtMoney, etc.)
 initState();
-updateUI();
-renderTicker();
-renderPeopleTab('staff');
+
+// Launch character creation
+renderCreationStep();
 
 </script>
 </body>
