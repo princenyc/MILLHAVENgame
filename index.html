@@ -963,6 +963,135 @@
     font-family: 'Playfair Display', serif;
   }
 
+  /* ── HIDDEN TRAITS ── */
+  .trait-hidden {
+    background: #1e1b2e;
+    color: #818cf8;
+    border: 1px dashed #818cf8;
+    cursor: help;
+    letter-spacing: 0.08em;
+  }
+
+  .trait-revealed-new {
+    animation: traitFlash 1.2s ease forwards;
+  }
+
+  @keyframes traitFlash {
+    0%   { background: #fef08a; color: #78350f; transform: scale(1.15); }
+    60%  { background: #fef08a; color: #78350f; }
+    100% { transform: scale(1); }
+  }
+
+  /* ── CONSULT BUTTON ── */
+  .consult-btn {
+    display: none;
+    width: 100%;
+    margin-top: 6px;
+    padding: 4px 6px;
+    background: transparent;
+    border: 1px solid var(--brass);
+    color: var(--brass);
+    font-family: 'Courier Prime', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .consult-btn:hover {
+    background: var(--ink);
+    color: var(--brass-light);
+  }
+
+  .consult-btn.visible { display: block; }
+  .consult-btn.consulted {
+    border-color: var(--paper-darker);
+    color: var(--ink-faded);
+    cursor: default;
+    opacity: 0.6;
+  }
+  .consult-btn.consulted:hover { background: transparent; color: var(--ink-faded); }
+
+  /* ── CONSULTATION LOG ── */
+  .consult-section {
+    margin-top: 8px;
+  }
+
+  .consult-section-label {
+    font-size: 0.58rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    font-family: 'Playfair Display', serif;
+    border-bottom: 1px solid var(--paper-darker);
+    padding-bottom: 3px;
+    margin-bottom: 6px;
+  }
+
+  .consult-entry {
+    background: #faf5e8;
+    border-left: 3px solid var(--brass);
+    padding: 7px 10px;
+    margin-bottom: 5px;
+    font-size: 0.68rem;
+  }
+
+  .consult-entry.ce-reveal {
+    border-left-color: #d97706;
+    background: #fffbeb;
+  }
+
+  .ce-header {
+    display: flex;
+    align-items: baseline;
+    gap: 6px;
+    margin-bottom: 3px;
+  }
+
+  .ce-name {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.72rem;
+  }
+
+  .ce-role {
+    font-size: 0.58rem;
+    color: var(--ink-faded);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .ce-advice {
+    color: var(--ink-faded);
+    font-style: italic;
+    line-height: 1.55;
+  }
+
+  .ce-reveal-banner {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #92400e;
+    margin-bottom: 3px;
+  }
+
+  .ce-reveal-trait {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: var(--ink);
+    font-size: 0.8rem;
+  }
+
+  .ce-reveal-desc {
+    font-size: 0.64rem;
+    color: var(--ink-faded);
+    margin-top: 2px;
+    font-style: italic;
+  }
+
 </style>
 </head>
 <body>
@@ -1133,6 +1262,199 @@ const TRAIT_LABELS = {
   analytical: 'Analytical', emotional: 'Emotional',
   principled: 'Principled', pragmatic: 'Pragmatic',
   forgiving: 'Forgiving', grudge: 'Grudge-Holder'
+};
+
+// ── HIDDEN TRAITS ──
+// Each person has 1 hidden trait the player doesn't know.
+// revealAt = number of consultations needed to surface it.
+// Some events trigger early reveals.
+const HIDDEN_TRAITS_DATA = {
+  cos:      { trait: 'self-protective', revealAt: 3 },
+  budget:   { trait: 'self-interested', revealAt: 3 },
+  comms:    { trait: 'disloyal',        revealAt: 2 }, // surfaces faster — she's not subtle
+  planning: { trait: 'burned-out',      revealAt: 3 },
+  c1:       { trait: 'negotiable',      revealAt: 3 }, // Torres — hard exterior, flexible price
+  c2:       { trait: 'connected',       revealAt: 4 }, // Beaumont — statehouse relationships
+  c3:       { trait: 'quietly-ambitious', revealAt: 3 }, // Nair — wants your seat eventually
+  c4:       { trait: 'corrupt',         revealAt: 4 }, // Callahan — actual liability
+  c5:       { trait: 'indecisive',      revealAt: 2 }, // Liu — conviction masks wavering
+  c6:       { trait: 'informant',       revealAt: 3 }, // Webb — leaks to the Herald
+  c7:       { trait: 'deeply-loyal',    revealAt: 2 }, // Reyes — more committed than she shows
+  labor:    { trait: 'divided',         revealAt: 3 },
+  business: { trait: 'coordinated',     revealAt: 3 },
+  residents:{ trait: 'mobilizable',     revealAt: 3 },
+  developers:{ trait: 'over-leveraged', revealAt: 4 },
+  press:    { trait: 'has-a-source',    revealAt: 3 },
+  police:   { trait: 'eyeing-your-chair', revealAt: 4 }
+};
+
+const HIDDEN_TRAIT_META = {
+  'self-protective':    { label: 'Self-Protective',     badge: 'trait-grudge',    desc: 'Advice is designed to shield her from blame, not optimize your outcomes.' },
+  'self-interested':    { label: 'Self-Interested',     badge: 'trait-ambitious', desc: 'Outside consulting relationships influence which options he recommends.' },
+  'disloyal':           { label: 'Disloyal',            badge: 'trait-ambitious', desc: 'Loyalty is conditional on her own advancement.' },
+  'burned-out':         { label: 'Burned Out',          badge: 'trait-grudge',    desc: 'Professionally exhausted. Wants to be proven right more than he wants solutions.' },
+  'negotiable':         { label: 'Negotiable',          badge: 'trait-forgiving', desc: 'More flexible than her public positions suggest. Has a price — find it.' },
+  'connected':          { label: 'Well-Connected',      badge: 'trait-loyal',     desc: 'Has relationships at the state level he never fully discloses.' },
+  'quietly-ambitious':  { label: 'Quietly Ambitious',   badge: 'trait-ambitious', desc: 'Has long-term political goals. Your seat may be on her roadmap.' },
+  'corrupt':            { label: 'Corrupt',             badge: 'trait-grudge',    desc: 'Has engaged in conduct that is a legal and political liability waiting to detonate.' },
+  'indecisive':         { label: 'Indecisive',          badge: 'trait-emotional', desc: 'Public conviction masks private wavering. Will fold under direct pressure.' },
+  'informant':          { label: 'Leaking',             badge: 'trait-grudge',    desc: 'Information from your consultations reaches the Herald within days.' },
+  'deeply-loyal':       { label: 'Deeply Loyal',        badge: 'trait-loyal',     desc: 'More committed to your success than her measured manner suggests.' },
+  'divided':            { label: 'Internally Divided',  badge: 'trait-emotional', desc: 'Torres does not speak for all members. A faction within would deal separately.' },
+  'coordinated':        { label: 'Coordinated',         badge: 'trait-grudge',    desc: 'Shares your decisions with other aligned factions before responding publicly.' },
+  'mobilizable':        { label: 'Mobilizable',         badge: 'trait-loyal',     desc: 'Can be organized as a real electoral force if properly engaged.' },
+  'over-leveraged':     { label: 'Over-Leveraged',      badge: 'trait-ambitious', desc: "The consortium is financially overextended. Their aggression is desperation." },
+  'has-a-source':       { label: 'Has a Source',        badge: 'trait-grudge',    desc: 'Vasquez has an inside contact in your administration. He knows things he shouldn\'t.' },
+  'eyeing-your-chair':  { label: 'Eyeing Your Chair',   badge: 'trait-ambitious', desc: 'Kovacs is building a public profile. A mayoral run is not off the table.' }
+};
+
+// ── CONSULTATION ADVICE ──
+// Written per character. Advice hints at hidden traits even before revealed.
+// Format: character id -> event id (or 'default_crisis', 'default_political', 'default')
+const CONSULTATION_ADVICE = {
+  // ── STAFF ──
+  cos: { // Rachel Okafor — loyal, analytical, hidden: self-protective
+    union_contract:     `"The 6% counter-offer is defensible on the numbers. If it goes sideways, you'll have documentation the original ask was unreasonable." [She slides a pre-drafted memo across the desk.]`,
+    rezone_commercial:  `"Districts 2 and 3 are going to remember this vote. Whatever you decide — make sure the community impact review is thorough and on file."`,
+    crime_spike:        `"Act. The optics of inaction are worse than any budget hit. I'll have a statement ready for either direction."`,
+    water_main:         `"The emergency repair is the only defensible choice publicly. The grant delay hands your opponents a free story."`,
+    press_investigation:`"Cooperate fully. Our office is clean — let that show. I'll draft the press briefing tonight."`,
+    budget_shortfall:   `"The reserve draw is painful but defensible. Just note: if we go to the reserve again next quarter, we have a structural problem, not a cash flow problem."`,
+    default_crisis:     `"Act decisively. Imperfect action in a crisis always reads better than a study. I can have a statement drafted in 20 minutes."`,
+    default_political:  `"Before you decide — what's our exposure if this goes wrong? I want the decision documented."`,
+    default:            `"There's a defensible path here. The question is which risk you can manage better, not which choice is perfect."`,
+  },
+
+  budget: { // Victor Slade — pragmatic, analytical, hidden: self-interested
+    union_contract:     `"Full concession compounds at $80k monthly. The math doesn't work long-term. Counter at 6. Fortis Group handles municipal labor mediation, by the way — excellent firm."`,
+    rezone_commercial:  `"The revenue math on full rezoning is solid. If affordable housing compliance is a concern, Westbrook Development does excellent impact work. I've seen their numbers."`,
+    budget_shortfall:   `"Draw from reserves again and we'll be having a much harder conversation by Q3. I can show you the projection — it's not pretty."`,
+    pension_crisis:     `"The actuarials are clear. Start restructuring now. Meridian Consulting does excellent pension restructuring — I've worked with their team before, quality outfit."`,
+    school_funding:     `"The city isn't a school district. Partial funding is defensible; full bailout sets a precedent I'd want documented before approving."`,
+    tax_rate_proposal:  `"New revenue solves the structural problem. The business community won't love it, but the numbers support it."`,
+    default_crisis:     `"What's the number? Give me the figure and I'll tell you if we can absorb it and how."`,
+    default:            `"Run the cost-benefit first. I can have a model in 20 minutes."`,
+  },
+
+  comms: { // Maya Chen — emotional, ambitious, hidden: disloyal
+    press_investigation:`"Schedule a presser. I'll lead the briefing — full transparency plays better than silence. Let me get ahead of the framing."`,
+    crime_spike:        `"This is a visibility moment. Walking tour of the affected district, press pool invited. I'll coordinate the coverage — we can own this story."`,
+    union_contract:     `"The union story has real legs. If we handle the announcement right, this could be a defining moment. Let me pitch the Herald an exclusive."`,
+    homeless_encampment:`"The shelter partnership has the best optics by far. I can get the evening news interested in a human-interest angle. Real residents, real outcomes."`,
+    rezone_commercial:  `"The community benefit angle plays well. We lead with affordable housing, not tax revenue. Let me draft the messaging."`,
+    default_political:  `"Let me think about the frame before we commit. The story we tell is as important as what we decide."`,
+    default:            `"Whatever you go with — let me control the rollout. A decision without a narrative is just noise."`,
+  },
+
+  planning: { // Douglas Merritt — principled, grudge, hidden: burned-out
+    water_main:         `"I submitted the first infrastructure memo on Chandler Avenue in 2019. Then 2021. There's a third pipe on Holloway that's in worse shape — also in the files."`,
+    rezone_commercial:  `"Callahan has brought this block under three administrations. All three said yes. You can see how that's worked out."`,
+    road_repair:        `"The D-rated roads are in the report I submitted in February. The February before that as well."`,
+    high_rise_variance: `"The 12-story limit exists because the 1994 variance caused flooding on Meridian Street that cost the city $900,000. That case study is in the files."`,
+    budget_shortfall:   `"If you defer infrastructure maintenance, you're not saving money. You're borrowing it from future repair costs at a bad interest rate."`,
+    default_crisis:     `"If this is infrastructure-related, I submitted a report on this. It may have been before your time."`,
+    default:            `"The documentation exists. Whether anyone acts on it is a separate matter entirely."`,
+  },
+
+  // ── COUNCIL ──
+  c1: { // Donna Torres — emotional, grudge, hidden: negotiable
+    union_contract:     `"The membership voted 78% to authorize action. That's not theater, Mayor. [pause] ...But I'm here talking to you, aren't I. The timeline might have some flexibility."`,
+    crime_spike:        `"District 3 has been asking for more patrols for two years. Don't let this be another study."`,
+    strike_threat:      `"The safety equipment issue has been in the grievance log for 14 months. This didn't come from nowhere."`,
+    budget_shortfall:   `"Don't cut services to balance your books. Not on my watch."`,
+    default_political:  `"I represent working people. That's my only agenda. [holds your eyes] The only agenda."`,
+    default:            `"Where does this leave District 3? That's my question. It's always my question."`,
+  },
+
+  c2: { // Frank Beaumont — pragmatic, analytical, hidden: connected
+    rezone_commercial:  `"The revenue projection is solid. Senator Holt's people have been watching how Millhaven handles development lately. Worth factoring in."`,
+    tax_rate_proposal:  `"I'd think carefully about the statehouse optics on a new tax. There are conversations happening at the state level about municipal finance reform."`,
+    corporation_incentive:`"Nexus is a solid company. I know their regional director — I could make a call if you want an informal read on their flexibility."`,
+    factory_violation:  `"Grayson employs 1,400 people. A punitive response sends a message to every employer watching this city."`,
+    default:            `"The business community is watching this one. And, frankly, so is Springfield."`,
+  },
+
+  c3: { // Priya Nair — principled, analytical, hidden: quietly-ambitious
+    tax_rate_proposal:  `"A public champion for infrastructure investment would make a defining statement. From the Mayor's office specifically. It matters that you stand behind it personally."`,
+    press_investigation:`"Full transparency is the only defensible position. A public statement of principle — from this office — would carry real weight with voters."`,
+    pension_crisis:     `"The right decision here is also the politically courageous one. Those moments define careers."`,
+    rezone_commercial:  `"The affordability requirement is non-negotiable for my vote. On the record."`,
+    default:            `"What does principle require here? I find that question clarifies almost everything."`,
+  },
+
+  c4: { // Jim Callahan — pragmatic, ambitious, hidden: corrupt
+    rezone_commercial:  `"The Eastside principals have structured the community benefit agreements very carefully. Very generously. The documentation is all in order, I can assure you."`,
+    high_rise_variance: `"The Kellerman principals are well-capitalized and deeply community-minded. I can personally vouch for the project's integrity."`,
+    press_investigation:`"I'm sure the Herald's inquiry is a misunderstanding. These things tend to resolve themselves when the appropriate people are... reassured."`,
+    corporation_incentive:`"Nexus is a good deal for the city. I know their people. Let me reach out — there may be additional community benefit arrangements we could structure."`,
+    default:            `"There's always a way to structure these things so everyone benefits. Let me make some calls."`,
+  },
+
+  c5: { // Sandra Liu — emotional, forgiving, hidden: indecisive
+    homeless_encampment:`"You have to stand up for these residents, Mayor — it's a moral imperative— [pause] though the budget pressures are also real, and a phased approach— I mean, what do the others think?"`,
+    school_funding:     `"The children need this. Unambiguously. [pause] Though the fiscal constraints are genuine. There might be a middle ground— what does the middle ground look like exactly?"`,
+    default_political:  `"My instinct is strongly toward the compassionate option— though both sides have valid points, honestly. What are you leaning toward?"`,
+    default:            `"I want to support the right thing here. I just want to make sure we've considered all the— what do you think?"`,
+  },
+
+  c6: { // Marcus Webb — analytical, pragmatic, hidden: informant
+    water_main:         `"Before I weigh in — what's the exact procurement timeline on the repair contract? And who are the approved vendors on the city's current list?"`,
+    rezone_commercial:  `"Interesting. What's the assessed value on the current parcel? And the square footage of the rezoned section?"`,
+    budget_shortfall:   `"Walk me through the reserve fund balance — the exact current figure. And the breakdown by line item."`,
+    press_investigation:`"I want to understand the specifics before advising. Which contracts exactly? What's the dollar amount and date range?"`,
+    default:            `"I want to make sure I understand the mechanics before I give you a position. What are the specific terms here?"`,
+  },
+
+  c7: { // Carla Reyes — principled, loyal, hidden: deeply-loyal
+    default_crisis:     `"Whatever you decide, District 6 is with you. I mean that — not just politically. Personally."`,
+    default_political:  `"I'll vote for what's right for the city. And I'll support you. Those things aren't always the same, but today I think they are."`,
+    budget_shortfall:   `"Don't cut District 6 services to solve a citywide problem. But if you need my vote for something harder — come to me directly."`,
+    default:            `"You have my vote. Off the record — you have my trust too. Don't waste either one."`,
+  },
+
+  // ── FACTIONS ──
+  labor: {
+    union_contract:     `Torres: "The membership voted 78% to authorize action. That's not a bluff, Mayor. But notice I'm the one who called you."`,
+    strike_threat:      `Torres: "The safety equipment issue has been in the grievance log for 14 months. The overnight shift is working with gear that failed inspection."`,
+    budget_shortfall:   `Torres: "Don't balance the city's books on the backs of people who fix the roads and collect the garbage."`,
+    default:            `Torres: "If it touches my members' wages, safety, or benefits — I have a position. What exactly are we looking at?"`,
+  },
+
+  business: {
+    rezone_commercial:  `Beaumont: "The Alliance supports development that increases the tax base. This qualifies. The math is straightforward."`,
+    factory_violation:  `Beaumont: "Grayson employs 1,400 people in this city. A punitive approach sends a message to every employer currently watching Millhaven."`,
+    tax_rate_proposal:  `Beaumont: "New taxes on property owners is not a conversation the Alliance will let pass quietly. I'm telling you this as a courtesy."`,
+    corporation_incentive:`Beaumont: "Nexus is exactly the kind of anchor employer this city needs. Don't let bureaucracy kill a good deal."`,
+    default:            `Beaumont: "What's the economic impact? That's the only question the Alliance is going to care about."`,
+  },
+
+  residents: {
+    homeless_encampment:`Nkemelu: "How this is handled will be remembered for years. By the people who live here. By the people who vote."`,
+    school_funding:     `Nkemelu: "1,200 kids. That's who you're making a decision about. I just want to make sure that's clear."`,
+    rezone_commercial:  `Nkemelu: "Districts 2 and 3 are watching. I'm watching. Affordable housing requirements are non-negotiable for my support."`,
+    default:            `Nkemelu: "Tell me what this means for the neighborhoods. Not the revenue projections — the people."`,
+  },
+
+  developers: {
+    rezone_commercial:  `Callahan: "The Eastside deal is structured to benefit the community. The principals have been very generous in the community benefit agreements."`,
+    high_rise_variance: `Callahan: "Density is the answer to housing costs. Anyone who tells you different has a backyard they're protecting."`,
+    corporation_incentive:`Callahan: "Nexus is a clean deal. Let me reach out to their people — there may be additional arrangements we could structure."`,
+    default:            `Callahan: "Is there a deal here? There's usually a deal to be made if you know how to structure it."`,
+  },
+
+  press: {
+    press_investigation:`Vasquez: "The story runs either way, Mayor. The only question is whether your office is in it — or above it."`,
+    factory_violation:  `Vasquez: "We've filed a FOIA on the Grayson compliance history. I'm telling you as a courtesy."`,
+    rezone_commercial:  `Vasquez: "We're pulling the Eastside parcel's ownership history. I wanted you to be aware."`,
+    default:            `Vasquez: "We're watching this one. What do you want on the record?"`,
+  },
+
+  police: {
+    crime_spike:        `Kovacs: "I've been asking for the overtime authorization for six weeks. The data speaks for itself. I need an answer."`,
+    strike_threat:      `Kovacs: "My people hold the line every single day. Morale is not a soft metric. I need you to understand that."`,
+    budget_shortfall:   `Kovacs: "Public safety funding is non-negotiable. I'll say that on record or off it."`,
+    default:            `Kovacs: "Public safety is non-negotiable. That's not politics. That's the job."`,
+  },
 };
 
 // ── STAFF ──
@@ -1901,6 +2223,12 @@ function initState() {
     newsLog: ['Millhaven awaits new leadership.', 'City Hall staff preparing transition.'],
     councilRelations: {}, // key: callahan_loyal, callahan_hostile, etc.
 
+    // ── HIDDEN TRAIT SYSTEM ──
+    consultCounts: {},     // personId -> number of times consulted (unique per event)
+    consultedThisEvent: {},// personId -> bool, resets each event
+    revealedTraits: {},    // personId -> bool, true when hidden trait revealed
+    consultLog: [],        // [{name, role, advice, isReveal, revealData}] — shown in situation room
+
     gameStatus: 'active'
   };
 }
@@ -1937,40 +2265,163 @@ function getStatClass(val) {
   return 'bad';
 }
 
-// Get advisor advice based on personality
-function getAdvice(event, advisorId) {
-  const staff = state.staff.find(s => s.id === advisorId);
-  if (!staff) return null;
-  const t = staff.traits;
+// ═══════════════════════════════════════════════════
+//  CONSULTATION SYSTEM
+// ═══════════════════════════════════════════════════
 
-  const adviceMap = {
-    'union_contract': {
-      loyal_analytical: `"The data supports partial concession. Full capitulation sets a bad precedent."`,
-      ambitious_emotional: `"Give them what they want. We need Torres's endorsement come election time."`,
-      principled_grudge: `"Hold firm. We cannot reward a slowdown threat. I have the memo ready."`,
-      pragmatic_analytical: `"A 6% counter-offer is defensible on the numbers. Get it in writing."`,
-      loyal_principled: `"There's a fair deal here. Find it. Don't make enemies you don't have to."`,
-      default: `"I'd recommend a counter-offer. Full concession sets a costly precedent."`,
-    },
-    'rezone_commercial': {
-      principled_grudge: `"This is the third time Callahan has brought this block. I've been watching him since 2019."`,
-      pragmatic_analytical: `"The revenue math works. Demand affordability requirements and take the deal."`,
-      loyal_analytical: `"Residents in Districts 2 and 3 will remember this. Factor that into November."`,
-      ambitious_emotional: `"Approve it. Callahan has deep pockets. We need him more than we need District 3."`,
-      default: `"There's a deal to be made here — but the terms matter enormously."`,
-    },
-    default_advisor: `"You know this situation better than I do. I'll support whatever you decide."`,
+// Get the pre-written advice for a person on the current event
+function getConsultationAdvice(personId, event) {
+  const table = CONSULTATION_ADVICE[personId];
+  if (!table) return `"I don't have a strong view on this one. You'll have to read the room."`;
+
+  // Try exact event match first, then fallback chain
+  return table[event.id]
+      || table[`default_${event.type}`]
+      || table[`default_${event.tag}`]
+      || table['default']
+      || `"I don't have a strong view on this one."`;
+}
+
+// Main consultation handler — called from person card CONSULT buttons
+function consultPerson(personId, personType) {
+  if (!state.awaitingDecision || state.decisionMade) return;
+
+  // Already consulted this person on this event?
+  const alreadyThisEvent = state.consultedThisEvent[personId];
+
+  // Find the person object
+  let person = null;
+  let displayRole = '';
+  if (personType === 'staff') {
+    person = state.staff.find(s => s.id === personId);
+    displayRole = person ? person.role : '';
+  } else if (personType === 'council') {
+    person = state.council.find(c => c.id === personId);
+    displayRole = person ? `${person.district} · ${person.factionLabel}` : '';
+  } else if (personType === 'faction') {
+    person = state.factions.find(f => f.id === personId);
+    displayRole = person ? 'Faction Leader' : '';
+  }
+
+  if (!person) return;
+
+  const event = state.currentEvent;
+  const advice = getConsultationAdvice(personId, event);
+
+  // Track consultation counts (only increment on first consult per event per person)
+  if (!alreadyThisEvent) {
+    state.consultedThisEvent[personId] = true;
+    state.consultCounts[personId] = (state.consultCounts[personId] || 0) + 1;
+  }
+
+  // Webb informant mechanic: consulting Webb has a chance to leak to Herald
+  if (personId === 'c6' && !alreadyThisEvent) {
+    const leaked = Math.random() < 0.55;
+    if (leaked) {
+      setTimeout(() => {
+        const leakMsg = state.revealedTraits['c6']
+          ? `HERALD EXCLUSIVE — Sources confirm: council member Webb briefed Herald on "${event.title}" before mayoral decision`
+          : `MILLHAVEN HERALD — Exclusive: details of upcoming City Hall decision on "${event.title.substring(0,30)}..." obtained by this paper`;
+        addTicker(leakMsg);
+      }, 1200);
+    }
+  }
+
+  // Build log entry
+  const entry = {
+    name: person.name,
+    role: displayRole,
+    advice,
+    isReveal: false,
+    personId
   };
 
-  const key = t.includes('principled') && t.includes('grudge') ? 'principled_grudge' :
-              t.includes('pragmatic') && t.includes('analytical') ? 'pragmatic_analytical' :
-              t.includes('loyal') && t.includes('analytical') ? 'loyal_analytical' :
-              t.includes('ambitious') && t.includes('emotional') ? 'ambitious_emotional' :
-              t.includes('loyal') && t.includes('principled') ? 'loyal_principled' : 'default';
+  // Check trait reveal
+  const hiddenData = HIDDEN_TRAITS_DATA[personId];
+  if (hiddenData && !state.revealedTraits[personId]) {
+    const count = state.consultCounts[personId];
+    if (count >= hiddenData.revealAt) {
+      state.revealedTraits[personId] = true;
+      const meta = HIDDEN_TRAIT_META[hiddenData.trait];
 
-  const evMap = adviceMap[event.id];
-  if (evMap) return evMap[key] || evMap['default'] || adviceMap.default_advisor;
-  return adviceMap.default_advisor;
+      // Add reveal entry after the advice entry
+      state.consultLog.unshift({
+        name: person.name,
+        role: displayRole,
+        advice,
+        isReveal: false,
+        personId
+      });
+      state.consultLog.unshift({
+        isReveal: true,
+        name: person.name,
+        trait: hiddenData.trait,
+        meta
+      });
+
+      // Keep log trimmed
+      if (state.consultLog.length > 6) state.consultLog = state.consultLog.slice(0, 6);
+      renderConsultLog();
+      renderPeopleTab(currentTab);
+      return;
+    }
+  }
+
+  // Normal log entry
+  state.consultLog.unshift(entry);
+  if (state.consultLog.length > 5) state.consultLog = state.consultLog.slice(0, 5);
+
+  renderConsultLog();
+  renderPeopleTab(currentTab); // refresh to update consult button state
+}
+
+// Render the consultation log into the situation body
+function renderConsultLog() {
+  let section = document.getElementById('consult-log-section');
+  if (!section) {
+    // Create and insert after event card
+    section = document.createElement('div');
+    section.id = 'consult-log-section';
+    section.className = 'consult-section';
+    const body = document.getElementById('situation-body');
+    body.appendChild(section);
+  }
+
+  if (state.consultLog.length === 0) {
+    section.innerHTML = '';
+    return;
+  }
+
+  const entriesHTML = state.consultLog.map(entry => {
+    if (entry.isReveal) {
+      return `
+        <div class="consult-entry ce-reveal">
+          <div class="ce-reveal-banner">⚑ Pattern Recognized — ${entry.name}</div>
+          <div class="ce-reveal-trait">${entry.meta.label}</div>
+          <div class="ce-reveal-desc">${entry.meta.desc}</div>
+        </div>
+      `;
+    }
+    return `
+      <div class="consult-entry">
+        <div class="ce-header">
+          <span class="ce-name">${entry.name}</span>
+          <span class="ce-role">${entry.role}</span>
+        </div>
+        <div class="ce-advice">${entry.advice}</div>
+      </div>
+    `;
+  }).join('');
+
+  section.innerHTML = `
+    <div class="consult-section-label">◈ Consultation Record</div>
+    ${entriesHTML}
+  `;
+}
+
+// Legacy getAdvice kept for pre-assigned advisor in event header (not full system)
+function getAdvice(event, advisorId) {
+  return getConsultationAdvice(advisorId, event);
 }
 
 // ═══════════════════════════════════════════════════
@@ -2167,6 +2618,10 @@ function advanceMonth() {
   state.turn++;
   state.month = (state.turn - 1) % 12;
   state.year = Math.ceil(state.turn / 12);
+
+  // Reset per-event consultation tracking
+  state.consultedThisEvent = {};
+  state.consultLog = [];
 
   processMonthlyTick();
 
@@ -2383,6 +2838,10 @@ function renderOutcome(event, choice, voteResult) {
   const existingCard = document.getElementById('event-card-main');
   if (existingCard) existingCard.remove();
 
+  // Remove consult log — decision made, log no longer needed in view
+  const consultSection = document.getElementById('consult-log-section');
+  if (consultSection) consultSection.remove();
+
   // Faction reactions
   let reactionsHTML = '';
   if (choice.factionEffects) {
@@ -2449,79 +2908,118 @@ function switchTab(tab) {
   renderPeopleTab(tab);
 }
 
+function buildHiddenTraitBadge(personId) {
+  const hiddenData = HIDDEN_TRAITS_DATA[personId];
+  if (!hiddenData) return '';
+  if (state.revealedTraits[personId]) {
+    const meta = HIDDEN_TRAIT_META[hiddenData.trait];
+    return `<span class="trait-badge ${meta.badge} trait-revealed-new" title="${meta.desc}">${meta.label}</span>`;
+  }
+  // Show unknown slot
+  const count = state.consultCounts[personId] || 0;
+  const needed = hiddenData.revealAt;
+  const dots = '·'.repeat(Math.min(count, needed));
+  return `<span class="trait-badge trait-hidden" title="Unknown trait — consult to learn more">${dots || '?'} HIDDEN</span>`;
+}
+
+function buildConsultBtn(personId, personType) {
+  if (!state.awaitingDecision || state.decisionMade) return '';
+  const consulted = !!state.consultedThisEvent[personId];
+  return `<button
+    class="consult-btn visible${consulted ? ' consulted' : ''}"
+    onclick="consultPerson('${personId}','${personType}')"
+    ${consulted ? 'disabled' : ''}>
+    ${consulted ? '✓ Consulted' : '▶ Request Briefing'}
+  </button>`;
+}
+
 function renderPeopleTab(tab) {
   const body = document.getElementById('people-body');
   body.innerHTML = '';
 
   if (tab === 'staff') {
     state.staff.forEach(s => {
-      const traitsHTML = s.traits.map(t =>
+      const knownBadges = s.traits.map(t =>
         `<span class="trait-badge trait-${t}">${TRAIT_LABELS[t]}</span>`
       ).join('');
+      const hiddenBadge = buildHiddenTraitBadge(s.id);
       const appColor = getApprovalColor(s.approval);
       const appFill = `background: linear-gradient(90deg, ${s.approval < 45 ? '#dc2626' : s.approval < 60 ? '#d97706' : '#16a34a'})`;
+      const consultBtn = buildConsultBtn(s.id, 'staff');
 
       const div = document.createElement('div');
       div.className = 'person-card';
       div.innerHTML = `
         <div class="person-name">${s.name}</div>
         <div class="person-role">${s.role}</div>
-        <div class="person-traits">${traitsHTML}</div>
+        <div class="person-traits">${knownBadges}${hiddenBadge}</div>
         <div class="person-approval">
           <span class="approval-mini-label">Loyalty</span>
           <div class="approval-mini-bar"><div class="approval-mini-fill" style="width:${s.approval}%; ${appFill}"></div></div>
           <span class="approval-mini-val" style="color:${appColor}">${Math.round(s.approval)}%</span>
         </div>
         <div style="font-size:0.61rem; color:var(--ink-faded); margin-top:4px; font-style:italic;">${s.bio}</div>
+        ${consultBtn}
       `;
       body.appendChild(div);
     });
+
   } else if (tab === 'council') {
     state.council.forEach(m => {
-      const traitsHTML = m.traits.map(t =>
+      const knownBadges = m.traits.map(t =>
         `<span class="trait-badge trait-${t}">${TRAIT_LABELS[t]}</span>`
       ).join('');
+      const hiddenBadge = buildHiddenTraitBadge(m.id);
       const appColor = getApprovalColor(m.approval);
       const appFill = `background: linear-gradient(90deg, ${m.approval < 45 ? '#dc2626' : m.approval < 60 ? '#d97706' : '#16a34a'})`;
       const isHostile = state.councilRelations[m.id] === 'hostile';
+      const consultBtn = buildConsultBtn(m.id, 'council');
 
       const div = document.createElement('div');
       div.className = 'council-member-card';
       div.innerHTML = `
-        <div style="display:flex; align-items:baseline; gap:4px; margin-bottom:2px;">
+        <div style="display:flex; align-items:baseline; gap:4px; margin-bottom:2px; flex-wrap:wrap;">
           <span class="council-name">${m.name}</span>
           <span class="council-faction-tag faction-${m.faction}">${m.factionLabel}</span>
           ${isHostile ? '<span style="font-size:0.58rem; color:var(--urgent);">⚑ HOSTILE</span>' : ''}
         </div>
         <div style="font-size:0.6rem; color:var(--ink-faded); margin-bottom:4px;">${m.district}</div>
-        <div class="person-traits">${traitsHTML}</div>
+        <div class="person-traits">${knownBadges}${hiddenBadge}</div>
         <div class="person-approval">
-          <span class="approval-mini-label">Mayor Approval</span>
+          <span class="approval-mini-label">Approval</span>
           <div class="approval-mini-bar"><div class="approval-mini-fill" style="width:${m.approval}%; ${appFill}"></div></div>
           <span class="approval-mini-val" style="color:${appColor}">${Math.round(m.approval)}%</span>
         </div>
+        ${consultBtn}
       `;
       body.appendChild(div);
     });
+
   } else if (tab === 'factions') {
     state.factions.forEach(f => {
       const appColor = getApprovalColor(f.approval);
       const appFill = `background: linear-gradient(90deg, ${f.approval < 45 ? '#dc2626' : f.approval < 60 ? '#d97706' : '#16a34a'})`;
-      const traitsHTML = f.traits.map(t =>
+      const knownBadges = f.traits.map(t =>
         `<span class="trait-badge trait-${t}">${TRAIT_LABELS[t]}</span>`
       ).join('');
+      const hiddenBadge = buildHiddenTraitBadge(f.id);
+      const consultBtn = buildConsultBtn(f.id, 'faction');
 
       const div = document.createElement('div');
       div.className = 'faction-card';
       div.innerHTML = `
         <div class="faction-name">${f.name}</div>
-        <div class="faction-leader" style="margin-bottom:3px;">Leader: <strong>${f.leader}</strong> — <em style="font-size:0.6rem;">${f.leaderPersonality}</em></div>
-        <div class="person-traits">${traitsHTML}</div>
+        <div class="faction-leader" style="margin-bottom:3px;">
+          Leader: <strong>${f.leader}</strong>
+          <em style="font-size:0.6rem; display:block; margin-top:1px;">${f.leaderPersonality}</em>
+        </div>
+        <div class="person-traits">${knownBadges}${hiddenBadge}</div>
         <div class="person-approval" style="margin-top:4px;">
           <span class="approval-mini-label">Support</span>
           <div class="approval-mini-bar"><div class="approval-mini-fill" style="width:${f.approval}%; ${appFill}"></div></div>
           <span class="approval-mini-val" style="color:${appColor}">${Math.round(f.approval)}%</span>
         </div>
+        ${consultBtn}
       `;
       body.appendChild(div);
     });
