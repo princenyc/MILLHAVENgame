@@ -5054,6 +5054,12 @@ function initState() {
     initiativeResolved: false,
     usedProposals: [],
 
+    // ── AMBIENT EVENTS ──
+    pendingAmbientEvent: null,
+    currentAmbientEvent: null,
+    ambientAwaitingDecision: false,
+    usedAmbientEvents: [],
+
     // ── FACTION AGENCY SYSTEM ──
     factionGrievances: {},
     factionPressure: {},
@@ -5661,26 +5667,160 @@ const PROPOSALS_POOL = [
       outcome: 'Nair and Torres vote against it on civil liberties grounds. Kovacs calls it "the council protecting crime." Webb abstains and says nothing publicly.'
     },
     weight: 8
+  },
+  {
+    id: 'prop_tax_incentive_small_biz',
+    title: 'Small Business Tax Relief Program',
+    category: 'development',
+    summary: 'Three-year tax abatement for businesses under $2M revenue opening in underserved districts. Estimated $180k annual revenue impact. Targets vacancy rates on Main corridor.',
+    councilKey: 'business_friendly',
+    factionLeans: { business: 8, residents: 6, labor: 4, developers: -2, press: 3, police: 0 },
+    onPass: {
+      effects: [{ stat: 'development', val: 5 }, { stat: 'budget', val: -180000 }],
+      factionEffects: { business: 8, residents: 5, labor: 3 },
+      outcome: 'Twenty-two new businesses apply within 60 days. The Main corridor vacancy rate drops six points over the next quarter. Slade notes the revenue hole in his next memo.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { business: -4, residents: 3 },
+      outcome: 'Torres killed it — not enough prevailing wage protection. Beaumont sends a terse note. The vacancy rate holds.'
+    },
+    weight: 8
+  },
+  {
+    id: 'prop_climate_resilience',
+    title: 'Climate Resilience Infrastructure Audit',
+    category: 'infrastructure',
+    summary: 'Commission a city-wide audit of flood zones, aging pipes, and heat vulnerability. $40k cost. No immediate fixes — positions Millhaven for federal infrastructure grants.',
+    councilKey: 'neutral',
+    factionLeans: { residents: 8, press: 6, labor: 3, business: -1, developers: -3, police: 0 },
+    onPass: {
+      effects: [{ stat: 'budget', val: -40000 }],
+      factionEffects: { residents: 6, press: 5 },
+      outcome: 'Audit complete in two months. Three grant applications go out. Merritt calls it "the first sensible long-term planning this office has done." Results from grants pending.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { residents: -4, press: -3 },
+      outcome: 'Callahan votes it down as "spending money to write reports." The Herald runs a short item. Merritt says nothing and updates his resume.'
+    },
+    weight: 7
+  },
+  {
+    id: 'prop_mental_health_response',
+    title: 'Mental Health Co-Responder Program',
+    category: 'public-safety',
+    summary: 'Embed licensed clinicians with police for non-violent crisis calls. $65k/month. Reduces unnecessary arrests, improves outcomes, slightly reduces police overtime.',
+    councilKey: 'community_friendly',
+    factionLeans: { residents: 10, labor: 3, press: 7, police: -4, business: 2, developers: 0 },
+    onPass: {
+      effects: [{ stat: 'crime', val: 4 }, { stat: 'services', val: 4 }, { stat: 'budget', val: -65000 }],
+      factionEffects: { residents: 9, press: 6, police: -5, labor: 3 },
+      outcome: 'Kovacs is skeptical publicly and cooperative privately — the overtime savings matter to him. First-month data is encouraging. The Herald runs it as a model program.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { police: 4, residents: -7, press: -5 },
+      outcome: 'Police union lobbied hard. Callahan provided cover. Nkemelu releases a statement. The Herald editorial board weighs in — not in your favor.'
+    },
+    weight: 9
+  },
+  {
+    id: 'prop_youth_employment',
+    title: 'Summer Youth Employment Initiative',
+    category: 'services',
+    summary: '500 paid summer positions for 16-21 year olds across city departments and nonprofit partners. $220k one-time cost. Strong community optics. Targets high-unemployment districts.',
+    councilKey: 'labor_friendly',
+    factionLeans: { labor: 10, residents: 12, press: 6, business: 2, police: 4, developers: 0 },
+    onPass: {
+      effects: [{ stat: 'services', val: 5 }, { stat: 'budget', val: -220000 }],
+      factionEffects: { labor: 8, residents: 12, press: 5 },
+      outcome: 'Every council member votes yes — even Callahan, reading the room. The Herald runs profiles of three participants. Crime in participating districts dips slightly over the summer.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { residents: -8, labor: -6 },
+      outcome: 'It fails on a budget amendment procedural vote Beaumont engineered. Torres is publicly furious. Three council members issue a joint statement distancing themselves from the "no" vote.'
+    },
+    weight: 9
+  },
+  {
+    id: 'prop_zoning_streamline',
+    title: 'Zoning Reform: Streamline Permit Process',
+    category: 'development',
+    summary: 'Cut residential permit review from 18 weeks to 6 through digital processing and dedicated staff. Requires $55k in system upgrades. Strong business support. Some resident concern about oversight.',
+    councilKey: 'business_friendly',
+    factionLeans: { developers: 10, business: 8, labor: 2, residents: -4, press: 2, police: 0 },
+    onPass: {
+      effects: [{ stat: 'development', val: 6 }, { stat: 'budget', val: -55000 }],
+      factionEffects: { developers: 8, business: 7, residents: -5 },
+      outcome: 'Processing times drop to 7 weeks by month three. Twelve projects unlock. Nkemelu calls it "a gift to developers wrapped in efficiency language." She\'s not wrong.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { developers: -5, business: -4, residents: 4 },
+      outcome: 'Nair and Torres block it pending a community oversight amendment. Callahan calls it "government getting in its own way." Merritt quietly agrees.'
+    },
+    weight: 8
+  },
+  {
+    id: 'prop_senior_services',
+    title: 'Senior Services Expansion',
+    category: 'services',
+    summary: 'Expand meal delivery, transit assistance, and home care coordination for residents 65+. $50k/month. Affects 3,200 households. High approval potential, zero political opposition.',
+    councilKey: 'community_friendly',
+    factionLeans: { residents: 14, labor: 6, press: 5, police: 0, business: 1, developers: 0 },
+    onPass: {
+      effects: [{ stat: 'services', val: 6 }, { stat: 'budget', val: -50000 }],
+      factionEffects: { residents: 12, labor: 5 },
+      outcome: 'Unanimous vote. First program in the state to integrate all three services. The Herald runs it as a feature. Torres calls it "basic human decency, finally."',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { residents: -10, labor: -5, press: -6 },
+      outcome: 'Budget amendment from Beaumont kills it — "not a core city function." The response from constituents is immediate and loud. Webb publicly breaks with the business bloc for the first time.'
+    },
+    weight: 9
+  },
+  {
+    id: 'prop_public_art',
+    title: 'Millhaven Public Art & Blight Remediation Fund',
+    category: 'development',
+    summary: 'A $75k fund for murals, public installations, and facade grants in three districts. Soft politics, high visibility. Developers like it. Residents love it. Slade will hate it.',
+    councilKey: 'neutral',
+    factionLeans: { residents: 8, press: 7, business: 3, developers: 4, labor: 2, police: 0 },
+    onPass: {
+      effects: [{ stat: 'development', val: 3 }, { stat: 'housing', val: 2 }, { stat: 'budget', val: -75000 }],
+      factionEffects: { residents: 7, press: 6 },
+      outcome: 'Fourteen installations approved. Three neighborhood organizations apply in the first week. The Herald runs a photo essay. Slade submits a memo titled "Seventy-Five Thousand Dollars."',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { residents: -3, press: -2 },
+      outcome: 'Torres abstains citing cost. Beaumont votes no — "not a government function." It fails 3-4. Nobody is particularly angry. Nobody remembers it happened.'
+    },
+    weight: 6
   }
 ];
 
 function buildInitiativeDeck() {
   let pool = [...PROPOSALS_POOL];
-  // Filter out recently used proposals
   const recentIds = state.usedProposals || [];
   let available = pool.filter(p => !recentIds.includes(p.id));
-  if (available.length < 3) {
+
+  // Only reset when the entire pool has been cycled through
+  if (available.length === 0) {
     state.usedProposals = [];
     available = pool;
   }
 
-  // Weighted selection of 3
+  // Weighted selection of 3 from what's available
   let weighted = [];
   available.forEach(p => { for (let i = 0; i < (p.weight || 8); i++) weighted.push(p); });
   let selected = [];
   let used = new Set();
   let attempts = 0;
-  while (selected.length < 3 && attempts < 200) {
+  while (selected.length < Math.min(3, available.length) && attempts < 200) {
     const pick = weighted[Math.floor(Math.random() * weighted.length)];
     if (!used.has(pick.id)) { selected.push(pick); used.add(pick.id); }
     attempts++;
@@ -6268,6 +6408,511 @@ function recalcApproval() {
   s.approval = clamp(Math.round(avgFaction * 0.55 + avgStats * 0.35 + 10 - unemploymentPenalty), 5, 95);
 }
 
+// ═══════════════════════════════════════════════════
+//  AMBIENT EVENT SYSTEM
+//  Random city-life events, ~22% chance per month
+//  Fire AFTER the main event resolves, via advanceMonth
+//  Short, sharp, no consultation phase — 2 choices max
+// ═══════════════════════════════════════════════════
+
+const AMBIENT_EVENTS = [
+  {
+    id: 'amb_school_shooting',
+    title: 'School Shooting — Eastside Middle School',
+    tag: 'CRISIS',
+    urgent: true,
+    body: 'A student opened fire in the cafeteria at Eastside Middle School this morning. Two students injured, one critically. School is locked down. City Hall phones haven\'t stopped. The governor\'s office is calling. The Herald has a reporter on scene.',
+    statHit: { crime: -8, services: -4 },
+    approvalHit: -6,
+    factionHit: { police: -5, residents: -8 },
+    choices: [
+      {
+        label: 'Go to the school — be visible, be present',
+        approvalMod: +5,
+        factionMod: { residents: 8, press: 6 },
+        statMod: {},
+        outcome: 'You arrive within the hour. Parents recognize you. The Herald photographs you with the principal. The governor\'s call goes better. You don\'t fix anything — but you showed up.'
+      },
+      {
+        label: 'Convene an emergency public safety task force',
+        approvalMod: +2,
+        factionMod: { police: 5, residents: 3, press: -3 },
+        statMod: { crime: 2 },
+        outcome: 'Kovacs chairs the first meeting by end of day. The task force will take weeks. Vasquez calls it "governance by committee during a crisis." He\'s not entirely wrong.'
+      }
+    ]
+  },
+  {
+    id: 'amb_warehouse_fire',
+    title: 'Four-Alarm Fire — Riverside Warehouse District',
+    tag: 'EMERGENCY',
+    urgent: true,
+    body: 'A warehouse fire in the Riverside district has spread to two adjacent structures. Forty families in neighboring apartments have been evacuated. No fatalities — yet. Fire department is on scene but resources are stretched. Three units are responding from neighboring municipalities.',
+    statHit: { crime: -5, infrastructure: -4 },
+    approvalHit: -3,
+    factionHit: { police: -3, residents: -5 },
+    choices: [
+      {
+        label: 'Declare local emergency — unlock reserve funds',
+        approvalMod: +4,
+        factionMod: { residents: 7, police: 6, labor: 4 },
+        statMod: { infrastructure: 3 },
+        outcome: 'The declaration moves fast. Emergency housing for 40 families within 24 hours. Recovery costs hit the reserve. Kovacs acknowledges the call publicly.'
+      },
+      {
+        label: 'Coordinate with county — share the cost and response',
+        approvalMod: +1,
+        factionMod: { residents: 3, business: 3 },
+        statMod: {},
+        outcome: 'County agrees. Response is slower than a solo declaration. Families are housed by day two. The Herald notes the delay. Recovery cost is split.'
+      }
+    ]
+  },
+  {
+    id: 'amb_viral_moment',
+    title: 'Mayor Goes Viral — For the Wrong Reason',
+    tag: 'PRESS',
+    urgent: false,
+    body: 'A clip from last week\'s council meeting — you, visibly impatient during a constituent\'s three-minute comment — has 400,000 views by morning. Local media picked it up. National political sites are running it under the headline "Mayor Dismisses Resident." Your comms team is in crisis mode.',
+    statHit: {},
+    approvalHit: -5,
+    factionHit: { press: -8, residents: -6 },
+    choices: [
+      {
+        label: 'Apologize directly — call the constituent personally',
+        approvalMod: +4,
+        factionMod: { residents: 8, press: 5 },
+        statMod: {},
+        outcome: 'You call. She accepts. The Herald runs the apology with the same prominence as the original clip. Approval stabilizes. Chen says it\'s the fastest kill she\'s ever executed.'
+      },
+      {
+        label: 'Say nothing — let the news cycle move on',
+        approvalMod: -2,
+        factionMod: { press: -5, residents: -4 },
+        statMod: {},
+        outcome: 'The clip lives another 48 hours. A city council member quotes it in a floor statement. By day four it\'s gone. The damage is real but finite.'
+      }
+    ]
+  },
+  {
+    id: 'amb_winter_storm',
+    title: 'Severe Winter Storm — City Paralyzed',
+    tag: 'WEATHER',
+    urgent: true,
+    body: 'A nor\'easter dropped 22 inches on Millhaven overnight. Three main roads are impassable. School is cancelled. Seven seniors are reported isolated in the Westside district without power. Salt and plow resources are running low — a procurement failure flagged by DPW three months ago.',
+    statHit: { infrastructure: -5, services: -6 },
+    approvalHit: -4,
+    factionHit: { residents: -6, labor: -3 },
+    choices: [
+      {
+        label: 'All hands — emergency deployment citywide',
+        approvalMod: +5,
+        factionMod: { labor: 8, residents: 7, police: 4 },
+        statMod: { infrastructure: 2, services: 3 },
+        outcome: 'Twelve-hour operation. Overtime budget takes a hit. All seven isolated seniors reached by evening. Merritt submits a procurement reform memo the next morning. City Hall gets good press.'
+      },
+      {
+        label: 'Prioritize main corridors — triage the response',
+        approvalMod: 0,
+        factionMod: { business: 4, residents: -5 },
+        statMod: { infrastructure: 1 },
+        outcome: 'Main roads clear within 18 hours. Two of the seven seniors aren\'t reached until the following morning. The Herald runs a photo of one of them. Torres calls it "government for commuters, not people."'
+      }
+    ]
+  },
+  {
+    id: 'amb_police_misconduct',
+    title: 'Police Misconduct Video Surfaces',
+    tag: 'CRISIS',
+    urgent: true,
+    body: 'Footage from a body camera — leaked, not released — shows an officer using excessive force during a routine stop in District 4. The officer is currently active duty. Community organizations are calling for immediate suspension. The union is calling for patience. The Herald has the clip.',
+    statHit: { crime: -4 },
+    approvalHit: -5,
+    factionHit: { residents: -8, press: -6, police: 4 },
+    choices: [
+      {
+        label: 'Suspend the officer pending investigation',
+        approvalMod: +6,
+        factionMod: { residents: 10, press: 7, police: -12 },
+        statMod: { crime: 2 },
+        outcome: 'Kovacs issues a statement supporting due process while complying. The union files a grievance. Community organizations hold a supportive rally. Vasquez calls it "decisive." The grievance will take months to resolve.'
+      },
+      {
+        label: 'Order internal review — let the process work',
+        approvalMod: -3,
+        factionMod: { police: 6, residents: -10, press: -8 },
+        statMod: {},
+        outcome: 'The union is satisfied. Three community groups announce a march for next week. The Herald editorial board runs "The Mayor Blinked." This one stays in the news.'
+      }
+    ]
+  },
+  {
+    id: 'amb_budget_windfall',
+    title: 'State Grant — Unexpected Budget Windfall',
+    tag: 'OPPORTUNITY',
+    urgent: false,
+    body: 'A state infrastructure grant Merritt applied for nine months ago — and everyone forgot about — just came through. $680,000, no strings, must be spent within 18 months on qualifying capital projects. You have 30 days to submit an allocation plan.',
+    statHit: {},
+    approvalHit: +2,
+    factionHit: { press: 4 },
+    choices: [
+      {
+        label: 'Infrastructure repair — Merritt\'s priority list',
+        approvalMod: +3,
+        factionMod: { labor: 6, residents: 5, developers: 3 },
+        statMod: { infrastructure: 10 },
+        outcome: 'Merritt\'s list goes to contract within 45 days. Infrastructure scores start climbing the following month. He sends you a one-line email: "Thank you."'
+      },
+      {
+        label: 'Split across three community priorities',
+        approvalMod: +4,
+        factionMod: { residents: 9, labor: 5, press: 4 },
+        statMod: { infrastructure: 4, services: 4, housing: 3 },
+        outcome: 'Three districts each get a visible project. The Herald covers the announcement. Nothing gets fully funded, but everything moves. Merritt submits a memo about "funding dilution." You ignore it.'
+      }
+    ]
+  },
+  {
+    id: 'amb_teachers_strike',
+    title: 'Teachers\' Strike — Schools Closed',
+    tag: 'LABOR',
+    urgent: true,
+    body: 'The Millhaven Teachers\' Union has voted to strike over a contract dispute with the school board — technically separate from city government, but try explaining that to 22,000 parents who just called the mayor\'s office. School has been closed for three days. The Herald is running it front page daily.',
+    statHit: { services: -6 },
+    approvalHit: -5,
+    factionHit: { labor: 8, residents: -7, press: -4 },
+    choices: [
+      {
+        label: 'Intervene publicly — offer the mayor\'s office as mediator',
+        approvalMod: +4,
+        factionMod: { residents: 7, labor: 4, press: 5 },
+        statMod: { services: 3 },
+        outcome: 'Schools reopen in 48 hours with a framework agreement. You get credit you didn\'t entirely earn. The school board is annoyed. Residents don\'t care. Torres calls it "a good use of political capital for once."'
+      },
+      {
+        label: 'Stay out — it\'s the school board\'s jurisdiction',
+        approvalMod: -3,
+        factionMod: { residents: -8, press: -5 },
+        statMod: {},
+        outcome: 'Legally correct. Politically painful. Strike runs six days. Parents are furious and don\'t understand the jurisdictional argument. The Herald runs a quote from a parent that will haunt you.'
+      }
+    ]
+  },
+  {
+    id: 'amb_business_closure',
+    title: 'Major Employer Announces Closure',
+    tag: 'ECONOMIC',
+    urgent: true,
+    body: 'Millhaven Manufacturing — 340 employees, anchor tenant of the Eastside industrial corridor — has announced it is closing its local plant and moving operations to Georgia. The closure takes effect in 90 days. It\'s the single largest private employer in District 3.',
+    statHit: { development: -8, housing: -3 },
+    approvalHit: -6,
+    factionHit: { labor: -10, business: -5, residents: -5 },
+    choices: [
+      {
+        label: 'Emergency economic response — incentive package to retain',
+        approvalMod: +3,
+        factionMod: { labor: 8, business: 5, residents: 4 },
+        statMod: { development: 4 },
+        outcome: 'The package is real money — tax abatement, infrastructure commitment, workforce training. Company agrees to a 6-month review. It might work. It might not. You bought time.'
+      },
+      {
+        label: 'Pivot — invest in workforce transition instead',
+        approvalMod: +1,
+        factionMod: { labor: 3, residents: 3, business: -3 },
+        statMod: { services: 3 },
+        outcome: 'The closure proceeds. 340 workers enter a city-backed transition program. It\'s honest about what\'s possible. Some residents appreciate the candor. Torres says "at least you didn\'t pretend."'
+      }
+    ]
+  },
+  {
+    id: 'amb_water_contamination',
+    title: 'Water Quality Alert — District 6',
+    tag: 'CRISIS',
+    urgent: true,
+    body: 'The DPW has detected elevated lead levels in water samples from 14 blocks in District 6. An aging pipe network is the likely source. 2,200 residents have been notified — technically. The actual notification was a mailer. Nobody read it. The Herald found out from a resident, not the city.',
+    statHit: { infrastructure: -6, services: -5 },
+    approvalHit: -8,
+    factionHit: { residents: -10, press: -10 },
+    choices: [
+      {
+        label: 'Full public disclosure — emergency pipe replacement',
+        approvalMod: +5,
+        factionMod: { residents: 8, press: 7 },
+        statMod: { infrastructure: 4 },
+        outcome: 'Press conference same day. Water distribution sites open within hours. Pipe replacement begins in 30 days. The Herald editorial is still harsh — but credits the response. This is the only path that doesn\'t get worse.'
+      },
+      {
+        label: 'Manage the narrative — controlled information release',
+        approvalMod: -6,
+        factionMod: { press: -15, residents: -12 },
+        statMod: {},
+        outcome: 'Vasquez has three more sources by morning. The Herald runs a five-day series. A council hearing is called. This becomes the defining story of your administration whether you want it to or not.'
+      }
+    ]
+  },
+  {
+    id: 'amb_federal_audit',
+    title: 'Federal Audit — HUD Reviews Housing Grants',
+    tag: 'FEDERAL',
+    urgent: false,
+    body: 'HUD has opened a routine compliance review of Millhaven\'s federal housing grant spending — $2.1M over three years. Routine audits become non-routine when they find things. Your legal counsel is asking to see every file from the past 36 months.',
+    statHit: {},
+    approvalHit: -2,
+    factionHit: { press: -4 },
+    choices: [
+      {
+        label: 'Full cooperation — open every file immediately',
+        approvalMod: +3,
+        factionMod: { press: 5, residents: 3 },
+        statMod: {},
+        outcome: 'Audit closes in six weeks. Minor documentation issues, no findings, one recommendation. Vasquez runs one paragraph. Your legal counsel bills 80 hours.'
+      },
+      {
+        label: 'Cooperate — but coordinate messaging first',
+        approvalMod: 0,
+        factionMod: { press: -3 },
+        statMod: {},
+        outcome: 'The 48-hour delay before cooperation is noted in the audit report. Nothing illegal. The Herald runs "City Hall slows federal housing review" as a brief. It\'s fine. Barely.'
+      }
+    ]
+  },
+  {
+    id: 'amb_heat_emergency',
+    title: 'Extreme Heat Emergency — Record Temperatures',
+    tag: 'WEATHER',
+    urgent: true,
+    body: 'Millhaven is in day four of a heat emergency — 103 degrees today, 107 forecast tomorrow. Eleven heat-related hospitalizations. City cooling centers are at capacity. Three seniors have died. The state has activated emergency protocols. DPW reports the power grid is straining.',
+    statHit: { services: -5, crime: -3 },
+    approvalHit: -5,
+    factionHit: { residents: -7, police: -3 },
+    choices: [
+      {
+        label: 'Open all public buildings as cooling centers 24/7',
+        approvalMod: +6,
+        factionMod: { residents: 10, labor: 6, press: 5 },
+        statMod: { services: 4 },
+        outcome: 'Libraries, rec centers, city hall lobby — all open overnight. Hospitalizations drop. Two more deaths over the week. Every one is one too many, but the response holds. Torres helps organize volunteers.'
+      },
+      {
+        label: 'Coordinate with county — expand regional response',
+        approvalMod: +2,
+        factionMod: { residents: 4, business: 3 },
+        statMod: { services: 2 },
+        outcome: 'County agreement takes a day to finalize. Coverage improves on day six. The Herald runs the names of the people who died waiting. The response was adequate. It did not feel adequate.'
+      }
+    ]
+  },
+  {
+    id: 'amb_protest_march',
+    title: 'Mass Protest — City Hall Steps',
+    tag: 'POLITICAL',
+    urgent: false,
+    body: 'Three hundred residents have gathered on City Hall steps. The coalition includes housing advocates, labor organizers, and two neighborhood associations. Their demands are specific: affordable housing commitment, contract transparency, and a meeting with the mayor within 48 hours. The Herald is covering live.',
+    statHit: {},
+    approvalHit: -3,
+    factionHit: { residents: 5, labor: 5, press: -3 },
+    choices: [
+      {
+        label: 'Walk out and meet them — right now',
+        approvalMod: +7,
+        factionMod: { residents: 12, labor: 8, press: 8 },
+        statMod: {},
+        outcome: 'You walk out at 2pm. The crowd goes quiet. You stand at the mic for 20 minutes and take questions. You don\'t promise everything. You promise a meeting within 48 hours and you keep it. Vasquez calls it "the most effective political move of this administration."'
+      },
+      {
+        label: 'Send Chief of Staff — schedule a formal meeting',
+        approvalMod: -1,
+        factionMod: { residents: -5, labor: -4, press: -5 },
+        statMod: {},
+        outcome: 'Okafor handles it professionally. The crowd reads it as avoidance. Nkemelu tells the Herald "the mayor sent a staffer." The meeting happens three days later. The moment is gone.'
+      }
+    ]
+  }
+];
+
+// Called from advanceMonth — ~22% base chance, modified by city conditions
+function rollAmbientEvent() {
+  if (!state.pendingAmbientEvent) state.pendingAmbientEvent = null;
+
+  let chance = 0.22;
+  // Low stats increase chance
+  const s = state.city.stats;
+  if (s.infrastructure < 45) chance += 0.06;
+  if (s.crime < 45)          chance += 0.06;
+  if (s.services < 45)       chance += 0.04;
+
+  if (Math.random() > chance) return;
+
+  // Filter out recently fired ambient events
+  if (!state.usedAmbientEvents) state.usedAmbientEvents = [];
+  let pool = AMBIENT_EVENTS.filter(e => !state.usedAmbientEvents.includes(e.id));
+  if (pool.length === 0) {
+    state.usedAmbientEvents = [];
+    pool = AMBIENT_EVENTS;
+  }
+
+  // Weight urgent events higher when city is stressed
+  const stressed = s.approval < 45 || s.crime < 45 || s.infrastructure < 45;
+  const weighted = [];
+  pool.forEach(e => {
+    const w = (stressed && e.urgent) ? 3 : 1;
+    for (let i = 0; i < w; i++) weighted.push(e);
+  });
+
+  const pick = weighted[Math.floor(Math.random() * weighted.length)];
+  state.usedAmbientEvents.push(pick.id);
+  state.pendingAmbientEvent = pick;
+}
+
+// Called after main event resolves — renders the ambient event as a fast overlay
+function fireAmbientEvent() {
+  const amb = state.pendingAmbientEvent;
+  if (!amb) return;
+  state.pendingAmbientEvent = null;
+
+  // Apply immediate stat/approval hits
+  const s = state.city.stats;
+  if (amb.statHit) {
+    Object.entries(amb.statHit).forEach(([stat, val]) => {
+      if (s[stat] !== undefined) s[stat] = clamp(s[stat] + val, 0, 100);
+    });
+  }
+  if (amb.approvalHit) s.approval = clamp(s.approval + amb.approvalHit, 5, 95);
+  if (amb.factionHit) {
+    Object.entries(amb.factionHit).forEach(([fid, val]) => {
+      const f = state.factions.find(x => x.id === fid);
+      if (f) f.approval = clamp(f.approval + val, 5, 95);
+      onFactionApprovalHit(fid, val);
+    });
+  }
+  recalcApproval();
+
+  state.ambientAwaitingDecision = true;
+  state.currentAmbientEvent = amb;
+
+  addTicker(`BREAKING — ${amb.tag}: ${amb.title}`);
+  renderAmbientEvent(amb);
+  updateUI();
+}
+
+function renderAmbientEvent(amb) {
+  const body = document.getElementById('situation-body');
+  while (body.lastChild) body.removeChild(body.lastChild);
+
+  const tagColor = amb.urgent ? 'var(--urgent)' : 'var(--brass)';
+
+  const card = document.createElement('div');
+  card.id = 'ambient-event-card';
+  card.innerHTML = `
+    <div style="
+      border-left: 3px solid ${tagColor};
+      background: var(--paper-light);
+      padding: 14px 16px;
+      margin-bottom: 10px;
+    ">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+        <span style="
+          font-family:'Arial',sans-serif; font-size:0.55rem; font-weight:700;
+          text-transform:uppercase; letter-spacing:0.1em;
+          color:${tagColor}; border:1px solid ${tagColor};
+          padding:2px 6px; border-radius:2px;
+        ">${amb.tag}</span>
+        <span style="font-family:'Playfair Display',serif; font-size:0.92rem; font-weight:700; color:var(--ink);">${amb.title}</span>
+      </div>
+      <div style="font-size:0.68rem; color:var(--ink); line-height:1.75; margin-bottom:12px;">${amb.body}</div>
+      <div style="font-size:0.6rem; color:var(--ink-faded); font-style:italic; margin-bottom:10px;">
+        This requires an immediate response. How do you respond, Mayor?
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px;">
+        ${amb.choices.map((ch, i) => `
+          <button onclick="resolveAmbientEvent(${i})" style="
+            text-align:left; padding:10px 12px;
+            background:var(--paper); border:1px solid var(--paper-darker);
+            cursor:pointer; font-family:'Playfair Display',serif;
+            font-size:0.68rem; color:var(--ink);
+            transition: background 0.15s;
+          " onmouseover="this.style.background='var(--paper-darker)'"
+             onmouseout="this.style.background='var(--paper)'">
+            <span style="font-weight:700; color:${tagColor}; margin-right:4px;">${String.fromCharCode(65+i)}.</span>
+            ${ch.label}
+          </button>
+        `).join('')}
+      </div>
+    </div>
+  `;
+
+  body.appendChild(card);
+
+  // Stamp
+  document.getElementById('event-type-stamp').textContent = '⚡ BREAKING';
+  document.getElementById('event-type-stamp').style.color = tagColor;
+  document.getElementById('event-type-stamp').style.borderColor = tagColor;
+  document.getElementById('advance-btn').disabled = true;
+}
+
+function resolveAmbientEvent(choiceIndex) {
+  if (!state.ambientAwaitingDecision) return;
+  state.ambientAwaitingDecision = false;
+
+  const amb = state.currentAmbientEvent;
+  const choice = amb.choices[choiceIndex];
+
+  // Apply choice effects
+  const s = state.city.stats;
+  if (choice.approvalMod) s.approval = clamp(s.approval + choice.approvalMod, 5, 95);
+  if (choice.statMod) {
+    Object.entries(choice.statMod).forEach(([stat, val]) => {
+      if (s[stat] !== undefined) s[stat] = clamp(s[stat] + val, 0, 100);
+    });
+  }
+  if (choice.factionMod) {
+    Object.entries(choice.factionMod).forEach(([fid, val]) => {
+      const f = state.factions.find(x => x.id === fid);
+      if (f) f.approval = clamp(f.approval + val, 5, 95);
+      onFactionApprovalHit(fid, val);
+    });
+  }
+  recalcApproval();
+
+  // Render outcome
+  const body = document.getElementById('situation-body');
+  while (body.lastChild) body.removeChild(body.lastChild);
+
+  const outcome = document.createElement('div');
+  outcome.innerHTML = `
+    <div style="
+      border-left: 3px solid var(--brass);
+      background: var(--paper-light);
+      padding: 14px 16px;
+    ">
+      <div style="font-family:'Arial',sans-serif; font-size:0.58rem; font-weight:700;
+        text-transform:uppercase; letter-spacing:0.08em; color:var(--brass); margin-bottom:6px;">
+        ${amb.tag} — Resolved
+      </div>
+      <div style="font-family:'Playfair Display',serif; font-size:0.78rem; font-weight:700;
+        color:var(--ink); margin-bottom:8px;">${amb.title}</div>
+      <div style="font-size:0.62rem; color:var(--ink-faded); margin-bottom:8px;">
+        Your decision: <em>${choice.label}</em>
+      </div>
+      <div style="font-size:0.68rem; color:var(--ink); line-height:1.75;">${choice.outcome}</div>
+    </div>
+  `;
+  body.appendChild(outcome);
+
+  addTicker(`CITY HALL — ${amb.title}: "${choice.label.substring(0, 50)}"`);
+
+  // Re-enable advance
+  const advBtn = document.getElementById('advance-btn');
+  advBtn.disabled = false;
+  advBtn.textContent = '▶ Advance to Next Month';
+
+  document.getElementById('event-type-stamp').textContent = 'Resolved';
+  document.getElementById('event-type-stamp').style.color = 'var(--neutral)';
+  document.getElementById('event-type-stamp').style.borderColor = 'var(--neutral)';
+
+  updateUI();
+}
+
 function processMonthlyTick() {
   const s = state.city.stats;
   const b = state.city.budget;
@@ -6386,7 +7031,7 @@ function selectEvent() {
 // ═══════════════════════════════════════════════════
 
 function advanceMonth() {
-  if (state.awaitingDecision || state.schedulePhase || state.initiativePhase) return;
+  if (state.awaitingDecision || state.schedulePhase || state.initiativePhase || state.ambientAwaitingDecision) return;
   if (state.gameStatus !== 'active') return;
 
   state.turn++;
@@ -6399,6 +7044,7 @@ function advanceMonth() {
   state.selectedActions = [];
 
   processMonthlyTick();
+  rollAmbientEvent(); // ~22% chance, stores in state.pendingAmbientEvent
 
   // Check bankruptcy
   if (state.city.budget.balance < -500000) {
@@ -6749,6 +7395,12 @@ function makeChoice(choiceIndex) {
 
   // Schedule any consequence events triggered by this choice
   scheduleConsequenceFromChoice(choice, event);
+
+  // If an ambient event is queued this month, fire it now
+  if (state.pendingAmbientEvent) {
+    // Small delay so outcome is readable before ambient card replaces it
+    setTimeout(() => fireAmbientEvent(), 1800);
+  }
 }
 
 function generateHeadline() {
