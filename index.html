@@ -5881,6 +5881,9 @@ function simulateInitiativeVote(proposal) {
 
 function finishInitiativePhase() {
   state.initiativePhase = false;
+  // Wipe the initiative result before the schedule renders
+  const body = document.getElementById('situation-body');
+  while (body.lastChild) body.removeChild(body.lastChild);
   enterSchedulePhase();
 }
 
@@ -6625,7 +6628,7 @@ function renderSchedule() {
     </div>
   `;
 
-  while (body.children.length > 1) body.removeChild(body.lastChild);
+  while (body.lastChild) body.removeChild(body.lastChild);
   body.appendChild(card);
 }
 
@@ -6914,7 +6917,7 @@ function renderEvent(event) {
   `;
 
   // Clear and add
-  while (body.children.length > 1) body.removeChild(body.lastChild);
+  while (body.lastChild) body.removeChild(body.lastChild);
   body.appendChild(card);
 
   document.getElementById('advance-btn').disabled = true;
@@ -6980,7 +6983,7 @@ function renderOutcome(event, choice, voteResult) {
     ${voteHTML}
   `;
 
-  while (body.children.length > 1) body.removeChild(body.lastChild);
+  while (body.lastChild) body.removeChild(body.lastChild);
   body.appendChild(outcomeCard);
 
   const advBtn = document.getElementById('advance-btn');
