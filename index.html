@@ -3524,6 +3524,7 @@ const EVENTS_POOL = [
         ],
         factionEffects: { labor: -20, business: +10, residents: -8, press: -5 },
         councilKey: 'business_friendly',
+        consequence: { key: 'labor_slowdown_hits', delay: 2 },
         outcome: 'Torres calls a work slowdown. Trash piles up in District 3. The Herald runs a front-page story on "Mayor Stonewalls Workers." Business Alliance quietly sends a thank-you note.',
         voteRequired: false
       }
@@ -3546,6 +3547,7 @@ const EVENTS_POOL = [
         ],
         factionEffects: { developers: +20, residents: -18, labor: +5, business: +10 },
         councilKey: 'developer_friendly',
+        consequence: { key: 'resident_backlash_organizing', delay: 5 },
         outcome: 'Construction begins within 90 days. District 2 organizes protests outside City Hall. Callahan sends a case of scotch to your office.',
         voteRequired: true,
         voteIssue: 'Eastside Rezoning Ordinance'
@@ -3894,7 +3896,9 @@ const EVENTS_POOL = [
         label: 'Confront her directly and demand her resignation',
         effects: [],
         factionEffects: { press: -5 },
-        outcome: 'Chen resigns and immediately joins your opponent\'s campaign. Her departure creates a brief media story but your internal team solidifies. Okafor notes: "The room is cleaner now."',
+        removeStaff: 'comms',
+        consequence: { key: 'comms_vacuum', delay: 3 },
+        outcome: 'Chen resigns and immediately joins your opponent\'s campaign. Her departure creates a brief media story but your internal team solidifies. Okafor notes: "The room is cleaner now." Her role is now vacant.',
         voteRequired: false
       },
       {
@@ -5038,6 +5042,18 @@ function initState() {
 
     gameStatus: 'active',
 
+    // ── CONSEQUENCE QUEUE ──
+    consequenceQueue: [],   // [{dueAtTurn, event}]
+
+    // ── STAFF MUTATIONS ──
+    removedStaff: [],       // staffIds permanently removed
+
+    // ── PLAYER INITIATIVE ──
+    initiativePhase: false,
+    initiativeDeck: [],
+    initiativeResolved: false,
+    usedProposals: [],
+
     // ── FACTION AGENCY SYSTEM ──
     factionGrievances: {},
     factionPressure: {},
@@ -5323,7 +5339,7 @@ function getFactionFallbackEvent(faction) {
     press: { id:'fev_press', title:"Herald Announces Six-Week Investigation Series", type:'crisis', tag:'political',
       body:'Tom Vasquez announces "The Millhaven Account" — a six-week investigative series on city hall decision-making. He has sources inside multiple departments. First piece runs Sunday.',
       advisor:'comms', choices:[
-        {label:'Grant Herald exclusive access',effects:{factionApproval:{press:12},approval:-2}},
+        {label:'Grant Herald exclusive access',effects:{factionApproval:{press:12},approval:-2},consequence:{key:'herald_investigation_runs',delay:3}},
         {label:'Refuse comment entirely',effects:{factionApproval:{press:-6},approval:-4}},
         {label:'Have Chen manage a counter-narrative',effects:{factionApproval:{press:-3},personApproval:{comms:4}}}
       ]},
@@ -5360,9 +5376,508 @@ function onFactionApprovalHit(factionId, delta) {
   else if (delta >= 4)  reduceFactionGrievance(factionId, 1);
 }
 
+// ═══════════════════════════════════════════════════
+//  CONSEQUENCE QUEUE
+//  Decisions write delayed events; advanceMonth fires them when due
+// ═══════════════════════════════════════════════════
+
+function queueConsequence(event, delayTurns) {
+  state.consequenceQueue.push({
+    dueAtTurn: state.turn + delayTurns,
+    event: event
+  });
+  // Sort by due date so earliest fires first
+  state.consequenceQueue.sort((a, b) => a.dueAtTurn - b.dueAtTurn);
+}
+
+function popDueConsequence() {
+  const idx = state.consequenceQueue.findIndex(c => c.dueAtTurn <= state.turn);
+  if (idx === -1) return null;
+  return state.consequenceQueue.splice(idx, 1)[0].event;
+}
+
+// Library of consequence events — keyed by decision flags set in makeChoice
+const CONSEQUENCE_EVENTS = {
+
+  // Fired if you gutted infrastructure budget early
+  infra_debt_crisis: {
+    id: 'cq_infra_debt', title: 'Infrastructure Bond Downgrade',
+    type: 'crisis', tag: 'financial',
+    body: 'Three months ago your administration reduced infrastructure spending significantly. The state\'s municipal bond rating agency has downgraded Millhaven\'s infrastructure bonds. Borrowing costs increase and two planned projects are now in jeopardy. Merritt hands you a two-page memo that just says "I told you."',
+    advisor: 'planning',
+    choices: [
+      { label: 'Emergency infrastructure appropriation', effects: [{ stat: 'budget', val: -180000 }], factionEffects: { residents: 5, business: -5 }, outcome: 'You restore confidence but at real cost. The bond rating holds. Merritt does not say thank you.' },
+      { label: 'Issue public bonds — spread the pain', effects: [{ stat: 'infrastructure', val: -5 }], factionEffects: { business: -8, residents: -5 }, outcome: 'The bond offering is undersubscribed. You raise half of what you needed. Infrastructure continues to degrade.' },
+      { label: 'Dispute the rating agency publicly', effects: [], factionEffects: { press: -12, business: -8 }, outcome: 'The Herald runs it as a three-day story. Analysts call it "erratic governance." The rating stands.' }
+    ]
+  },
+
+  // Fired after labor confrontation — slowdown actually hits services
+  labor_slowdown_hits: {
+    id: 'cq_labor_slowdown', title: 'Work-to-Rule Visible in Streets',
+    type: 'crisis', tag: 'political',
+    body: 'The municipal workers\' work-to-rule from last month has become visible: trash collection is running two days late in three districts, park maintenance has stopped, and permit processing is backed up six weeks. The Herald ran photos this morning. Residents are calling the mayor\'s office.',
+    advisor: 'cos',
+    choices: [
+      { label: 'Open emergency contract talks immediately', effects: [{ stat: 'services', val: -5 }], factionEffects: { labor: 12, residents: -3 }, outcome: 'Torres agrees to suspend the action pending negotiation. Services stabilize. The cost of the eventual contract will be real.' },
+      { label: 'Deploy supervisory staff as replacements', effects: [{ stat: 'services', val: -8 }], factionEffects: { labor: -15, police: 3 }, outcome: 'Minimal coverage restored. Union files three grievances. This gets harder before it gets easier.' },
+      { label: 'Let it play out — they\'ll run out of leverage', effects: [{ stat: 'services', val: -12 }, { stat: 'crime', val: -5 }], factionEffects: { labor: -8, residents: -10, press: -8 }, outcome: 'By week three the Herald has named it a crisis. Resident approval craters. Torres is playing a longer game than you thought.' }
+    ]
+  },
+
+  // Fired after press given access — they publish something uncomfortable
+  herald_investigation_runs: {
+    id: 'cq_herald_investigation', title: 'Herald Investigation: The First Piece Runs',
+    type: 'crisis', tag: 'press',
+    body: 'The Herald\'s investigation series has published its first installment. The piece is meticulous: three months of budget decisions, two anonymous city hall sources, and a timeline of staff consultation records. It\'s not inaccurate. It is unflattering. Vasquez calls it "accountability journalism."',
+    advisor: 'comms',
+    choices: [
+      { label: 'Hold a press conference — respond on the record', effects: [], factionEffects: { press: 8, residents: 5, business: -3 }, outcome: 'Chen manages the room. You get one good news cycle in response. The series continues next week regardless.' },
+      { label: 'Freeze all non-essential media access', effects: [], factionEffects: { press: -15, residents: -5 }, outcome: 'Vasquez publishes a sidebar: "Mayor\'s Office Goes Dark." The next piece comes out harder.' },
+      { label: 'Feed Vasquez a counternarrative exclusively', effects: [], factionEffects: { press: 5, labor: -5 }, outcome: 'It partially works. The second piece leads with your framing. The union accuses you of using the Herald as a mouthpiece.' }
+    ]
+  },
+
+  // Fired if developer concessions given — residents organize
+  resident_backlash_organizing: {
+    id: 'cq_resident_backlash', title: 'Neighborhood Coalition Files Lawsuit',
+    type: 'crisis', tag: 'political',
+    body: 'Three months after the development variance was approved, a coalition of five neighborhood associations has filed suit in municipal court challenging the environmental review process. The lead plaintiff is Patricia Nkemelu\'s organization. The suit will delay the project 6-9 months and generate press regardless of outcome.',
+    advisor: 'comms',
+    choices: [
+      { label: 'Settle with the coalition — offer community benefits', effects: [{ stat: 'budget', val: -120000 }], factionEffects: { residents: 12, developers: -8 }, outcome: 'Agreement reached: community benefit fund, enhanced green space, a seat on the project oversight committee. Callahan is furious but the project eventually moves.' },
+      { label: 'Defend the review — fight in court', effects: [], factionEffects: { residents: -10, developers: 8, press: -5 }, outcome: 'City legal wins on a technicality 8 months later. The litigation is a drain. Nkemelu doesn\'t forget.' },
+      { label: 'Commission an independent third-party review', effects: [{ stat: 'budget', val: -60000 }], factionEffects: { residents: 5, developers: -3, press: 5 }, outcome: 'The review takes four months and confirms the original process was adequate with minor gaps. The project proceeds. Nobody is entirely satisfied.' }
+    ]
+  },
+
+  // Fired after ignoring police funding — response times degrade publicly
+  police_response_failure: {
+    id: 'cq_police_response', title: 'Response Time Data Released — Numbers Are Bad',
+    type: 'crisis', tag: 'public-safety',
+    body: 'The state\'s annual public safety report is out. Millhaven\'s average emergency response times have increased 22% from last year. Chief Kovacs releases a statement calling the numbers "a predictable outcome of understaffing." Three council members are calling for hearings.',
+    advisor: 'cos',
+    choices: [
+      { label: 'Emergency public safety appropriation', effects: [{ stat: 'crime', val: 5 }, { stat: 'budget', val: -200000 }], factionEffects: { police: 12, labor: 5, business: -3 }, outcome: 'Kovacs holds a press conference with you. The numbers will improve — in about six months. The budget takes a real hit.' },
+      { label: 'Announce a "strategic staffing review" committee', effects: [], factionEffects: { police: -5, residents: -5, press: -8 }, outcome: 'The Herald calls it what it is. Kovacs stops returning calls to your office. The numbers don\'t move.' },
+      { label: 'Redirect non-emergency calls to a civilian response team', effects: [{ stat: 'crime', val: 3 }, { stat: 'budget', val: -80000 }], factionEffects: { police: -8, residents: 5, labor: -3 }, outcome: 'The union files a grievance. Response times improve modestly for non-emergency incidents. The political cost with Kovacs is real and lasting.' }
+    ]
+  },
+
+  // Fired after Chen resignation — communications gap becomes visible
+  comms_vacuum: {
+    id: 'cq_comms_vacuum', title: 'Communications Vacuum — Two Crises Unmanaged',
+    type: 'crisis', tag: 'political',
+    body: 'Three months since Communications Director Chen\'s departure, two simultaneous stories — a leaked budget memo and a council member\'s public criticism — went unmanaged for 72 hours. The Herald ran both without a mayoral response. Victor Slade\'s memo: "We are not prepared for this volume without a comms director."',
+    advisor: 'budget',
+    choices: [
+      { label: 'Hire an interim director immediately ($8k/month)', effects: [{ stat: 'budget', val: -8000 }], factionEffects: { press: 6 }, outcome: 'An experienced political operative takes the interim role. Not as good as Chen. Functional.' },
+      { label: 'Promote from within — someone on Chen\'s team', effects: [], factionEffects: { labor: 3, press: -3 }, outcome: 'The promotion is welcomed internally. The new director lacks Chen\'s media relationships. Coverage becomes more reactive.' },
+      { label: 'Manage media directly through the mayor\'s office', effects: [], factionEffects: { press: -8, residents: -3 }, outcome: 'Works for two weeks until a scheduling conflict leaves a council hearing uncovered. Vasquez publishes a "who\'s running the mayor\'s office?" piece.' }
+    ]
+  }
+};
+
+// Called from makeChoice when a choice carries a `consequence` flag
+function scheduleConsequenceFromChoice(choice, event) {
+  if (!choice.consequence) return;
+  const { key, delay } = choice.consequence;
+  const cEvent = CONSEQUENCE_EVENTS[key];
+  if (cEvent) queueConsequence(cEvent, delay);
+}
+
+// ═══════════════════════════════════════════════════
+//  STAFF REMOVAL SYSTEM
+// ═══════════════════════════════════════════════════
+
+function removeStaffMember(staffId) {
+  const member = state.staff.find(s => s.id === staffId);
+  if (!member) return;
+  state.removedStaff.push(staffId);
+  state.staff = state.staff.filter(s => s.id !== staffId);
+  addTicker(`CITY HALL — ${member.name} has departed the administration.`);
+  addToHistory(staffId, `Departed the administration on turn ${state.turn}. Role now vacant.`, 'neg');
+  // If they were a principled advisor, that consult slot is gone
+}
+
+function isStaffRemoved(staffId) {
+  return state.removedStaff.includes(staffId);
+}
+
+// ═══════════════════════════════════════════════════
+//  PLAYER INITIATIVE SYSTEM
+//  One mayoral proposal per month → council vote → consequence
+// ═══════════════════════════════════════════════════
+
+const PROPOSALS_POOL = [
+  {
+    id: 'prop_infra_bond',
+    title: 'Municipal Infrastructure Bond Program',
+    category: 'infrastructure',
+    summary: 'Issue $4M in municipal bonds to fund infrastructure repair across all six districts. Requires council approval. Increases long-term debt but front-loads improvement.',
+    councilKey: 'infrastructure',
+    factionLeans: { labor: 8, residents: 6, business: -4, developers: 3, police: 2, press: 3 },
+    onPass: {
+      effects: [{ stat: 'infrastructure', val: 12 }, { stat: 'budget', val: -180000 }],
+      factionEffects: { labor: 6, residents: 8, business: -3 },
+      outcome: 'The bond measure passes 5-2. Construction bids go out within 60 days. Infrastructure scores will climb over the next four months. Slade is worried about the debt service.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { residents: -5, business: 3 },
+      outcome: 'Beaumont and Callahan held firm. The measure fails 3-4. Merritt requests a meeting. Residents in District 4 start a petition.'
+    },
+    weight: 10
+  },
+  {
+    id: 'prop_community_policing',
+    title: 'Community Policing Initiative',
+    category: 'public-safety',
+    summary: 'Deploy 12 officers to permanent district beats with community liaison requirements. Costs $95k/month in overtime. Requires council and union agreement.',
+    councilKey: 'public_safety',
+    factionLeans: { police: 10, residents: 8, labor: 4, business: 3, press: 5, developers: 0 },
+    onPass: {
+      effects: [{ stat: 'crime', val: 8 }, { stat: 'budget', val: -95000 }],
+      factionEffects: { police: 8, residents: 10, labor: 3 },
+      outcome: 'Kovacs endorses it publicly. The Herald runs a favorable feature. Crime stats begin improving next month. Budget hurts.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { police: -6, residents: -4 },
+      outcome: 'Torres blocked it over the overtime structure. Kovacs says nothing publicly. He says a great deal privately.'
+    },
+    weight: 9
+  },
+  {
+    id: 'prop_affordable_housing',
+    title: 'Affordable Housing Fast-Track Program',
+    category: 'housing',
+    summary: 'Waive permitting fees and expedite review for developments dedicating 30% of units as affordable. Residents support it. Developers are lukewarm on the mandated percentage.',
+    councilKey: 'housing',
+    factionLeans: { residents: 12, labor: 6, developers: -5, business: -3, press: 6, police: 0 },
+    onPass: {
+      effects: [{ stat: 'housing', val: 8 }, { stat: 'development', val: 3 }],
+      factionEffects: { residents: 10, labor: 5, developers: -6 },
+      outcome: 'Nair and Reyes carried the vote. Four developers announce qualifying projects within two months. Housing numbers improve slowly but the trajectory is right.',
+      consequence: { key: 'resident_backlash_organizing', delay: 8 }
+    },
+    onFail: {
+      factionEffects: { residents: -8, developers: 4 },
+      outcome: 'Callahan killed it in committee. Nkemelu issues a statement. The Herald gives it four paragraphs.'
+    },
+    weight: 10
+  },
+  {
+    id: 'prop_business_district',
+    title: 'Downtown Business Improvement District',
+    category: 'development',
+    summary: 'Establish a self-taxing BID in the downtown core. Participating businesses fund enhanced services, security, and marketing. City contributes $60k seed funding.',
+    councilKey: 'business_friendly',
+    factionLeans: { business: 12, developers: 8, labor: -3, residents: 2, press: 4, police: 3 },
+    onPass: {
+      effects: [{ stat: 'development', val: 6 }, { stat: 'budget', val: -60000 }],
+      factionEffects: { business: 10, developers: 6, labor: -4 },
+      outcome: 'Beaumont chairs the inaugural BID board. Storefronts begin improving within six months. Torres calls it "a subsidy for people who don\'t need one."',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { business: -6, residents: 3 },
+      outcome: 'Torres and Nair vote it down. Beaumont withdraws from the next informal caucus meeting without explanation.'
+    },
+    weight: 8
+  },
+  {
+    id: 'prop_services_expansion',
+    title: 'City Services Access Expansion',
+    category: 'services',
+    summary: 'Open three satellite city services offices in underserved districts. Costs $45k/month in staffing. Shortens permit and benefits processing times for residents.',
+    councilKey: 'community_friendly',
+    factionLeans: { residents: 12, labor: 8, press: 5, police: 0, business: -2, developers: 0 },
+    onPass: {
+      effects: [{ stat: 'services', val: 8 }, { stat: 'budget', val: -45000 }],
+      factionEffects: { residents: 10, labor: 6 },
+      outcome: 'Liu and Reyes champion it publicly. Offices open over the next three months. Constituent satisfaction climbs. Slade notes the recurring cost in every subsequent budget memo.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { residents: -6, labor: -4, press: -3 },
+      outcome: 'Beaumont and Callahan vote it down as "bureaucratic expansion." Nkemelu releases a statement. The Herald runs it A3.'
+    },
+    weight: 9
+  },
+  {
+    id: 'prop_jobs_training',
+    title: 'Millhaven Workforce Development Program',
+    category: 'development',
+    summary: 'Partner with Millhaven Community College for a city-funded trades training program. 200 slots/year. $120k annual cost. Targets 5% unemployment reduction over three years.',
+    councilKey: 'labor_friendly',
+    factionLeans: { labor: 10, residents: 6, business: 5, press: 4, police: 0, developers: 2 },
+    onPass: {
+      effects: [{ stat: 'development', val: 5 }, { stat: 'budget', val: -120000 }],
+      factionEffects: { labor: 8, residents: 5, business: 4 },
+      outcome: 'Cross-aisle vote — even Webb supports it. Torres calls it "the first serious thing this administration has done." Unemployment will move — slowly, but it will move.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { labor: -5, residents: -3 },
+      outcome: 'The business bloc killed it over the college partnership structure. Torres sends a one-line email: "Noted."'
+    },
+    weight: 8
+  },
+  {
+    id: 'prop_transparency_office',
+    title: 'Office of Budget Transparency',
+    category: 'press',
+    summary: 'Create a public-facing budget dashboard and quarterly public briefings. $30k setup cost. Signals openness. The Herald will cover the announcement. The Business Alliance sees it as overhead.',
+    councilKey: 'neutral',
+    factionLeans: { press: 15, residents: 6, labor: 3, business: -4, developers: -2, police: 0 },
+    onPass: {
+      effects: [{ stat: 'budget', val: -30000 }],
+      factionEffects: { press: 12, residents: 6 },
+      outcome: 'Vasquez covers the launch favorably. Two months later a Herald editorial calls it "a genuine signal of accountability." Business Alliance calls it "performative."',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { press: -8, residents: -3 },
+      outcome: 'Beaumont and Callahan vote it down as unnecessary spending. Vasquez writes a 600-word piece on "the administration that rejected transparency." You cannot win this framing war.'
+    },
+    weight: 7
+  },
+  {
+    id: 'prop_crime_task_force',
+    title: 'Inter-Agency Crime Task Force',
+    category: 'public-safety',
+    summary: 'Coordinate city police with county sheriff and state resources on targeted enforcement in high-crime districts. No direct cost — leverages existing resources.',
+    councilKey: 'public_safety',
+    factionLeans: { police: 12, business: 6, developers: 4, residents: -2, labor: 0, press: 2 },
+    onPass: {
+      effects: [{ stat: 'crime', val: 10 }],
+      factionEffects: { police: 10, business: 5, residents: -5 },
+      outcome: 'Kovacs is enthusiastic. Crime numbers improve over six weeks. Three community groups raise concerns about enforcement patterns in minority neighborhoods. The Herald covers both angles.',
+      consequence: { key: null }
+    },
+    onFail: {
+      factionEffects: { police: -4, business: -3 },
+      outcome: 'Nair and Torres vote against it on civil liberties grounds. Kovacs calls it "the council protecting crime." Webb abstains and says nothing publicly.'
+    },
+    weight: 8
+  }
+];
+
+function buildInitiativeDeck() {
+  let pool = [...PROPOSALS_POOL];
+  // Filter out recently used proposals
+  const recentIds = state.usedProposals || [];
+  let available = pool.filter(p => !recentIds.includes(p.id));
+  if (available.length < 3) {
+    state.usedProposals = [];
+    available = pool;
+  }
+
+  // Weighted selection of 3
+  let weighted = [];
+  available.forEach(p => { for (let i = 0; i < (p.weight || 8); i++) weighted.push(p); });
+  let selected = [];
+  let used = new Set();
+  let attempts = 0;
+  while (selected.length < 3 && attempts < 200) {
+    const pick = weighted[Math.floor(Math.random() * weighted.length)];
+    if (!used.has(pick.id)) { selected.push(pick); used.add(pick.id); }
+    attempts++;
+  }
+  return selected;
+}
+
+function enterInitiativePhase() {
+  state.initiativePhase = true;
+  state.initiativeResolved = false;
+  state.initiativeDeck = buildInitiativeDeck();
+
+  renderInitiativePhase();
+  document.getElementById('advance-btn').disabled = true;
+  document.getElementById('event-type-stamp').textContent = 'INITIATIVE';
+  document.getElementById('event-type-stamp').style.color = 'var(--brass)';
+  document.getElementById('event-type-stamp').style.borderColor = 'var(--brass)';
+}
+
+function renderInitiativePhase() {
+  const body = document.getElementById('situation-body');
+  body.innerHTML = '';
+
+  const header = document.createElement('div');
+  header.innerHTML = `
+    <div style="font-family:'Playfair Display',serif; font-size:1rem; font-weight:700; color:var(--ink); margin-bottom:4px;">Mayor's Initiative</div>
+    <div style="font-size:0.65rem; color:var(--ink-faded); line-height:1.5; margin-bottom:12px;">Choose one proposal to champion this month. It goes to a council vote immediately. The others wait.</div>
+  `;
+  body.appendChild(header);
+
+  state.initiativeDeck.forEach((proposal, idx) => {
+    const card = document.createElement('div');
+    card.className = 'choice-card';
+    card.style.cssText = 'cursor:pointer; margin-bottom:8px;';
+    card.onclick = () => selectInitiative(idx);
+
+    const catColors = {
+      infrastructure: 'var(--blue-stat)',
+      'public-safety': 'var(--urgent)',
+      housing: 'var(--green-stat)',
+      development: 'var(--brass)',
+      services: 'var(--blue-stat)',
+      press: 'var(--ink-faded)'
+    };
+    const catColor = catColors[proposal.category] || 'var(--ink-faded)';
+
+    card.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+        <span style="font-size:0.55rem; text-transform:uppercase; letter-spacing:0.1em; font-weight:700; color:${catColor}; border:1px solid ${catColor}; padding:1px 5px; border-radius:2px;">${proposal.category}</span>
+        <span style="font-family:'Playfair Display',serif; font-size:0.8rem; font-weight:700; color:var(--ink);">${proposal.title}</span>
+      </div>
+      <div style="font-size:0.65rem; color:var(--ink-faded); line-height:1.6;">${proposal.summary}</div>
+    `;
+    body.appendChild(card);
+  });
+
+  const skip = document.createElement('div');
+  skip.style.cssText = 'text-align:center; margin-top:8px;';
+  skip.innerHTML = `<button onclick="skipInitiative()" style="
+    background:none; border:1px solid var(--paper-darker); color:var(--ink-faded);
+    font-size:0.6rem; padding:4px 12px; cursor:pointer; font-family:'Playfair Display',serif;
+  ">No initiative this month — focus on the schedule</button>`;
+  body.appendChild(skip);
+}
+
+function selectInitiative(deckIndex) {
+  if (!state.initiativePhase || state.initiativeResolved) return;
+  const proposal = state.initiativeDeck[deckIndex];
+  if (!proposal) return;
+
+  state.initiativeResolved = true;
+
+  // Mark used
+  if (!state.usedProposals) state.usedProposals = [];
+  state.usedProposals.push(proposal.id);
+
+  // Simulate council vote biased by proposal's faction leans
+  const voteResult = simulateInitiativeVote(proposal);
+
+  // Apply outcomes
+  let outcome;
+  if (voteResult.passed) {
+    const pass = proposal.onPass;
+    if (pass.effects) {
+      pass.effects.forEach(eff => {
+        if (eff.stat === 'budget') state.city.budget.balance += eff.val;
+        else if (state.city.stats[eff.stat] !== undefined)
+          state.city.stats[eff.stat] = clamp(state.city.stats[eff.stat] + eff.val, 0, 100);
+      });
+    }
+    if (pass.factionEffects) {
+      Object.entries(pass.factionEffects).forEach(([fid, delta]) => {
+        const f = state.factions.find(x => x.id === fid);
+        if (f) f.approval = clamp(f.approval + delta, 5, 95);
+        onFactionApprovalHit(fid, delta);
+      });
+    }
+    if (pass.consequence && pass.consequence.key) {
+      queueConsequence(CONSEQUENCE_EVENTS[pass.consequence.key], pass.consequence.delay || 6);
+    }
+    outcome = pass.outcome;
+    addTicker(`CITY HALL — "${proposal.title}" passes council ${voteResult.yea}-${voteResult.nay}. Mayor's initiative enacted.`);
+  } else {
+    const fail = proposal.onFail;
+    if (fail.factionEffects) {
+      Object.entries(fail.factionEffects).forEach(([fid, delta]) => {
+        const f = state.factions.find(x => x.id === fid);
+        if (f) f.approval = clamp(f.approval + delta, 5, 95);
+        onFactionApprovalHit(fid, delta);
+      });
+    }
+    outcome = fail.outcome;
+    addTicker(`CITY HALL — "${proposal.title}" fails council vote ${voteResult.yea}-${voteResult.nay}. Initiative blocked.`);
+  }
+
+  recalcApproval();
+
+  // Render result
+  const memberVotes = voteResult.votes.map(v => {
+    const cls = v.vote === 'yes' ? 'vote-yes' : v.vote === 'no' ? 'vote-no' : 'vote-abstain';
+    const short = v.member.name.split(' ').slice(-1)[0];
+    return `<span class="vote-member ${cls}">${short}: ${v.vote.toUpperCase()}</span>`;
+  }).join('');
+
+  const body = document.getElementById('situation-body');
+  body.innerHTML = '';
+
+  const result = document.createElement('div');
+  result.className = 'outcome-card';
+  result.innerHTML = `
+    <div class="outcome-title">Initiative: "${proposal.title}"</div>
+    <div class="vote-display">
+      <div class="vote-title">Council Vote on Mayor's Proposal</div>
+      <div class="vote-results">${memberVotes}</div>
+      <div class="vote-summary">
+        ${voteResult.passed
+          ? `✓ PASSED — ${voteResult.yea}-${voteResult.nay} in favor`
+          : `✗ FAILED — ${voteResult.yea}-${voteResult.nay}, motion defeated`}
+      </div>
+    </div>
+    <div style="margin-top:8px; font-size:0.68rem; color:var(--ink); line-height:1.7;">${outcome}</div>
+    <button onclick="finishInitiativePhase()" style="
+      margin-top:10px; width:100%; padding:8px; background:var(--paper-darker);
+      border:none; font-family:'Playfair Display',serif; font-size:0.65rem;
+      color:var(--ink); cursor:pointer;
+    ">Proceed to Monthly Schedule →</button>
+  `;
+  body.appendChild(result);
+  updateUI();
+}
+
+function skipInitiative() {
+  if (!state.initiativePhase || state.initiativeResolved) return;
+  state.initiativeResolved = true;
+  state.initiativePhase = false;
+
+  const body = document.getElementById('situation-body');
+  body.innerHTML = `<div class="outcome-card" style="text-align:center;">
+    <div style="color:var(--ink-faded); font-style:italic; font-size:0.68rem; padding:8px;">
+      No initiative this month. The schedule awaits.
+    </div>
+    <button onclick="finishInitiativePhase()" style="
+      margin-top:8px; width:100%; padding:8px; background:var(--paper-darker);
+      border:none; font-family:'Playfair Display',serif; font-size:0.65rem;
+      color:var(--ink); cursor:pointer;
+    ">Proceed to Schedule →</button>
+  </div>`;
+}
+
+function simulateInitiativeVote(proposal) {
+  let yea = 0, nay = 0;
+  const votes = state.council.map(member => {
+    let score = member.approval - 50; // base: their approval of the mayor
+    // Faction lean
+    const lean = proposal.factionLeans[member.faction] || 0;
+    score += lean * 0.7;
+    // Personality
+    if (member.traits.includes('pragmatic')) score += 5;
+    if (member.traits.includes('principled') && lean < 0) score -= 8;
+    if (state.councilRelations[member.id] === 'hostile') score -= 15;
+    // Grudge
+    if (member.traits.includes('grudge') && member.approval < 45) score -= 10;
+    score += (Math.random() - 0.5) * 20;
+    const vote = score > 5 ? 'yes' : score < -5 ? 'no' : 'abstain';
+    if (vote === 'yes') yea++;
+    else if (vote === 'no') nay++;
+    return { member, vote };
+  });
+  return { votes, yea, nay, passed: yea > nay };
+}
+
+function finishInitiativePhase() {
+  state.initiativePhase = false;
+  enterSchedulePhase();
+}
 
 
-function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
 function fmtMoney(n) {
   if (Math.abs(n) >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
   if (Math.abs(n) >= 1000) return '$' + Math.round(n/1000) + 'k';
@@ -5817,7 +6332,11 @@ function processMonthlyTick() {
 // ═══════════════════════════════════════════════════
 
 function selectEvent() {
-  // If a faction has queued an event, use it
+  // Consequence queue fires first — these are earned by past decisions
+  const due = popDueConsequence();
+  if (due) return due;
+
+  // Faction-forced event is next priority
   if (state.queuedFactionEvent) {
     const ev = state.queuedFactionEvent;
     state.queuedFactionEvent = null;
@@ -5856,7 +6375,7 @@ function selectEvent() {
 // ═══════════════════════════════════════════════════
 
 function advanceMonth() {
-  if (state.awaitingDecision || state.schedulePhase) return;
+  if (state.awaitingDecision || state.schedulePhase || state.initiativePhase) return;
   if (state.gameStatus !== 'active') return;
 
   state.turn++;
@@ -5888,7 +6407,8 @@ function advanceMonth() {
   }
 
   updateUI();
-  enterSchedulePhase();
+  // Initiative phase fires before schedule every month
+  enterInitiativePhase();
 }
 
 // ── SCHEDULE PHASE ──
@@ -6209,6 +6729,14 @@ function makeChoice(choiceIndex) {
   renderOutcome(event, choice, voteResult);
   updateUI();
   addTicker(`CITY HALL — ${event.title}: "${choice.label.substring(0, 50)}${choice.label.length > 50 ? '...' : ''}"`);
+
+  // Staff removal (resignation events)
+  if (choice.removeStaff) {
+    removeStaffMember(choice.removeStaff);
+  }
+
+  // Schedule any consequence events triggered by this choice
+  scheduleConsequenceFromChoice(choice, event);
 }
 
 function generateHeadline() {
@@ -6526,6 +7054,35 @@ function renderPeopleTab(tab) {
         <div style="font-size:0.61rem; color:var(--ink-faded); margin-top:4px; font-style:italic;">${s.bio}</div>
         ${consultBtn}
         ${buildDossierBlock(s.id)}
+      `;
+      body.appendChild(div);
+    });
+
+    // Render vacant slots for removed staff
+    const STAFF_ROLES = {
+      cos:     'Chief of Staff',
+      budget:  'Budget Director',
+      comms:   'Communications Director',
+      planning:'City Planner'
+    };
+    (state.removedStaff || []).forEach(staffId => {
+      const role = STAFF_ROLES[staffId] || staffId;
+      const div = document.createElement('div');
+      div.className = 'person-card';
+      div.style.cssText = 'opacity:0.55; border-style:dashed;';
+      div.innerHTML = `
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:6px;">
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--paper-darker);
+            display:flex;align-items:center;justify-content:center;
+            font-size:0.8rem;color:var(--ink-faded);flex-shrink:0;">—</div>
+          <div>
+            <div class="person-name" style="color:var(--ink-faded);">VACANT</div>
+            <div class="person-role">${role}</div>
+          </div>
+        </div>
+        <div style="font-size:0.62rem; color:var(--urgent); font-style:italic; margin-top:2px;">
+          This role has been vacated. Consequences are incoming.
+        </div>
       `;
       body.appendChild(div);
     });
