@@ -5877,6 +5877,7 @@ function finishInitiativePhase() {
   enterSchedulePhase();
 }
 
+function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
 
 function fmtMoney(n) {
   if (Math.abs(n) >= 1000000) return '$' + (n/1000000).toFixed(2) + 'M';
