@@ -5702,7 +5702,8 @@ function enterInitiativePhase() {
 
 function renderInitiativePhase() {
   const body = document.getElementById('situation-body');
-  body.innerHTML = '';
+  // Clear body but preserve no-event-msg if it exists
+  while (body.lastChild) body.removeChild(body.lastChild);
 
   const header = document.createElement('div');
   header.innerHTML = `
@@ -5806,7 +5807,7 @@ function selectInitiative(deckIndex) {
   }).join('');
 
   const body = document.getElementById('situation-body');
-  body.innerHTML = '';
+  while (body.lastChild) body.removeChild(body.lastChild);
 
   const result = document.createElement('div');
   result.className = 'outcome-card';
@@ -5838,7 +5839,12 @@ function skipInitiative() {
   state.initiativePhase = false;
 
   const body = document.getElementById('situation-body');
-  body.innerHTML = `<div class="outcome-card" style="text-align:center;">
+  while (body.lastChild) body.removeChild(body.lastChild);
+
+  const card = document.createElement('div');
+  card.className = 'outcome-card';
+  card.style.textAlign = 'center';
+  card.innerHTML = `
     <div style="color:var(--ink-faded); font-style:italic; font-size:0.68rem; padding:8px;">
       No initiative this month. The schedule awaits.
     </div>
@@ -5847,7 +5853,8 @@ function skipInitiative() {
       border:none; font-family:'Playfair Display',serif; font-size:0.65rem;
       color:var(--ink); cursor:pointer;
     ">Proceed to Schedule →</button>
-  </div>`;
+  `;
+  body.appendChild(card);
 }
 
 function simulateInitiativeVote(proposal) {
@@ -6555,7 +6562,8 @@ function confirmSchedule() {
 
 function renderSchedule() {
   const body = document.getElementById('situation-body');
-  document.getElementById('no-event-msg').style.display = 'none';
+  const noEvt = document.getElementById('no-event-msg');
+  if (noEvt) noEvt.style.display = 'none';
 
   const filled = state.selectedActions.length;
   const pips = Array.from({length: ACTION_SLOTS}, (_, i) =>
@@ -6890,7 +6898,8 @@ function renderEvent(event) {
     `;
   }
 
-  document.getElementById('no-event-msg').style.display = 'none';
+  const noEvtMsg = document.getElementById('no-event-msg');
+  if (noEvtMsg) noEvtMsg.style.display = 'none';
 
   const card = document.createElement('div');
   card.id = 'event-card-main';
