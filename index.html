@@ -3292,28 +3292,28 @@ const INITIAL_STAFF = [
   {
     id: 'cos', name: 'Rachel Okafor', role: 'Chief of Staff',
     traits: ['loyal', 'analytical'],
-    approval: 72,
+    approval: 58,
     bio: 'Former city planner. Methodical, keeps you from stepping on landmines.',
     relationHistory: []
   },
   {
     id: 'budget', name: 'Victor Slade', role: 'Budget Director',
     traits: ['pragmatic', 'analytical'],
-    approval: 65,
+    approval: 52,
     bio: 'Numbers man. Will find a deal anywhere. Not above creative accounting.',
     relationHistory: []
   },
   {
     id: 'comms', name: 'Maya Chen', role: 'Communications Director',
     traits: ['emotional', 'ambitious'],
-    approval: 68,
+    approval: 54,
     bio: 'Media savvy. Wants your success badly — mostly because she wants hers.',
     relationHistory: []
   },
   {
     id: 'planning', name: 'Douglas Merritt', role: 'City Planner',
     traits: ['principled', 'grudge'],
-    approval: 60,
+    approval: 45,
     bio: 'Old school. Has seen every backroom deal this city ever made. Remembers them.',
     relationHistory: []
   }
@@ -3321,32 +3321,32 @@ const INITIAL_STAFF = [
 
 // ── COUNCIL ──
 const INITIAL_COUNCIL = [
-  { id: 'c1', name: 'Donna Torres', faction: 'labor', factionLabel: 'Labor', traits: ['emotional', 'grudge'], approval: 55, district: 'District 3' },
-  { id: 'c2', name: 'Frank Beaumont', faction: 'business', factionLabel: 'Business', traits: ['pragmatic', 'analytical'], approval: 60, district: 'At-Large' },
-  { id: 'c3', name: 'Priya Nair', faction: 'reform', factionLabel: 'Reform', traits: ['principled', 'analytical'], approval: 63, district: 'District 1' },
-  { id: 'c4', name: 'James "Big Jim" Callahan', faction: 'developer', factionLabel: 'Developer', traits: ['pragmatic', 'ambitious'], approval: 50, district: 'District 5' },
-  { id: 'c5', name: 'Sandra Liu', faction: 'community', factionLabel: 'Community', traits: ['emotional', 'forgiving'], approval: 58, district: 'District 2' },
-  { id: 'c6', name: 'Marcus Webb', faction: 'independent', factionLabel: 'Independent', traits: ['analytical', 'pragmatic'], approval: 52, district: 'District 4' },
-  { id: 'c7', name: 'Carla Reyes', faction: 'community', factionLabel: 'Community', traits: ['principled', 'loyal'], approval: 65, district: 'District 6' }
+  { id: 'c1', name: 'Donna Torres', faction: 'labor', factionLabel: 'Labor', traits: ['emotional', 'grudge'], approval: 42, district: 'District 3' },
+  { id: 'c2', name: 'Frank Beaumont', faction: 'business', factionLabel: 'Business', traits: ['pragmatic', 'analytical'], approval: 48, district: 'At-Large' },
+  { id: 'c3', name: 'Priya Nair', faction: 'reform', factionLabel: 'Reform', traits: ['principled', 'analytical'], approval: 50, district: 'District 1' },
+  { id: 'c4', name: 'James "Big Jim" Callahan', faction: 'developer', factionLabel: 'Developer', traits: ['pragmatic', 'ambitious'], approval: 38, district: 'District 5' },
+  { id: 'c5', name: 'Sandra Liu', faction: 'community', factionLabel: 'Community', traits: ['emotional', 'forgiving'], approval: 46, district: 'District 2' },
+  { id: 'c6', name: 'Marcus Webb', faction: 'independent', factionLabel: 'Independent', traits: ['analytical', 'pragmatic'], approval: 40, district: 'District 4' },
+  { id: 'c7', name: 'Carla Reyes', faction: 'community', factionLabel: 'Community', traits: ['principled', 'loyal'], approval: 52, district: 'District 6' }
 ];
 
 // ── FACTIONS ──
 const INITIAL_FACTIONS = [
-  { id: 'labor', name: 'Municipal Workers Union', leader: 'Donna Torres', leaderPersonality: 'Emotional, holds grudges', approval: 55, traits: ['emotional', 'grudge'] },
-  { id: 'business', name: 'Millhaven Business Alliance', leader: 'Frank Beaumont', leaderPersonality: 'Analytical, deal-maker', approval: 62, traits: ['analytical', 'pragmatic'] },
-  { id: 'residents', name: "Residents' Association", leader: 'Patricia Nkemelu', leaderPersonality: 'Principled, won\'t be bought', approval: 58, traits: ['principled', 'forgiving'] },
-  { id: 'developers', name: 'City Developers Consortium', leader: 'James Callahan', leaderPersonality: 'Ambitious, transactional', approval: 52, traits: ['ambitious', 'pragmatic'] },
-  { id: 'press', name: 'Millhaven Herald', leader: 'Tom Vasquez', leaderPersonality: 'Principled, analytical', approval: 50, traits: ['principled', 'analytical'] },
-  { id: 'police', name: 'Police & Fire Unions', leader: 'Chief Ray Kovacs', leaderPersonality: 'Loyal (to precedent), grudge', approval: 60, traits: ['loyal', 'grudge'] }
+  { id: 'labor', name: 'Municipal Workers Union', leader: 'Donna Torres', leaderPersonality: 'Emotional, holds grudges', approval: 44, traits: ['emotional', 'grudge'] },
+  { id: 'business', name: 'Millhaven Business Alliance', leader: 'Frank Beaumont', leaderPersonality: 'Analytical, deal-maker', approval: 50, traits: ['analytical', 'pragmatic'] },
+  { id: 'residents', name: "Residents' Association", leader: 'Patricia Nkemelu', leaderPersonality: 'Principled, won\'t be bought', approval: 46, traits: ['principled', 'forgiving'] },
+  { id: 'developers', name: 'City Developers Consortium', leader: 'James Callahan', leaderPersonality: 'Ambitious, transactional', approval: 40, traits: ['ambitious', 'pragmatic'] },
+  { id: 'press', name: 'Millhaven Herald', leader: 'Tom Vasquez', leaderPersonality: 'Principled, analytical', approval: 38, traits: ['principled', 'analytical'] },
+  { id: 'police', name: 'Police & Fire Unions', leader: 'Chief Ray Kovacs', leaderPersonality: 'Loyal (to precedent), grudge', approval: 48, traits: ['loyal', 'grudge'] }
 ];
 
 // ─────────────────────────────────────────────────────
 //  MONTHLY SCHEDULE ACTIONS POOL
-//  Each month the player picks ACTION_SLOTS of ACTIONS_SHOWN
-//  Unpicked actions apply their skipCost
+//  Skip costs now MIRROR benefits — you either gain or lose the same delta.
+//  No free passes. Not attending costs what attending would have earned.
 // ─────────────────────────────────────────────────────
-const ACTION_SLOTS   = 4; // how many the mayor can take
-const ACTIONS_SHOWN  = 7; // how many are offered each month
+const ACTION_SLOTS   = 4;
+const ACTIONS_SHOWN  = 7;
 
 const MONTHLY_ACTIONS_POOL = [
   {
@@ -3355,8 +3355,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'admin',
     personId: 'cos',
     desc: 'Weekly check-in with Rachel Okafor. Stay ahead of what\'s developing in the building.',
-    benefit: { label: 'Okafor loyalty +3 · Early warning on incoming issues', personApproval: { cos: 3 } },
-    skipCost: { label: 'Okafor: "Access to you has become irregular."', personApproval: { cos: -5 }, note: 'Rachel Okafor noted your absence at three consecutive briefings.' },
+    benefit:  { label: 'Okafor loyalty +4', personApproval: { cos: 4 } },
+    skipCost: { label: 'Okafor loyalty −4', personApproval: { cos: -4 }, note: 'Rachel Okafor noted your absence at the morning briefing. Access to you has become irregular.' },
     weight: 12
   },
   {
@@ -3365,8 +3365,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'finance',
     personId: 'budget',
     desc: 'Deep-dive on the monthly numbers with Victor Slade. Catch problems before they become crises.',
-    benefit: { label: 'Slade loyalty +2 · Reveals treasury trend', personApproval: { budget: 2 }, statBonus: { stat: 'budget_awareness', val: 1 } },
-    skipCost: { label: 'Slade logs it as "fiscal oversight lapse."', personApproval: { budget: -4 }, note: 'Victor Slade\'s memos have been going unread. He has started noting this.' },
+    benefit:  { label: 'Slade loyalty +4 · Services +1', personApproval: { budget: 4 }, statBonus: { stat: 'services', val: 1 } },
+    skipCost: { label: 'Slade loyalty −4 · Services −1', personApproval: { budget: -4 }, statPenalty: { stat: 'services', val: -1 }, note: 'Victor Slade\'s memos have been going unread. He has started noting this formally.' },
     weight: 11
   },
   {
@@ -3375,18 +3375,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'press',
     personId: 'comms',
     desc: 'Thirty minutes with the Herald and local press. Shape the narrative before others do.',
-    benefit: { label: 'Press relations +5 · Approval +1', factionApproval: { press: 5 }, statBonus: { stat: 'approval', val: 1 } },
-    skipCost: { label: 'Vasquez runs a "silent mayor" item in Friday\'s edition.', factionApproval: { press: -8 }, note: 'The Herald ran a short piece on mayoral inaccessibility.' },
-    weight: 10
-  },
-  {
-    id: 'community_visit_d1',
-    title: 'District Site Visit',
-    category: 'field',
-    personId: null,
-    desc: 'Walk a district. Shake hands, hear complaints directly. You can\'t govern what you don\'t see.',
-    benefit: { label: 'Residents support +6 · Approval +2', factionApproval: { residents: 6 }, statBonus: { stat: 'approval', val: 2 } },
-    skipCost: { label: 'Residents note the mayor hasn\'t visited in months.', factionApproval: { residents: -5 }, note: 'Patricia Nkemelu mentioned publicly that the mayor hasn\'t been seen in the neighborhoods.' },
+    benefit:  { label: 'Press +6 · Approval +2', factionApproval: { press: 6 }, statBonus: { stat: 'approval', val: 2 } },
+    skipCost: { label: 'Press −6 · Approval −2', factionApproval: { press: -6 }, statPenalty: { stat: 'approval', val: -2 }, note: 'The Herald ran a "silent mayor" item. Vasquez is logging the pattern.' },
     weight: 10
   },
   {
@@ -3395,8 +3385,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'political',
     personId: null,
     desc: 'Off-the-record session with council members before the formal agenda. Politics is made in hallways.',
-    benefit: { label: 'Council relations +4 across board', councilApproval: 4 },
-    skipCost: { label: 'Council members feel frozen out.', councilApproval: -5, note: 'Two council members privately complained about lack of executive access.' },
+    benefit:  { label: 'All council +5', councilApproval: 5 },
+    skipCost: { label: 'All council −5', councilApproval: -5, note: 'Two council members privately complained about lack of executive access. Webb mentioned it to Vasquez.' },
     weight: 9
   },
   {
@@ -3405,8 +3395,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'political',
     personId: 'c1',
     desc: 'Sit down with Torres before issues become grievances. Relationship maintenance is cheaper than crisis management.',
-    benefit: { label: 'Torres approval +7 · Labor support +5', personApproval: { c1: 7 }, factionApproval: { labor: 5 } },
-    skipCost: { label: 'Torres: "The mayor has time for everyone except workers."', personApproval: { c1: -6 }, factionApproval: { labor: -7 }, note: 'Torres made a comment to the Herald about executive distance.' },
+    benefit:  { label: 'Torres +8 · Labor +6', personApproval: { c1: 8 }, factionApproval: { labor: 6 } },
+    skipCost: { label: 'Torres −8 · Labor −6', personApproval: { c1: -8 }, factionApproval: { labor: -6 }, note: 'Torres made a comment to the Herald about executive distance from working families.' },
     weight: 8
   },
   {
@@ -3415,8 +3405,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'field',
     personId: 'planning',
     desc: 'Walk the field with Merritt. What\'s in the reports becomes real when you see it yourself.',
-    benefit: { label: 'Merritt loyalty +5 · Infrastructure stat +2', personApproval: { planning: 5 }, statBonus: { stat: 'infrastructure', val: 2 } },
-    skipCost: { label: 'Merritt logs another deferred inspection in the record.', personApproval: { planning: -4 }, note: 'Merritt submitted another infrastructure inspection request that went unacknowledged.' },
+    benefit:  { label: 'Merritt +6 · Infrastructure +3', personApproval: { planning: 6 }, statBonus: { stat: 'infrastructure', val: 3 } },
+    skipCost: { label: 'Merritt −6 · Infrastructure −3', personApproval: { planning: -6 }, statPenalty: { stat: 'infrastructure', val: -3 }, note: 'Merritt submitted another deferred inspection request that went unacknowledged.' },
     weight: 8
   },
   {
@@ -3425,8 +3415,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'political',
     personId: 'c2',
     desc: 'Quarterly relationship maintenance with Beaumont and the Business Alliance. These relationships have a balance sheet.',
-    benefit: { label: 'Business support +8 · Beaumont approval +5', personApproval: { c2: 5 }, factionApproval: { business: 8 } },
-    skipCost: { label: 'Alliance interprets absence as a political signal.', factionApproval: { business: -6 }, note: 'The Business Alliance newsletter noted your absence from the quarterly luncheon.' },
+    benefit:  { label: 'Business +8 · Beaumont +6', personApproval: { c2: 6 }, factionApproval: { business: 8 } },
+    skipCost: { label: 'Business −8 · Beaumont −6', personApproval: { c2: -6 }, factionApproval: { business: -8 }, note: 'The Business Alliance newsletter noted your absence. Beaumont was conspicuously cold at the last session.' },
     weight: 7
   },
   {
@@ -3434,9 +3424,9 @@ const MONTHLY_ACTIONS_POOL = [
     title: 'Policy Briefing Session',
     category: 'admin',
     personId: 'cos',
-    desc: 'Deep-dive on long-term city planning with Okafor. Decisions made here prevent crises later.',
-    benefit: { label: 'Services +2 · Housing +2', statBonus: { stat: 'services', val: 2 }, statBonus2: { stat: 'housing', val: 2 } },
-    skipCost: { label: 'Long-range policy drifts without executive direction.', statPenalty: { stat: 'services', val: -2 } },
+    desc: 'Deep-dive on long-range city planning with Okafor. Decisions made here prevent crises later.',
+    benefit:  { label: 'Services +3 · Housing +2', statBonus: { stat: 'services', val: 3 }, statBonus2: { stat: 'housing', val: 2 } },
+    skipCost: { label: 'Services −3 · Housing −2', statPenalty: { stat: 'services', val: -3 }, statPenalty2: { stat: 'housing', val: -2 }, note: 'Long-range policy drifts without executive direction. Okafor flagged two deferred decisions.' },
     weight: 7
   },
   {
@@ -3445,8 +3435,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'political',
     personId: 'c3',
     desc: 'Nair and the reform caucus have proposals worth hearing — even when they\'re inconvenient.',
-    benefit: { label: 'Nair approval +6 · Press +3', personApproval: { c3: 6 }, factionApproval: { press: 3 } },
-    skipCost: { label: 'Reform caucus drifts toward public opposition.', personApproval: { c3: -5 }, note: 'Priya Nair gave an interview questioning executive engagement on reform priorities.' },
+    benefit:  { label: 'Nair +7 · Press +4', personApproval: { c3: 7 }, factionApproval: { press: 4 } },
+    skipCost: { label: 'Nair −7 · Press −4', personApproval: { c3: -7 }, factionApproval: { press: -4 }, note: 'Nair gave an interview questioning executive engagement on reform priorities.' },
     weight: 6
   },
   {
@@ -3455,8 +3445,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'admin',
     personId: null,
     desc: 'Monthly briefing from Kovacs on crime trends, staffing, and field conditions.',
-    benefit: { label: 'Police relations +6 · Public safety +1', factionApproval: { police: 6 }, statBonus: { stat: 'crime', val: 1 } },
-    skipCost: { label: 'Kovacs: "The mayor has not attended a safety briefing in weeks."', factionApproval: { police: -8 }, note: 'Chief Kovacs publicly noted the mayor\'s absence from safety briefings.' },
+    benefit:  { label: 'Police +7 · Safety +2', factionApproval: { police: 7 }, statBonus: { stat: 'crime', val: 2 } },
+    skipCost: { label: 'Police −7 · Safety −2', factionApproval: { police: -7 }, statPenalty: { stat: 'crime', val: -2 }, note: 'Kovacs publicly noted the mayor\'s absence from safety briefings for the third time.' },
     weight: 8
   },
   {
@@ -3465,8 +3455,8 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'community',
     personId: null,
     desc: 'Open forum with residents. Uncomfortable but irreplaceable. They talk; you listen.',
-    benefit: { label: 'Approval +4 · Residents +8 · Press +4', statBonus: { stat: 'approval', val: 4 }, factionApproval: { residents: 8, press: 4 } },
-    skipCost: { label: 'Community groups post "Where is the Mayor?" flyers downtown.', factionApproval: { residents: -7 }, statPenalty: { stat: 'approval', val: -2 }, note: 'Multiple community groups issued a joint statement on mayoral accessibility.' },
+    benefit:  { label: 'Approval +4 · Residents +8 · Press +4', statBonus: { stat: 'approval', val: 4 }, factionApproval: { residents: 8, press: 4 } },
+    skipCost: { label: 'Approval −4 · Residents −8 · Press −4', statPenalty: { stat: 'approval', val: -4 }, factionApproval: { residents: -8, press: -4 }, note: 'Community groups posted "Where is the Mayor?" flyers. Nkemelu issued a joint statement.' },
     weight: 7
   },
   {
@@ -3475,11 +3465,220 @@ const MONTHLY_ACTIONS_POOL = [
     category: 'political',
     personId: 'c4',
     desc: 'Callahan\'s coalition wants a read on zoning and development priorities. Useful — and requires careful navigation.',
-    benefit: { label: 'Developer support +8 · Development +2', factionApproval: { developers: 8 }, statBonus: { stat: 'development', val: 2 } },
-    skipCost: { label: 'Callahan interprets absence as opposition.', factionApproval: { developers: -6 }, note: 'Jim Callahan was conspicuously cold at the last council session.' },
+    benefit:  { label: 'Developers +8 · Development +3', factionApproval: { developers: 8 }, statBonus: { stat: 'development', val: 3 } },
+    skipCost: { label: 'Developers −8 · Development −3', factionApproval: { developers: -8 }, statPenalty: { stat: 'development', val: -3 }, note: 'Callahan interprets absence as opposition. He has started working alternative channels.' },
     weight: 6
+  },
+  {
+    id: 'legal_review',
+    title: 'Legal Strategy Session',
+    category: 'admin',
+    personId: null,
+    desc: 'Review pending litigation, ordinance exposure, and contract vulnerabilities with legal counsel.',
+    benefit:  { label: 'Treasury protected · Approval +1', statBonus: { stat: 'approval', val: 1 } },
+    skipCost: { label: 'Approval −1 · Services −1', statPenalty: { stat: 'approval', val: -1 }, statPenalty2: { stat: 'services', val: -1 }, note: 'Legal flagged two unreviewed contract exposures. The window to respond is closing.' },
+    weight: 5
+  },
+  {
+    id: 'district_visit',
+    title: 'District Field Visit',
+    category: 'field',
+    personId: null,
+    districtPicker: true,
+    desc: 'Visit a district. You choose which one — each has different political stakes and different consequences for being absent.',
+    benefit:  { label: 'Choose district → Council +7 · Faction +6 · Stat +2', factionApproval: {} },
+    skipCost: { label: 'Chosen district: relations decay · neglect clock ticks', factionApproval: {}, note: 'No district visit this month. Neglect clocks advance.' },
+    weight: 11
   }
 ];
+
+// ─────────────────────────────────────────────────────
+//  DISTRICT SITE VISIT SYSTEM
+//  Replaces the generic 'community_visit_d1' action.
+//  Player chooses which of four districts to visit.
+//  Each district has a character, aligned council member, and faction.
+// ─────────────────────────────────────────────────────
+const DISTRICTS = [
+  {
+    id: 'district_labor',
+    name: 'District 1 — Riverside',
+    character: 'Labor corridor. Docks, warehouses, union halls. This is Torres country.',
+    councilId: 'c1',       // Torres
+    factionId: 'labor',
+    statBonus: { stat: 'services', val: 2 },
+    benefitLabel: 'Torres +7 · Labor +6 · Services +2',
+    skipLabel: 'Torres −5 · Labor −5',
+    neglectThreshold: 4,   // turns before neglect event fires
+    color: '#9a3412'
+  },
+  {
+    id: 'district_business',
+    name: 'District 2 — Downtown Core',
+    character: 'Commerce, storefronts, the Business Alliance\'s base. Beaumont watches who shows up here.',
+    councilId: 'c2',       // Beaumont
+    factionId: 'business',
+    statBonus: { stat: 'development', val: 2 },
+    benefitLabel: 'Beaumont +7 · Business +6 · Development +2',
+    skipLabel: 'Beaumont −5 · Business −5',
+    neglectThreshold: 4,
+    color: '#1e3a8a'
+  },
+  {
+    id: 'district_community',
+    name: 'District 3 — Westside',
+    character: 'Residential neighborhoods, community organizations, Nkemelu\'s base. Underserved and paying attention.',
+    councilId: 'c5',       // Liu (community)
+    factionId: 'residents',
+    statBonus: { stat: 'housing', val: 2 },
+    benefitLabel: 'Liu +7 · Residents +7 · Housing +2',
+    skipLabel: 'Liu −5 · Residents −6',
+    neglectThreshold: 3,   // residents notice faster
+    color: '#14532d'
+  },
+  {
+    id: 'district_development',
+    name: 'District 4 — Eastside Corridor',
+    character: 'Industrial redevelopment zone. Callahan has projects here. So does Merritt\'s infrastructure backlog.',
+    councilId: 'c4',       // Callahan
+    factionId: 'developers',
+    statBonus: { stat: 'infrastructure', val: 2 },
+    benefitLabel: 'Callahan +6 · Developers +5 · Infrastructure +2',
+    skipLabel: 'Callahan −4 · Developers −4',
+    neglectThreshold: 5,
+    color: '#78350f'
+  }
+];
+
+// Track last visit turn per district
+function getDistrictNeglect() {
+  if (!state.districtLastVisit) state.districtLastVisit = {};
+  return DISTRICTS.map(d => ({
+    district: d,
+    lastVisit: state.districtLastVisit[d.id] || 0,
+    turnsNeglected: state.turn - (state.districtLastVisit[d.id] || 0)
+  }));
+}
+
+// Called from schedule phase — shows district picker inline
+function showDistrictPicker() {
+  const neglect = getDistrictNeglect();
+  const body = document.getElementById('situation-body');
+
+  const overlay = document.createElement('div');
+  overlay.id = 'district-picker';
+  overlay.style.cssText = `
+    position:fixed; inset:0; background:rgba(20,12,8,0.75);
+    display:flex; align-items:center; justify-content:center; z-index:500;
+  `;
+
+  const panel = document.createElement('div');
+  panel.style.cssText = `
+    background:var(--paper); border:1px solid var(--brass);
+    padding:20px 24px; max-width:520px; width:90%;
+    font-family:'Playfair Display',serif;
+  `;
+
+  const cards = DISTRICTS.map(d => {
+    const info = neglect.find(n => n.district.id === d.id);
+    const turns = info ? info.turnsNeglected : 0;
+    const neglected = turns >= d.neglectThreshold;
+    const urgency = neglected
+      ? `<span style="color:var(--urgent); font-size:0.58rem; font-weight:700;">⚑ NOT VISITED IN ${turns} MONTHS</span>`
+      : turns > 1 ? `<span style="color:var(--brass); font-size:0.58rem;">${turns} months since last visit</span>` : '';
+
+    return `
+      <div onclick="selectDistrict('${d.id}')" style="
+        border:1px solid ${neglected ? 'var(--urgent)' : 'var(--paper-darker)'};
+        padding:10px 14px; margin-bottom:8px; cursor:pointer;
+        background:${neglected ? '#fff5f5' : 'var(--paper-light)'};
+        transition:background 0.15s;
+      " onmouseover="this.style.background='var(--paper-darker)'"
+         onmouseout="this.style.background='${neglected ? '#fff5f5' : 'var(--paper-light)'}'">
+        <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:3px;">
+          <span style="font-size:0.78rem; font-weight:700; color:${d.color};">${d.name}</span>
+          ${urgency}
+        </div>
+        <div style="font-size:0.62rem; color:var(--ink-faded); margin-bottom:5px; font-style:italic;">${d.character}</div>
+        <div style="font-size:0.6rem; color:var(--ink);">↑ ${d.benefitLabel}</div>
+      </div>
+    `;
+  }).join('');
+
+  panel.innerHTML = `
+    <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:0.1em;
+      color:var(--brass); margin-bottom:4px; font-family:Arial,sans-serif; font-weight:700;">
+      Field Visit — Choose Your District
+    </div>
+    <div style="font-size:0.68rem; color:var(--ink-faded); margin-bottom:14px; line-height:1.6;">
+      You have time for one district this month. Each has a different character and a different political cost for being absent.
+    </div>
+    ${cards}
+    <button onclick="cancelDistrictPicker()" style="
+      width:100%; margin-top:4px; padding:7px; background:none;
+      border:1px solid var(--paper-darker); color:var(--ink-faded);
+      font-family:'Playfair Display',serif; font-size:0.62rem; cursor:pointer;
+    ">Cancel — skip the field visit</button>
+  `;
+
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+}
+
+function selectDistrict(districtId) {
+  const d = DISTRICTS.find(x => x.id === districtId);
+  if (!d) return;
+
+  document.getElementById('district-picker')?.remove();
+
+  if (!state.districtLastVisit) state.districtLastVisit = {};
+  state.districtLastVisit[d.id] = state.turn;
+
+  // Apply benefits
+  const s = state.city.stats;
+  const councilMember = state.council.find(c => c.id === d.councilId);
+  const faction = state.factions.find(f => f.id === d.factionId);
+
+  if (councilMember) councilMember.approval = clamp(councilMember.approval + 7, 10, 95);
+  if (faction) { faction.approval = clamp(faction.approval + 6, 5, 95); reduceFactionGrievance(d.factionId, 2); }
+  if (d.statBonus && s[d.statBonus.stat] !== undefined) s[d.statBonus.stat] = clamp(s[d.statBonus.stat] + d.statBonus.val, 0, 100);
+
+  addToHistory(d.councilId, `Mayor visited ${d.name}. Relationship +7.`, 'pos');
+  addToHistory(d.factionId, `Mayor visited ${d.name}. Direct engagement. Grievance reduced.`, 'pos');
+  addTicker(`FIELD — Mayor visits ${d.name}. ${councilMember ? councilMember.name.split(' ')[1] : ''} accompanies the walkthrough.`);
+
+  recalcApproval();
+
+  // Mark this action as taken in schedule
+  if (!state.selectedActions.includes('district_visit')) {
+    state.selectedActions.push('district_visit');
+  }
+  renderSchedule();
+  updateUI();
+}
+
+function cancelDistrictPicker() {
+  document.getElementById('district-picker')?.remove();
+}
+
+// Check each month for neglected districts — fires into consequence queue
+function checkDistrictNeglect() {
+  if (!state.districtLastVisit) state.districtLastVisit = {};
+  DISTRICTS.forEach(d => {
+    const lastVisit = state.districtLastVisit[d.id] || 0;
+    const neglected = state.turn - lastVisit;
+    if (neglected === d.neglectThreshold) {
+      // Fire a soft consequence — Herald item + faction hit
+      const faction = state.factions.find(f => f.id === d.factionId);
+      if (faction) { faction.approval = clamp(faction.approval - 6, 5, 95); onFactionApprovalHit(d.factionId, -6); }
+      const council = state.council.find(c => c.id === d.councilId);
+      if (council) council.approval = clamp(council.approval - 5, 10, 95);
+      addTicker(`HERALD — Mayor hasn\'t visited ${d.name} in ${neglected} months. Residents are noticing.`);
+      addToHistory(d.factionId, `${d.name} neglected for ${neglected} months. Resentment building.`, 'neg');
+    }
+  });
+}
+
+
 
 // ─────────────────────────────────────────────────────
 //  EVENTS POOL
@@ -5059,6 +5258,9 @@ function initState() {
     currentAmbientEvent: null,
     ambientAwaitingDecision: false,
     usedAmbientEvents: [],
+
+    // ── DISTRICTS ──
+    districtLastVisit: {},   // districtId -> turn last visited
 
     // ── FACTION AGENCY SYSTEM ──
     factionGrievances: {},
@@ -6979,6 +7181,60 @@ function processMonthlyTick() {
   if (socialTier === 'skeleton') s.unemployment = clamp(s.unemployment + 0.25, 3, 15);
 
   recalcApproval();
+
+  // ── NATURAL DECAY ──
+  // Relationships drift down without active maintenance.
+  // Staff: -1.5/mo. Council: -1/mo. Factions: -1.5/mo.
+  // This is the floor — skip costs compound on top of it.
+  state.staff.forEach(st => {
+    st.approval = clamp(st.approval - 1.5, 10, 95);
+  });
+  state.council.forEach(cm => {
+    cm.approval = clamp(cm.approval - 1.0, 10, 95);
+  });
+  state.factions.forEach(f => {
+    f.approval = clamp(f.approval - 1.5, 5, 95);
+    // Accumulate a small grievance from neglect
+    addFactionGrievance(f.id, 0.3);
+  });
+
+  // ── CROSS-FACTION TENSION ──
+  // Pleasing one bloc creates friction with its ideological opposite.
+  // Labor vs Business, Residents vs Developers, Press is neutral.
+  const labor    = state.factions.find(f => f.id === 'labor');
+  const business = state.factions.find(f => f.id === 'business');
+  const residents  = state.factions.find(f => f.id === 'residents');
+  const developers = state.factions.find(f => f.id === 'developers');
+
+  if (labor && business) {
+    // Each month, the gap between them creates friction for whoever is lower
+    const gap = labor.approval - business.approval;
+    if (gap > 15) {
+      // Labor well ahead — business feels overlooked
+      business.approval = clamp(business.approval - 1, 5, 95);
+      onFactionApprovalHit('business', -1);
+    } else if (gap < -15) {
+      // Business well ahead — labor feels overlooked
+      labor.approval = clamp(labor.approval - 1, 5, 95);
+      onFactionApprovalHit('labor', -1);
+    }
+  }
+  if (residents && developers) {
+    const gap = residents.approval - developers.approval;
+    if (gap > 15) {
+      developers.approval = clamp(developers.approval - 1, 5, 95);
+      onFactionApprovalHit('developers', -1);
+    } else if (gap < -15) {
+      residents.approval = clamp(residents.approval - 1, 5, 95);
+      onFactionApprovalHit('residents', -1);
+    }
+  }
+
+  // ── DISTRICT NEGLECT CHECK ──
+  checkDistrictNeglect();
+
+  recalcApproval();
+
   // Run faction agency (async — fires in background, doesn't block turn)
   processFactionTick();
 }
@@ -7179,6 +7435,10 @@ function confirmSchedule() {
       if (sc.statPenalty.stat === 'approval') s.approval = clamp(s.approval + sc.statPenalty.val, 5, 95);
       else if (s[sc.statPenalty.stat] !== undefined) s[sc.statPenalty.stat] = clamp(s[sc.statPenalty.stat] + sc.statPenalty.val, 0, 100);
     }
+    if (sc.statPenalty2) {
+      if (sc.statPenalty2.stat === 'approval') s.approval = clamp(s.approval + sc.statPenalty2.val, 5, 95);
+      else if (s[sc.statPenalty2.stat] !== undefined) s[sc.statPenalty2.stat] = clamp(s[sc.statPenalty2.stat] + sc.statPenalty2.val, 0, 100);
+    }
     if (sc.note) {
       state.skipLog.push(sc.note);
       // Also log in the relevant person/faction dossier
@@ -7224,10 +7484,13 @@ function renderSchedule() {
     const isDisabled = !isSelected && state.selectedActions.length >= ACTION_SLOTS;
     const catColors = { admin:'#1e3a8a', finance:'#14532d', press:'#6b21a8', field:'#92400e', political:'#9a3412', community:'#155e75' };
     const catColor = catColors[action.category] || '#333';
+    const clickHandler = action.districtPicker
+      ? `onclick="if(!${isSelected} && ${state.selectedActions.length} < ${ACTION_SLOTS}) showDistrictPicker()"`
+      : `onclick="toggleAction('${action.id}')"`;
 
     return `
       <div class="action-card ${isSelected ? 'selected' : ''} ${isDisabled ? 'disabled' : ''}"
-           onclick="toggleAction('${action.id}')">
+           ${clickHandler}>
         <span class="ac-check">✓</span>
         <div class="ac-category" style="${isSelected ? '' : `color:${catColor}`}">${action.category.toUpperCase()}</div>
         <div class="ac-title">${action.title}</div>
