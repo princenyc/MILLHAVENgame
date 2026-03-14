@@ -687,6 +687,13 @@
   .trait-pragmatic { background: #ffedd5; color: #7c2d12; }
   .trait-forgiving { background: #ecfeff; color: #155e75; }
   .trait-grudge { background: #fef3c7; color: #92400e; }
+  /* New mechanical traits — visually distinct */
+  .trait-volatile      { background: #fef2f2; color: #991b1b; border: 1px solid #fca5a5; }
+  .trait-self-protective { background: #f0fdf4; color: #166534; border: 1px solid #86efac; }
+  .trait-vindictive    { background: #1c1917; color: #fef3c7; }
+  .trait-ideological   { background: #ede9fe; color: #4c1d95; border: 1px solid #c4b5fd; }
+  .trait-transactional { background: #fff7ed; color: #9a3412; border: 1px solid #fdba74; }
+  .trait-vain          { background: #fdf4ff; color: #701a75; border: 1px solid #e879f9; }
 
   .person-approval {
     display: flex;
@@ -3091,7 +3098,14 @@ const TRAIT_LABELS = {
   loyal: 'Loyal', ambitious: 'Ambitious',
   analytical: 'Analytical', emotional: 'Emotional',
   principled: 'Principled', pragmatic: 'Pragmatic',
-  forgiving: 'Forgiving', grudge: 'Grudge-Holder'
+  forgiving: 'Forgiving', grudge: 'Grudge-Holder',
+  // ── NEW TEETH TRAITS ──
+  volatile:       'Volatile',
+  'self-protective': 'Self-Protective',
+  vindictive:     'Vindictive',
+  ideological:    'Ideological',
+  transactional:  'Transactional',
+  vain:           'Vain'
 };
 
 // ── HIDDEN TRAITS ──
@@ -3321,23 +3335,30 @@ const INITIAL_STAFF = [
 
 // ── COUNCIL ──
 const INITIAL_COUNCIL = [
-  { id: 'c1', name: 'Donna Torres', faction: 'labor', factionLabel: 'Labor', traits: ['emotional', 'grudge'], approval: 42, district: 'District 3' },
-  { id: 'c2', name: 'Frank Beaumont', faction: 'business', factionLabel: 'Business', traits: ['pragmatic', 'analytical'], approval: 48, district: 'At-Large' },
-  { id: 'c3', name: 'Priya Nair', faction: 'reform', factionLabel: 'Reform', traits: ['principled', 'analytical'], approval: 50, district: 'District 1' },
-  { id: 'c4', name: 'James "Big Jim" Callahan', faction: 'developer', factionLabel: 'Developer', traits: ['pragmatic', 'ambitious'], approval: 38, district: 'District 5' },
-  { id: 'c5', name: 'Sandra Liu', faction: 'community', factionLabel: 'Community', traits: ['emotional', 'forgiving'], approval: 46, district: 'District 2' },
-  { id: 'c6', name: 'Marcus Webb', faction: 'independent', factionLabel: 'Independent', traits: ['analytical', 'pragmatic'], approval: 40, district: 'District 4' },
-  { id: 'c7', name: 'Carla Reyes', faction: 'community', factionLabel: 'Community', traits: ['principled', 'loyal'], approval: 52, district: 'District 6' }
+  { id: 'c1', name: 'Donna Torres',            faction: 'labor',       factionLabel: 'Labor',       traits: ['emotional', 'grudge', 'volatile'],                    approval: 42, district: 'District 3' },
+  { id: 'c2', name: 'Frank Beaumont',           faction: 'business',    factionLabel: 'Business',    traits: ['pragmatic', 'analytical', 'transactional'],            approval: 48, district: 'At-Large',
+    transactionalWant: { desc: 'Support the Business Improvement District proposal', proposalId: 'prop_business_district' } },
+  { id: 'c3', name: 'Priya Nair',               faction: 'reform',      factionLabel: 'Reform',      traits: ['principled', 'analytical', 'ideological'],              approval: 50, district: 'District 1',
+    ideologicalLines: ['no developer fast-tracks without affordable housing', 'no police budget cuts'] },
+  { id: 'c4', name: 'James "Big Jim" Callahan', faction: 'developer',   factionLabel: 'Developer',   traits: ['pragmatic', 'ambitious', 'vindictive', 'transactional'], approval: 38, district: 'District 5',
+    transactionalWant: { desc: 'Approve at least one major development variance this term', eventId: 'rezone_commercial' },
+    callahanArc: { stage: 1, actionsAgainstPlayer: 0, exposedTurn: null } },
+  { id: 'c5', name: 'Sandra Liu',               faction: 'community',   factionLabel: 'Community',   traits: ['emotional', 'forgiving'],                               approval: 46, district: 'District 2' },
+  { id: 'c6', name: 'Marcus Webb',              faction: 'independent', factionLabel: 'Independent', traits: ['analytical', 'pragmatic', 'vain'],                      approval: 40, district: 'District 4',
+    vainCredit: [] },
+  { id: 'c7', name: 'Carla Reyes',              faction: 'community',   factionLabel: 'Community',   traits: ['principled', 'loyal', 'ideological'],                   approval: 52, district: 'District 6',
+    ideologicalLines: ['no cuts to social services', 'no development without community benefit'] }
 ];
 
 // ── FACTIONS ──
 const INITIAL_FACTIONS = [
-  { id: 'labor', name: 'Municipal Workers Union', leader: 'Donna Torres', leaderPersonality: 'Emotional, holds grudges', approval: 44, traits: ['emotional', 'grudge'] },
-  { id: 'business', name: 'Millhaven Business Alliance', leader: 'Frank Beaumont', leaderPersonality: 'Analytical, deal-maker', approval: 50, traits: ['analytical', 'pragmatic'] },
-  { id: 'residents', name: "Residents' Association", leader: 'Patricia Nkemelu', leaderPersonality: 'Principled, won\'t be bought', approval: 46, traits: ['principled', 'forgiving'] },
-  { id: 'developers', name: 'City Developers Consortium', leader: 'James Callahan', leaderPersonality: 'Ambitious, transactional', approval: 40, traits: ['ambitious', 'pragmatic'] },
-  { id: 'press', name: 'Millhaven Herald', leader: 'Tom Vasquez', leaderPersonality: 'Principled, analytical', approval: 38, traits: ['principled', 'analytical'] },
-  { id: 'police', name: 'Police & Fire Unions', leader: 'Chief Ray Kovacs', leaderPersonality: 'Loyal (to precedent), grudge', approval: 48, traits: ['loyal', 'grudge'] }
+  { id: 'labor',     name: 'Municipal Workers Union',    leader: 'Donna Torres',     leaderPersonality: 'Emotional, holds grudges, volatile',    approval: 44, traits: ['emotional', 'grudge', 'volatile'] },
+  { id: 'business',  name: 'Millhaven Business Alliance', leader: 'Frank Beaumont',  leaderPersonality: 'Analytical, deal-maker, transactional', approval: 50, traits: ['analytical', 'pragmatic', 'transactional'] },
+  { id: 'residents', name: "Residents' Association",      leader: 'Patricia Nkemelu', leaderPersonality: "Principled, won't be bought",          approval: 46, traits: ['principled', 'forgiving'] },
+  { id: 'developers',name: 'City Developers Consortium',  leader: 'James Callahan',   leaderPersonality: 'Ambitious, transactional, vindictive', approval: 40, traits: ['ambitious', 'pragmatic', 'vindictive'] },
+  { id: 'press',     name: 'Millhaven Herald',            leader: 'Tom Vasquez',      leaderPersonality: 'Principled, analytical, vain',         approval: 38, traits: ['principled', 'analytical', 'vain'] },
+  { id: 'police',    name: 'Police & Fire Unions',        leader: 'Chief Ray Kovacs', leaderPersonality: 'Loyal (to precedent), transactional',  approval: 48, traits: ['loyal', 'grudge', 'transactional'],
+    transactionalWant: { desc: 'Increase public safety budget by 20% or more' } }
 ];
 
 // ─────────────────────────────────────────────────────
@@ -3747,6 +3768,7 @@ const EVENTS_POOL = [
         factionEffects: { developers: +20, residents: -18, labor: +5, business: +10 },
         councilKey: 'developer_friendly',
         consequence: { key: 'resident_backlash_organizing', delay: 5 },
+        onApply: () => deliverTransactionalWant('c4'),
         outcome: 'Construction begins within 90 days. District 2 organizes protests outside City Hall. Callahan sends a case of scotch to your office.',
         voteRequired: true,
         voteIssue: 'Eastside Rezoning Ordinance'
@@ -4342,6 +4364,191 @@ const EVENTS_POOL = [
         outcome: 'Slade puts his concerns in writing and asks that you sign his memo. "For the record," he says. You know what that means.',
         voteRequired: false
       }
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════
+  //  QUARTER 1 EVENTS (turns 1-12) — Establishment
+  // ═══════════════════════════════════════════════════
+  {
+    id: 'q1_first_council',
+    title: 'First Formal Council Session',
+    tag: 'political', type: 'routine',
+    minTurn: 1, maxTurn: 3, oneShot: true,
+    body: 'Your first formal council session as mayor. The room is watching how you run it. Torres is already whispering to Liu. Callahan arrived ten minutes late and sat in the back row. Webb is taking notes on everything.',
+    advisor: 'cos',
+    choices: [
+      { label: 'Run it tight — parliamentary, efficient, no grandstanding',
+        effects: [], factionEffects: { business: 5, press: 4 },
+        outcome: 'Beaumont approves. Torres complains about "not being heard." The Herald calls it "competent if cold." You established a tone. That matters.', voteRequired: false },
+      { label: 'Open the floor — let everyone speak their piece',
+        effects: [], factionEffects: { labor: 6, residents: 5, press: 6 },
+        outcome: 'Three council members give speeches. Torres thanks you publicly. The session runs ninety minutes over. Webb submits a procedural objection. The Herald calls it "refreshingly open."', voteRequired: false }
+    ]
+  },
+  {
+    id: 'q1_governor_call',
+    title: 'Call from the Governor\'s Office',
+    tag: 'opportunity', type: 'routine',
+    minTurn: 2, maxTurn: 8, oneShot: true,
+    body: 'The governor\'s chief of staff calls to congratulate you and float a meeting. The governor wants to discuss infrastructure investment and is considering Millhaven for a pilot program — if the relationship is right.',
+    advisor: 'cos',
+    choices: [
+      { label: 'Schedule the meeting — build the relationship now',
+        effects: [{ stat: 'infrastructure', val: 3 }], factionEffects: { press: 5, business: 4 },
+        consequence: { key: null },
+        outcome: 'Meeting scheduled for next month. The Herald runs it. Callahan is visibly annoyed — he has his own statehouse relationships. You\'ve cut around him.', voteRequired: false },
+      { label: 'Send Okafor — maintain distance for now',
+        effects: [], factionEffects: { press: -3 },
+        outcome: 'Okafor handles it professionally. The meeting happens. The relationship is arm\'s length. You didn\'t build anything, but you didn\'t owe anything either.', voteRequired: false }
+    ]
+  },
+  {
+    id: 'q1_torres_test',
+    title: 'Torres Puts You on Record',
+    tag: 'political', type: 'routine',
+    minTurn: 3, maxTurn: 10, oneShot: true,
+    body: 'Donna Torres calls a press conference and announces that her union expects the mayor to publicly commit to no layoffs in city departments for the first year. She\'s not asking. She\'s announcing — and waiting to see if you correct her.',
+    advisor: 'cos',
+    choices: [
+      { label: 'Confirm the commitment publicly',
+        effects: [], factionEffects: { labor: 10, business: -8 },
+        consequence: { key: 'labor_slowdown_hits', delay: 8 },
+        outcome: 'Torres thanks you at the press conference. Beaumont sends a one-line email: "Noted." You\'ve made a promise you\'ll have to keep.', voteRequired: false },
+      { label: 'Clarify — no commitment to that framing',
+        effects: [], factionEffects: { labor: -8, business: 6, press: -4 },
+        outcome: 'Torres calls it "a bad start." The Herald runs both statements. You didn\'t give up leverage, but Torres now sees exactly who she\'s dealing with.', voteRequired: false }
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════
+  //  QUARTER 2 EVENTS (turns 13-24) — Momentum
+  // ═══════════════════════════════════════════════════
+  {
+    id: 'q2_midterm_audit',
+    title: 'Herald Mid-Term Audit: Promises vs. Actions',
+    tag: 'press', type: 'crisis',
+    minTurn: 14, maxTurn: 20, oneShot: true,
+    body: 'Tom Vasquez has published "The First Year Report" — a point-by-point comparison of your campaign commitments against your actual decisions. It\'s meticulous. Three promises are marked "kept," four are "in progress," and two are "abandoned." The council has already been asked to comment.',
+    advisor: 'comms',
+    choices: [
+      { label: 'Call a press conference — defend the record directly',
+        effects: [], factionEffects: { press: 6, residents: 5, business: 3 },
+        outcome: 'You hold the room for forty minutes. Vasquez asks hard questions. You answer most of them. The follow-up piece is shorter and more neutral. Chen calls it the best press event of the term.', voteRequired: false },
+      { label: 'Respond in writing — release a detailed counter-memo',
+        effects: [], factionEffects: { press: -2, residents: 2 },
+        outcome: 'The Herald buries your response on page six. Vasquez runs a piece about the response to the response. You\'ve given him two more cycles on a story you wanted to end.', voteRequired: false },
+      { label: 'Say nothing — let the news cycle move',
+        effects: [], factionEffects: { press: -10, residents: -6, business: -4 },
+        outcome: 'The silence becomes the story. Vasquez runs an editorial: "A mayor who doesn\'t answer for their record doesn\'t deserve another term." Webb shares it on social media.', voteRequired: false }
+    ]
+  },
+  {
+    id: 'q2_state_grant_cut',
+    title: 'State Cuts Your Operating Grant',
+    tag: 'financial', type: 'crisis',
+    minTurn: 16, maxTurn: 22, oneShot: true,
+    body: 'The state legislature has passed a budget cutting municipal operating grants by 12%. Millhaven loses $110,000 in monthly revenue effective next quarter. Slade\'s memo lands on your desk before the public announcement: "We were counting on this. We need to talk."',
+    advisor: 'budget',
+    choices: [
+      { label: 'Cut administration costs — absorb it internally',
+        effects: [{ stat: 'budget', val: -110000 }], factionEffects: { labor: -5, residents: -4 },
+        outcome: 'You cut discretionary admin spending. Services slow slightly. Slade is unhappy but respects the decision. Torres notes the cuts publicly.', voteRequired: false },
+      { label: 'Raise city fees to offset the gap',
+        effects: [{ stat: 'budget', val: 80000 }], factionEffects: { residents: -8, business: -6, press: -4 },
+        outcome: 'Fees go up across twelve categories. The Herald runs "Mayor Raises Fees to Cover State Cut." Residents are furious. The math works.', voteRequired: false },
+      { label: 'Go to the council for an emergency appropriation',
+        effects: [], factionEffects: { press: 4 },
+        outcome: 'Council votes 5-2 to draw from reserves. Beaumont votes no and says so loudly. You bought time.', voteRequired: true, voteIssue: 'Emergency Reserve Appropriation' }
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════
+  //  QUARTER 3 EVENTS (turns 25-36) — Reckoning
+  // ═══════════════════════════════════════════════════
+  {
+    id: 'q3_coalition_against_policy',
+    title: 'Coalition Challenges Your Signature Policy',
+    tag: 'political', type: 'crisis',
+    minTurn: 26, maxTurn: 34, oneShot: true,
+    body: 'A coalition of three factions — whichever have the highest grievance — has issued a joint statement calling your administration\'s signature policy "a failure in practice." They\'re calling for a public review. The Herald is framing it as a midterm referendum.',
+    advisor: 'cos',
+    choices: [
+      { label: 'Agree to an independent review — show confidence',
+        effects: [], factionEffects: { press: 8, residents: 5 },
+        outcome: 'The review takes six weeks. Its findings are mixed. You survive the process with credibility intact. The coalition expected you to fight it. You didn\'t.', voteRequired: false },
+      { label: 'Defend the policy — take it to the public directly',
+        effects: [], factionEffects: { press: -5 },
+        outcome: 'You hold a town hall. Three hundred people attend. The reviews are mixed. The coalition goes quiet — but only temporarily.', voteRequired: false }
+    ]
+  },
+  {
+    id: 'q3_internal_leak',
+    title: 'Internal Memo Leaked to the Herald',
+    tag: 'crisis', type: 'crisis',
+    minTurn: 28, maxTurn: 36, oneShot: true,
+    body: 'A confidential memo about budget contingency plans — including potential service cuts — has leaked to the Herald. Vasquez has it. He\'s running it tomorrow. Someone in your administration or on the council leaked it. The memo was circulated to six people.',
+    advisor: 'cos',
+    choices: [
+      { label: 'Get ahead of it — release the full memo yourself tonight',
+        effects: [], factionEffects: { press: 8, residents: 4, labor: -5 },
+        outcome: 'You release it at 9pm. Vasquez runs "Mayor Releases Own Leaked Memo" — a stranger headline, but it shifts the story. Labor is furious about the contingency cuts. The leak investigation is quietly dropped.', voteRequired: false },
+      { label: 'Launch an internal investigation — find the source',
+        effects: [], factionEffects: { press: -8, labor: 3 },
+        consequence: { key: null },
+        outcome: 'The investigation takes three weeks and produces nothing actionable. Vasquez runs the memo anyway. You spent political capital finding something you couldn\'t use.', voteRequired: false }
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════
+  //  QUARTER 4 EVENTS (turns 37-48) — Election Arc
+  // ═══════════════════════════════════════════════════
+  {
+    id: 'q4_opponent_emerges',
+    title: 'Your Opponent Announces',
+    tag: 'political', type: 'crisis',
+    minTurn: 37, maxTurn: 40, oneShot: true,
+    body: 'A candidate has filed to run against you. Their announcement speech cites three specific decisions from your term — the ones where your approval was lowest. They\'re running as "the mayor Millhaven deserves." The Herald gives it front page. Callahan\'s name appears in the endorsement section.',
+    advisor: 'comms',
+    choices: [
+      { label: 'Attack their record — go on offense immediately',
+        effects: [], factionEffects: { press: -6, residents: -4 },
+        outcome: 'You hit first. The Herald calls it "unusually sharp for an incumbent." Your attacks land but make you look worried. Callahan\'s endorsement becomes a bigger story.', voteRequired: false },
+      { label: 'Stay above it — govern, don\'t campaign',
+        effects: [], factionEffects: { press: 5, residents: 4 },
+        outcome: 'You say "I\'ll let my record speak." For two weeks it works. Then your opponent runs their first ad and the polling moves three points.', voteRequired: false }
+    ]
+  },
+  {
+    id: 'q4_endorsement_round',
+    title: 'Faction Endorsements — Who\'s With You',
+    tag: 'political', type: 'routine',
+    minTurn: 41, maxTurn: 45, oneShot: true,
+    body: 'With five weeks to election, factions are declaring. The Herald is running a tracker. Each faction\'s decision is based on their relationship with your administration — not promises, record. Factions above 55% support endorse you. Below 40% endorse your opponent. In between: neutral.',
+    advisor: 'cos',
+    choices: [
+      { label: 'Accept endorsements publicly — make it a rally moment',
+        effects: [],
+        factionEffects: {},  // dynamically calculated in outcome
+        outcome: 'The endorsement announcements run over three days. Each faction above 55% adds to your coalition publicly. Each below 40% is a Herald story about opposition. The middle stays quiet and watches.',
+        voteRequired: false,
+        endorsementRound: true }
+    ]
+  },
+  {
+    id: 'q4_debate',
+    title: 'The Millhaven Mayoral Debate',
+    tag: 'press', type: 'crisis',
+    minTurn: 44, maxTurn: 47, oneShot: true,
+    body: 'The Herald has organized a single mayoral debate. Your opponent has prepared specific attacks on your record — infrastructure spending, your handling of the union, and a decision from month six that you probably remember. Three hundred people in the room. Vasquez is moderating.',
+    advisor: 'comms',
+    choices: [
+      { label: 'Go on offense — challenge their qualifications',
+        effects: [], factionEffects: { press: -4, residents: -3 },
+        outcome: 'Your attacks land but the split-screen works against you. Vasquez gives you a look each time. Post-debate polls show you won on points and lost on likability. The Herald calls it a draw.', voteRequired: false },
+      { label: 'Defend your record — make the case directly',
+        effects: [], factionEffects: { press: 5, residents: 6, business: 3 },
+        outcome: 'You lead with your strongest decisions. Your opponent\'s attacks bounce off when you have the answers. The Herald calls it a narrow win. Your approval ticks up two points the next day.', voteRequired: false }
     ]
   }
 ];
@@ -5260,7 +5467,16 @@ function initState() {
     usedAmbientEvents: [],
 
     // ── DISTRICTS ──
-    districtLastVisit: {},   // districtId -> turn last visited
+    districtLastVisit: {},
+
+    // ── TRAIT ENGINE STATE ──
+    selfProtectiveFired: {},
+    vindictiveFired: {},
+    transactionalDelivered: {},
+    transactionalWarned: {},
+
+    // ── EVENT SYSTEM ──
+    firedOneShotEvents: [],
 
     // ── FACTION AGENCY SYSTEM ──
     factionGrievances: {},
@@ -5585,7 +5801,212 @@ function onFactionApprovalHit(factionId, delta) {
 }
 
 // ═══════════════════════════════════════════════════
-//  CONSEQUENCE QUEUE
+//  TRAIT ENGINE
+//  Runs monthly. Fires mechanics for volatile, self-protective,
+//  vindictive, ideological, transactional, vain.
+// ═══════════════════════════════════════════════════
+
+function processTraitEngine() {
+  const approval = state.city.stats.approval;
+  const allPeople = [...state.staff, ...state.council];
+
+  allPeople.forEach(person => {
+    if (!person.traits) return;
+
+    // ── VOLATILE: approval swings are doubled in applyPersonDelta ──
+    // (handled at point of application via applyPersonDeltaWithTraits)
+
+    // ── SELF-PROTECTIVE: if overall approval < 40, they distance publicly ──
+    if (person.traits.includes('self-protective') && approval < 40) {
+      if (!state.selfProtectiveFired) state.selfProtectiveFired = {};
+      const lastFired = state.selfProtectiveFired[person.id] || 0;
+      if (state.turn - lastFired >= 3) {
+        person.approval = clamp(person.approval - 4, 10, 95);
+        state.selfProtectiveFired[person.id] = state.turn;
+        addTicker(`HERALD — ${person.name} distances from administration: "I've had concerns about direction for some time."`);
+        addToHistory(person.id, `Publicly distanced from the administration (approval at ${approval}%). Self-protective move.`, 'neg');
+      }
+    }
+
+    // ── VINDICTIVE: if approval < 35, they make one active move against you ──
+    if (person.traits.includes('vindictive') && person.approval < 35) {
+      if (!state.vindictiveFired) state.vindictiveFired = {};
+      const lastFired = state.vindictiveFired[person.id] || 0;
+      if (state.turn - lastFired >= 4 && Math.random() < 0.5) {
+        state.vindictiveFired[person.id] = state.turn;
+        // Force a faction event from their faction
+        const factionId = person.faction;
+        if (factionId && factionId !== 'independent') {
+          const faction = state.factions.find(f => f.id === factionId);
+          if (faction) addFactionGrievance(factionId, 4, `${person.name} stirring opposition (vindictive trait)`);
+        }
+        addToHistory(person.id, `Made an active move against your interests. (Vindictive — approval below 35)`, 'neg');
+        addTicker(`INSIDER — Sources say ${person.name} has been working opposition channels against the administration.`);
+      }
+    }
+
+    // ── TRANSACTIONAL: flag if their ask has gone unmet for 3+ turns ──
+    if (person.traits.includes('transactional') && person.transactionalWant) {
+      if (!state.transactionalUnmet) state.transactionalUnmet = {};
+      const want = person.transactionalWant;
+      const deliveredKey = `delivered_${person.id}`;
+      if (!state.transactionalUnmet[deliveredKey] && state.turn > 8) {
+        // Check via state flags whether their want was delivered
+        const delivered = state.transactionalDelivered?.[person.id];
+        if (!delivered && !state.transactionalWarned?.[person.id] && state.turn > 12) {
+          if (!state.transactionalWarned) state.transactionalWarned = {};
+          state.transactionalWarned[person.id] = true;
+          addToHistory(person.id, `Transactional: "${want.desc}" — still waiting. Their patience has limits.`, 'neg');
+        }
+        if (!delivered && state.turn > 20) {
+          // Approval penalty for unmet transaction
+          person.approval = clamp(person.approval - 2, 10, 95);
+        }
+      }
+    }
+
+    // ── VAIN: if they were consulted and the credit wasn't given, they notice ──
+    // (handled in makeChoice via giveVainCredit / checkVainCredit)
+  });
+}
+
+// Called when a person with VOLATILE trait gets an approval delta
+function applyPersonDeltaWithTraits(person, delta) {
+  if (!person) return;
+  const multiplier = person.traits?.includes('volatile') ? 2 : 1;
+  const adjusted = delta * multiplier;
+  const oldVal = person.approval;
+  person.approval = clamp(person.approval + adjusted, 10, 95);
+  if (multiplier > 1 && Math.abs(adjusted) >= 8) {
+    const dir = adjusted > 0 ? 'surge' : 'collapse';
+    addToHistory(person.id, `Volatile reaction: ${adjusted > 0 ? '+' : ''}${Math.round(adjusted)} (${dir}). Small moves land hard with this one.`, adjusted > 0 ? 'pos' : 'neg');
+  }
+}
+
+// Mark a transactional ask as delivered
+function deliverTransactionalWant(personId) {
+  if (!state.transactionalDelivered) state.transactionalDelivered = {};
+  state.transactionalDelivered[personId] = state.turn;
+  const person = state.council.find(c => c.id === personId);
+  if (person && person.transactionalWant) {
+    person.approval = clamp(person.approval + 12, 10, 95);
+    addToHistory(personId, `Transactional ask fulfilled: "${person.transactionalWant.desc}". Loyalty secured — for now.`, 'pos');
+  }
+}
+
+// Check ideological lines — call this when making major decisions
+function checkIdeologicalLines(person, decisionTag) {
+  if (!person?.traits?.includes('ideological') || !person.ideologicalLines) return false;
+  const crossed = person.ideologicalLines.some(line => decisionTag.includes(line.split(' ')[1]));
+  if (crossed) {
+    person.approval = clamp(person.approval - 20, 10, 95);
+    if (!state.councilRelations) state.councilRelations = {};
+    state.councilRelations[person.id] = 'hostile';
+    addToHistory(person.id, `Ideological line crossed. Permanent hostility — this is not recoverable through normal relationship maintenance.`, 'neg');
+    addTicker(`HERALD — ${person.name} announces opposition to mayor's position on principled grounds.`);
+  }
+  return crossed;
+}
+
+// Vain credit system — track when someone was consulted and decision passed
+function grantVainCredit(personId, eventTitle) {
+  const person = state.council.find(c => c.id === personId) || state.staff.find(s => s.id === personId);
+  if (!person?.traits?.includes('vain')) return;
+  if (!person.vainCredit) person.vainCredit = [];
+  person.vainCredit.push({ event: eventTitle, turn: state.turn, acknowledged: false });
+}
+
+function acknowledgeVainCredit(personId) {
+  const person = state.council.find(c => c.id === personId) || state.staff.find(s => s.id === personId);
+  if (!person?.vainCredit?.length) return;
+  const unacked = person.vainCredit.filter(c => !c.acknowledged);
+  if (unacked.length === 0) return;
+  unacked.forEach(c => { c.acknowledged = true; });
+  person.approval = clamp(person.approval + 8, 10, 95);
+  addToHistory(personId, `Publicly credited. Loyalty +8. Vain characters remember being seen.`, 'pos');
+}
+
+function checkVainNeglect() {
+  [...state.staff, ...state.council].forEach(person => {
+    if (!person.traits?.includes('vain') || !person.vainCredit) return;
+    const unacked = person.vainCredit.filter(c => !c.acknowledged && state.turn - c.turn > 2);
+    if (unacked.length > 0) {
+      person.approval = clamp(person.approval - 6, 10, 95);
+      unacked.forEach(c => { c.acknowledged = true; });
+      addToHistory(person.id, `Credit not given for their role in a recent decision. Vain characters do not forget this.`, 'neg');
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════
+//  CALLAHAN ARC
+//  Three-act antagonist across 48 turns.
+//  Moves independently based on what you gave him.
+// ═══════════════════════════════════════════════════
+
+function processCallahanArc() {
+  const callahan = state.council.find(c => c.id === 'c4');
+  if (!callahan || !callahan.callahanArc) return;
+
+  const arc = callahan.callahanArc;
+  const turn = state.turn;
+  const callahanApproval = callahan.approval;
+  const devDelivered = state.transactionalDelivered?.c4;
+
+  // ACT 1 (turns 1-16): Watching. Plants one signal in the Herald.
+  if (arc.stage === 1 && turn >= 10 && turn <= 14 && !arc.signalFired) {
+    arc.signalFired = true;
+    addTicker(`HERALD — Callahan seen at private dinner with three city hall department heads. "Just catching up," he says.`);
+    addToHistory('c4', `Act 1: Signal planted. He's meeting people outside official channels.`, 'neg');
+  }
+
+  if (arc.stage === 1 && turn > 16) {
+    arc.stage = 2;
+  }
+
+  // ACT 2 (turns 17-32): Escalates if crossed, quiet if delivered
+  if (arc.stage === 2) {
+    if (callahanApproval < 35 && !arc.act2Escalated) {
+      arc.act2Escalated = true;
+      arc.actionsAgainstPlayer++;
+      addFactionGrievance('developers', 3, 'Callahan escalating (Act 2)');
+      addToHistory('c4', `Act 2 escalation: Actively working against the administration through developer channels.`, 'neg');
+      addTicker(`INSIDER — Callahan described as "building a coalition" outside city hall. Sources won't say for what.`);
+    }
+
+    if (callahanApproval >= 50 && devDelivered && !arc.act2Satisfied) {
+      arc.act2Satisfied = true;
+      addToHistory('c4', `Act 2: Satisfied — you delivered on development. He stays neutral for now.`, 'pos');
+    }
+
+    if (turn > 32) arc.stage = 3;
+  }
+
+  // ACT 3 (turns 33-48): Makes his final move
+  if (arc.stage === 3 && !arc.act3Resolved && turn >= 36 && turn <= 40) {
+    arc.act3Resolved = true;
+
+    if (callahanApproval < 40 || arc.actionsAgainstPlayer >= 1) {
+      // He backs your opponent
+      arc.backedOpponent = true;
+      callahan.approval = clamp(callahan.approval - 10, 10, 95);
+      state.city.stats.approval = clamp(state.city.stats.approval - 8, 5, 95);
+      if (!state.councilRelations) state.councilRelations = {};
+      state.councilRelations['c4'] = 'hostile';
+      addFactionGrievance('developers', 5, 'Callahan backing opposition (Act 3)');
+      addToHistory('c4', `Act 3: Backed your opponent. His Eastside network is working against your re-election.`, 'neg');
+      addTicker(`BREAKING — Callahan endorses mayoral challenger: "Millhaven needs leadership that understands growth." Developers Consortium follows.`);
+      recalcApproval();
+    } else {
+      // Grudging neutrality — best outcome
+      arc.stayedNeutral = true;
+      addToHistory('c4', `Act 3: Stayed neutral. Not with you — but not against you. Best outcome possible with Callahan.`, 'neutral');
+      addTicker(`HERALD — Callahan declines to endorse either mayoral candidate. "I'm focused on the Eastside projects," he says.`);
+    }
+  }
+}
+
+
 //  Decisions write delayed events; advanceMonth fires them when due
 // ═══════════════════════════════════════════════════
 
@@ -6598,6 +7019,9 @@ function applyChoice(choice) {
   }
 
   recalcApproval();
+
+  // Fire any onApply callback (e.g., transactional delivery)
+  if (typeof choice.onApply === 'function') choice.onApply();
 }
 
 function recalcApproval() {
@@ -7233,6 +7657,10 @@ function processMonthlyTick() {
   // ── DISTRICT NEGLECT CHECK ──
   checkDistrictNeglect();
 
+  // ── TRAIT ENGINE ──
+  processTraitEngine();
+  checkVainNeglect();
+
   recalcApproval();
 
   // Run faction agency (async — fires in background, doesn't block turn)
@@ -7256,13 +7684,27 @@ function selectEvent() {
   }
 
   const s = state.city.stats;
-  let available = EVENTS_POOL.filter(e => !state.usedEvents.includes(e.id));
+  let available = EVENTS_POOL.filter(e => {
+    if (state.usedEvents.includes(e.id)) return false;
+    if (e.oneShot && state.firedOneShotEvents?.includes(e.id)) return false;
+    if (e.minTurn && state.turn < e.minTurn) return false;
+    if (e.maxTurn && state.turn > e.maxTurn) return false;
+    return true;
+  });
   if (available.length === 0) {
     state.usedEvents = [];
-    available = EVENTS_POOL;
+    available = EVENTS_POOL.filter(e => {
+      if (e.oneShot && state.firedOneShotEvents?.includes(e.id)) return false;
+      if (e.minTurn && state.turn < e.minTurn) return false;
+      if (e.maxTurn && state.turn > e.maxTurn) return false;
+      return true;
+    });
+    if (available.length === 0) available = EVENTS_POOL.filter(e => !e.oneShot);
   }
 
-  // Weight by city conditions
+  // Weight by quarter — boost quarter events when in their window
+  const quarterBoost = available.filter(ev => ev.minTurn && state.turn >= ev.minTurn && (!ev.maxTurn || state.turn <= ev.maxTurn));
+
   let weighted = [];
   available.forEach(ev => {
     let weight = 10;
@@ -7273,12 +7715,17 @@ function selectEvent() {
     if (ev.id === 'crime_spike' && s.crime < 40) weight += 20;
     if (ev.id === 'water_main' && s.infrastructure < 45) weight += 20;
     if (ev.id === 'budget_shortfall' && getNet() < 0) weight += 25;
-    // Prevent repeats
+    // Quarter events get a strong boost when in-window
+    if (ev.minTurn && state.turn >= ev.minTurn && (!ev.maxTurn || state.turn <= ev.maxTurn)) weight += 30;
     for (let i = 0; i < weight; i++) weighted.push(ev);
   });
 
   const selected = weighted[Math.floor(Math.random() * weighted.length)];
   state.usedEvents.push(selected.id);
+  if (selected.oneShot) {
+    if (!state.firedOneShotEvents) state.firedOneShotEvents = [];
+    state.firedOneShotEvents.push(selected.id);
+  }
   return selected;
 }
 
@@ -7300,7 +7747,8 @@ function advanceMonth() {
   state.selectedActions = [];
 
   processMonthlyTick();
-  rollAmbientEvent(); // ~22% chance, stores in state.pendingAmbientEvent
+  rollAmbientEvent();
+  processCallahanArc(); // Callahan moves independently each turn
 
   // Check bankruptcy
   if (state.city.budget.balance < -500000) {
@@ -8026,6 +8474,37 @@ function renderPeopleTab(tab) {
       const isHostile = state.councilRelations[m.id] === 'hostile';
       const consultBtn = buildConsultBtn(m.id, 'council');
 
+      // Transactional want indicator
+      let transactionalHTML = '';
+      if (m.traits?.includes('transactional') && m.transactionalWant) {
+        const delivered = state.transactionalDelivered?.[m.id];
+        transactionalHTML = `<div style="
+          font-size:0.58rem; margin-top:4px; padding:3px 6px;
+          background:${delivered ? '#f0fdf4' : '#fff7ed'};
+          border-left:2px solid ${delivered ? '#16a34a' : '#f97316'};
+          color:${delivered ? '#166534' : '#9a3412'};
+        ">◈ Transactional: ${delivered ? '✓ Delivered' : `"${m.transactionalWant.desc}"`}</div>`;
+      }
+
+      // Ideological lines indicator
+      let ideologicalHTML = '';
+      if (m.traits?.includes('ideological') && m.ideologicalLines) {
+        ideologicalHTML = `<div style="
+          font-size:0.57rem; margin-top:3px; color:var(--ink-faded); font-style:italic;
+        ">Hard lines: ${m.ideologicalLines.join(' · ')}</div>`;
+      }
+
+      // Callahan arc stage
+      let callahanHTML = '';
+      if (m.id === 'c4' && m.callahanArc) {
+        const stage = m.callahanArc.stage;
+        const stageLabels = { 1: 'Watching', 2: 'Moving', 3: 'Resolved' };
+        const stageColors = { 1: 'var(--ink-faded)', 2: 'var(--urgent)', 3: '#7c3aed' };
+        callahanHTML = `<div style="font-size:0.57rem; margin-top:3px; color:${stageColors[stage]}; font-weight:700;">
+          ◈ Arc Stage ${stage}: ${stageLabels[stage]}${m.callahanArc.backedOpponent ? ' — BACKED OPPONENT' : m.callahanArc.stayedNeutral ? ' — Neutral' : ''}
+        </div>`;
+      }
+
       const div = document.createElement('div');
       div.className = 'council-member-card';
       div.innerHTML = `
@@ -8046,6 +8525,7 @@ function renderPeopleTab(tab) {
           <div class="approval-mini-bar"><div class="approval-mini-fill" style="width:${m.approval}%; ${appFill}"></div></div>
           <span class="approval-mini-val" style="color:${appColor}">${Math.round(m.approval)}%</span>
         </div>
+        ${transactionalHTML}${ideologicalHTML}${callahanHTML}
         ${consultBtn}
         ${buildDossierBlock(m.id)}
       `;
